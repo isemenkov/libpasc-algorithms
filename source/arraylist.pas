@@ -88,25 +88,25 @@ type
 
 implementation
 
-constructor TArrayList.Create(ALength : Cardinal);
+constructor TArrayLists.Create(ALength : Cardinal);
 begin
-  if FLength = 0 then
+  if ALength = 0 then
   begin
-    FLength := 16;
+    ALength := 16;
   end;
 
-  SetLength(FData, FLength);
-  FAlloced := FLength;
+  SetLength(FData, ALength);
+  FAlloced := ALength;
   FLength := 0;
 end;
 
-destructor TArrayList.Destroy;
+destructor TArrayLists.Destroy;
 begin
   SetLength(FData, 0);
   inherited Destroy;
 end;
 
-function TArrayList.Enlarge : Boolean;
+function TArrayLists.Enlarge : Boolean;
 var
   NewSize : Cardinal;
 begin
@@ -120,7 +120,7 @@ begin
   Result := True;  
 end;
 
-function TArrayList.Insert (AIndex : Cardinal; AData : T) : Boolean;
+function TArrayLists.Insert (AIndex : Cardinal; AData : T) : Boolean;
 begin
   { Sanity check the index }
   if AIndex > FLength then
@@ -140,8 +140,7 @@ begin
   end;
 
   { Move the contents of the array forward from the index onwards }
-  Move((FData + SizeOf(T) * AIndex)^, (FData + SizeOf(T) * (AIndex + 1))^,
-    (FLength - AIndex) * SizeOf(T));
+  Move(FData[AIndex], FData[AIndex + 1], (FLength - AIndex) * SizeOf(T));
 
   { Insert the new entry at the index }
   FData[AIndex] := AData;
@@ -150,17 +149,17 @@ begin
   Result := True;
 end;
 
-function TArrayList.Append (AValue : T) : Boolean;
+function TArrayLists.Append (AValue : T) : Boolean;
 begin
   Result := Insert(FLength, AValue);
 end;
 
-function TArrayList.Prepend (AValue : T) : Boolean;
+function TArrayLists.Prepend (AValue : T) : Boolean;
 begin
   Result := Insert(0, AValue);
 end;
 
-procedure TArrayList.RemoveRange (AIndex : Cardinal; ALength : Cardinal);
+procedure TArrayLists.RemoveRange (AIndex : Cardinal; ALength : Cardinal);
 begin
   { Check this is a valid range }
   if (AIndex > FLength) or (AIndex + ALength > FLength) then
@@ -169,12 +168,17 @@ begin
   end;
 
   { Move back the entries following the range to be removed }
-  Move((FData + (AIndex + ALength) * SizeOf(T))^, (FData + AIndex * SizeOf(T))^,
+  Move(FData[AIndex + ALength], FData[AIndex],
     FLength - (AIndex + ALength) * SizeOf(T));
   Dec(FLength, ALength);
 end;
 
-function TArrayList.IndexOf (AData : T) : Integer;
+procedure TArrayLists.Remove (AIndex : Cardinal);
+begin
+  RemoveRange(AIndex, 1);
+end;
+
+function TArrayLists.IndexOf (AData : T) : Integer;
 var
   i : Cardinal;
 begin
@@ -189,12 +193,12 @@ begin
   Result := -1;
 end;
 
-procedure TArrayList.Clear;
+procedure TArrayLists.Clear;
 begin
   FLength := 0;
 end;
 
-procedure TArrayList.Sort;
+procedure TArrayLists.Sort;
 begin
   
 end;

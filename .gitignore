@@ -1,3 +1,8 @@
+#unit-test
+/unit-tests/libpascalgorithmstestcase
+/unit-tests/libpascalgorithmstestcase.fpcunit.ini
+/unit-tests/libpascalgorithmstestcase.ico
+
 #Project files
 .vscode/
 
