@@ -16,6 +16,7 @@ type
     procedure TestArrayListsRealloc;
     procedure TestArrayListsPrepend;
     procedure TestArrayListInsertRemove;
+    procedure TestArrayListSort;
   end;
 
 implementation
@@ -121,6 +122,40 @@ begin
   AssertTrue('4: ArrayLists length is not correct', arr.Length = 2);
   AssertTrue('4: ArrayLists index 0 value is not correct', arr.Value[0] = -100);
   AssertTrue('4: ArrayLists index 1 value is not correct', arr.Value[1] = 492);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListsTestCase.TestArrayListSort;
+var
+  arr : TIntegerArrayLists;
+begin
+  arr := TIntegerArrayLists.Create;
+  arr.Append(9);
+  arr.Append(3);
+  arr.Append(-4);
+  arr.Append(12);
+  arr.Sort;
+
+  AssertTrue('1: ArrayLists length is not correct', arr.Length = 4);
+  AssertTrue('1: ArrayLists index 0 value is not correct', arr.Value[0] = -4);
+  AssertTrue('1: ArrayLists index 1 value is not correct', arr.Value[1] = 3);
+  AssertTrue('1: ArrayLists index 2 value is not correct', arr.Value[2] = 9);
+  AssertTrue('1: ArrayLists index 3 value is not correct', arr.Value[3] = 12);
+
+  arr.Insert(2, 43);
+  arr.Prepend(5);
+  arr.Insert(1, 17);
+  arr.Sort;
+
+  AssertTrue('2: ArrayLists length is not correct', arr.Length = 7);
+  AssertTrue('2: ArrayLists index 0 value is not correct', arr.Value[0] = -4);
+  AssertTrue('2: ArrayLists index 1 value is not correct', arr.Value[1] = 3);
+  AssertTrue('2: ArrayLists index 2 value is not correct', arr.Value[2] = 5);
+  AssertTrue('2: ArrayLists index 3 value is not correct', arr.Value[3] = 9);
+  AssertTrue('2: ArrayLists index 4 value is not correct', arr.Value[4] = 12);
+  AssertTrue('2: ArrayLists index 5 value is not correct', arr.Value[5] = 17);
+  AssertTrue('2: ArrayLists index 6 value is not correct', arr.Value[6] = 43);
 
   FreeAndNil(arr);
 end;

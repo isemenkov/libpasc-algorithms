@@ -41,7 +41,7 @@ type
   EIndexOutOfRangeException = class(Exception);
 
   { Automatically resizing array. 
-    ArrayLists are arrays of pointers which automatically increase in size. }
+    ArrayLists are generic arrays of T which automatically increase in size. }
   generic TArrayLists<T> = class
   public
     constructor Create (ALength : Cardinal = 0);
@@ -82,6 +82,9 @@ type
   protected
     { Reallocate the array to the new size }
     function Enlarge : Boolean;
+
+    { Sort the values }
+    procedure SortInternal (var AData : array of T; ALength : Cardinal);
 
     { Get value by index. }
     function GetValue (AIndex : Cardinal) : T;
@@ -154,6 +157,66 @@ begin
   FAlloced := NewSize;
   
   Result := True;  
+end;
+
+procedure TArrayLists.SortInternal (var AData : array of T; ALength : Cardinal);
+var
+  pivot, tmp : T;
+  list1_length, list2_length : Cardinal;
+  i : Cardinal;
+begin
+  { If less than two items, it is always sorted. }
+  if ALength <= 1 then
+  begin
+    Exit;
+  end;
+
+  { Take the last item as the pivot. }
+  pivot := AData[ALength - 1];
+
+  { Divide the list into two lists:
+
+    List 1 contains data less than the pivot.
+    List 2 contains data more than the pivot.
+
+    As the lists are build up, they are stored sequentially after each other, 
+    ie. AData[ALength - 1] is the last item in list 1, AData[ALength] is the 
+    first item in list 2. }
+  list1_length := 0;
+
+  for i := 0 to ALength - 1 do
+  begin
+    if AData[i] < pivot then
+    begin
+      { This should be in list 1. Therefore it is in the wrong position. Swap 
+        the data immediately following the last item in list 1 with this data. }
+      tmp := AData[i];
+      AData[i] := AData[list1_length];
+      AData[list1_length] := tmp;
+      
+      Inc(list1_length);
+    end else
+    begin
+      { This should be in list 2. This is already in the right position. }
+    end;
+  end;
+
+  { The length of list 2 can be calculated. }
+  list2_length := ALength - list1_length - 1;
+
+  { AData[0..list1_length - 1] now contains all items which are before the 
+    pivot.
+    AData[list1_length..ALength - 2] contains all items after or equal to the 
+    pivot.
+
+    Move the pivot into place, by swapping it with the item immediately 
+    following the end of list 1. }
+  AData[ALength - 1] := AData[list1_length];
+  AData[list1_length] := pivot;
+
+  { Recursively sort the sublists. } 
+  SortInternal(AData, list1_length);
+  SortInternal(AData[list1_length + 1], list2_length);
 end;
 
 function TArrayLists.Insert (AIndex : Cardinal; AData : T) : Boolean;
@@ -236,7 +299,8 @@ end;
 
 procedure TArrayLists.Sort;
 begin
-  
+  { Perform the recursive sort. }
+  SortInternal(FData, FLength);
 end;
 
 end.
