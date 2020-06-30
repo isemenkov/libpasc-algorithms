@@ -37,11 +37,14 @@ uses
   SysUtils;
 
 type
+  { ArrayList index is not exists. }
+  EIndexOutOfRangeException = class(Exception);
+
   { Automatically resizing array. 
     ArrayLists are arrays of pointers which automatically increase in size. }
   generic TArrayLists<T> = class
   public
-    constructor Create (ALength : Cardinal);
+    constructor Create (ALength : Cardinal = 0);
     destructor Destroy; override;
 
     { Append a value to the end of an ArrayList. 
@@ -79,11 +82,24 @@ type
   protected
     { Reallocate the array to the new size }
     function Enlarge : Boolean;
+
+    { Get value by index. }
+    function GetValue (AIndex : Cardinal) : T;
+
+    { Set new value by index. }
+    procedure SetValue (AIndex : Cardinal; AData : T);
   protected
     var
       FData : array of T;
       FLength : Cardinal;
-      FAlloced : Cardinal;    
+      FAlloced : Cardinal;
+  protected
+    { Read/Write value in an ArrayList. If index not exists raise
+      EIndexOutOfRangeException. }
+    property Value [AIndex : Cardinal] : T read GetValue write SetValue;
+
+    { Get ArrayList length. }
+    property Length : Cardinal read FLength;
   end;
 
 implementation
@@ -104,6 +120,26 @@ destructor TArrayLists.Destroy;
 begin
   SetLength(FData, 0);
   inherited Destroy;
+end;
+
+function TArrayLists.GetValue (AIndex : Cardinal) : T;
+begin
+  if AIndex > FLength then
+  begin
+    raise EIndexOutOfRangeException.Create('Index out of range.');
+  end;
+
+  Result := FData[AIndex];
+end;
+
+procedure TArrayLists.SetValue (AIndex : Cardinal; AData : T);
+begin
+  if AIndex > FLength then
+  begin
+    raise EIndexOutOfRangeException.Create('Index out of range.');
+  end;  
+
+  FData[AIndex] := AData;
 end;
 
 function TArrayLists.Enlarge : Boolean;
@@ -169,7 +205,7 @@ begin
 
   { Move back the entries following the range to be removed }
   Move(FData[AIndex + ALength], FData[AIndex],
-    FLength - (AIndex + ALength) * SizeOf(T));
+    (FLength - (AIndex + ALength)) * SizeOf(T));
   Dec(FLength, ALength);
 end;
 
