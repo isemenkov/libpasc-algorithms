@@ -96,7 +96,7 @@ type
       FData : array of T;
       FLength : Cardinal;
       FAlloced : Cardinal;
-  protected
+  public
     { Read/Write value in an ArrayList. If index not exists raise
       EIndexOutOfRangeException. }
     property Value [AIndex : Cardinal] : T read GetValue write SetValue;
