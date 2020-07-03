@@ -48,6 +48,9 @@ type
   generic TList<T> = class
   protected
     type
+      { TList pointer type. }
+      PList = ^(specialize TList<T>);
+
       { TList item entry type. }
       PListEntry = ^TListEntry;
       TListEntry = record
@@ -61,7 +64,7 @@ type
       TIterator = class
       public
         { Create new iterator for list item entry. }
-        constructor Create (AItem : PListEntry);
+        constructor Create (AList : PList; AItem : PListEntry);
 
         { Retrieve the previous entry in a list. }
         function Prev : TIterator;
@@ -79,6 +82,7 @@ type
         procedure SetValue (AValue : T);
       protected
         var
+          FList : PList;
           FItem : PListEntry;
       public
         { Read/Write list item value. If value not exists raise 
@@ -129,5 +133,86 @@ type
 
 implementation
 
+constructor TList.TIterator.Create (AList : PList; AItem : PListEntry);
+begin
+  FList := AList;
+  FItem := AItem;
+end;
+
+function TList.TIterator.Prev : TIterator;
+begin
+  if FItem = nil then
+  begin
+    Result := TIterator.Create(nil);
+    Exit;
+  end;
+
+  Result := TIterator.Create(FItem.Prev);
+end;
+
+function TList.TIterator.Next : TIterator;
+begin
+  if FItem = nil then
+  begin
+    Result := TIterator.Create(nil);
+    Exit;
+  end;
+
+  Result := TIterator.Create(FItem.Next);
+end;
+
+procedure TList.TIterator.Remove;
+begin
+  { If the entry is NULL, always fail }
+  if FItem = nil then
+  begin
+    Exit;
+  end;
+
+  { Action to take is different if the entry is the first in the list }
+  if FItem.Prev = nil then
+  begin
+    FList.FFirstNode := FItem.Next;
+
+    {  Update the second entry's prev pointer, if there is a second entry }
+    if FItem.Next <> nil then
+    begin  
+      FItem.Next.Prev := nil;
+    end;
+  end else
+  begin
+    { This is not the first in the list, so we must have a previous entry. 
+      Update its 'next' pointer to the new value }
+    FItem.Prev.Next := FItem.Next;
+
+    { If there is an entry following this one, update its 'prev' pointer to the 
+      new value }
+    if FItem.Next <> nil then
+    begin
+      FItem.Next.Prev := FItem.Prev;
+    end;
+  end;
+
+  { Free the list entry }
+  FreeAndNil(FItem);
+end;
+
+function TList.TIterator.GetValue : T;
+begin
+  if FItem = nil then
+  begin
+    raise EValueNotExistsException.Create('Value not exists.');
+  end;
+
+  Result := FItem.Value;
+end;
+
+procedure TList.TIterator.SetValue (AValue : T);
+begin
+  if FItem <> nil then
+  begin
+    FItem.Value := AValue;
+  end;
+end;
 
 end.
