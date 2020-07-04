@@ -90,6 +90,8 @@ type
         property Value : T read GetValue write SetValue;
       end;
   public
+    { Create new list. }
+    constructor Create;
     { Free an entire list. }
     destructor Destroy; override;
 
@@ -147,7 +149,7 @@ begin
     Exit;
   end;
 
-  Result := TIterator.Create(FItem.Prev);
+  Result := TIterator.Create(FItem^.Prev);
 end;
 
 function TList.TIterator.Next : TIterator;
@@ -158,7 +160,7 @@ begin
     Exit;
   end;
 
-  Result := TIterator.Create(FItem.Next);
+  Result := TIterator.Create(FItem^.Next);
 end;
 
 procedure TList.TIterator.Remove;
@@ -170,26 +172,26 @@ begin
   end;
 
   { Action to take is different if the entry is the first in the list }
-  if FItem.Prev = nil then
+  if FItem^.Prev = nil then
   begin
-    FList.FFirstNode := FItem.Next;
+    FList^.FFirstNode := FItem^.Next;
 
     {  Update the second entry's prev pointer, if there is a second entry }
-    if FItem.Next <> nil then
+    if FItem^.Next <> nil then
     begin  
-      FItem.Next.Prev := nil;
+      FItem^.Next^.Prev := nil;
     end;
   end else
   begin
     { This is not the first in the list, so we must have a previous entry. 
       Update its 'next' pointer to the new value }
-    FItem.Prev.Next := FItem.Next;
+    FItem^.Prev^.Next := FItem^.Next;
 
     { If there is an entry following this one, update its 'prev' pointer to the 
       new value }
-    if FItem.Next <> nil then
+    if FItem^.Next <> nil then
     begin
-      FItem.Next.Prev := FItem.Prev;
+      FItem^.Next^.Prev := FItem^.Prev;
     end;
   end;
 
@@ -204,15 +206,87 @@ begin
     raise EValueNotExistsException.Create('Value not exists.');
   end;
 
-  Result := FItem.Value;
+  Result := FItem^.Value;
 end;
 
 procedure TList.TIterator.SetValue (AValue : T);
 begin
   if FItem <> nil then
   begin
-    FItem.Value := AValue;
+    FItem^.Value := AValue;
   end;
+end;
+
+constructor TList.Create;
+begin
+  FFirstNode := nil;
+  FLastNode := nil;
+  FLength := 0;
+end;
+
+destructor TList.Destroy;
+var
+  CurrItem, NextItem : PListEntry;
+begin
+  { Iterate over each entry, freeing each list entry, until the end is reached }
+  CurrItem := FFirstNode;
+  while CurrItem <> nil do
+  begin
+    NextItem := CurrItem^.Next;
+    FreeAndNil(CurrItem);
+    CurrItem := NextItem;
+  end;
+
+  inherited Destroy;
+end;
+
+function TList.FirstEntry : TIterator;
+begin
+  Result := TIterator.Create(@Self, FFirstNode);
+end;
+
+function TList.LastEntry : TIterator;
+begin
+  Result := TIterator.Create(@Self, FLastNode);
+end;
+
+function TList.Prepend (AData : T) : Boolean;
+var
+  NewItem : PListEntry;
+begin
+  { Create new entry }
+  New(NewItem);
+  NewItem^.Value := AData;
+
+  { Hook into the list start }
+  if FFirstNode <> nil then
+  begin
+    FFirstNode^.Prev := NewItem;
+  end;
+  NewItem^.Prev := nil;
+  NewItem^.Next := FFirstNode;
+  FFirstNode := NewItem;
+  Inc(FLength);
+  Result := True;
+end;
+
+function TList.Append (AData : T) : Boolean;
+var
+  NewItem : PListEntry;
+begin
+  { Create new entry }
+  New(NewItem);
+  NewItem^.Value := AData;
+
+  if FLastNode <> nil then
+  begin
+    FLastNode^.Next := NewItem;
+  end;
+  NewItem^.Prev := FLastNode;
+  NewItem^.Next := nil;
+  FLastNode := NewItem;
+  Inc(FLength);
+  Result := True;
 end;
 
 end.
