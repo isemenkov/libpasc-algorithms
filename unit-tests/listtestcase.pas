@@ -14,6 +14,7 @@ type
   published
     procedure TestCreateList;
     procedure TestListPrepend;
+    procedure TestListInsert;
   end;
 
 implementation
@@ -61,9 +62,43 @@ begin
   iterator := iterator.Next;
   AssertTrue('1: List item 1 value is not correct', iterator.Value = 67);
 
-  //list.Clear;
+  list.Clear;
 
-  //AssertTrue('2: List length is not correct', list.Length = 0);
+  AssertTrue('2: List length is not correct', list.Length = 0);
+
+  FreeAndNil(list);
+end;
+
+procedure TListTestCase.TestListInsert;
+var
+  list : TIntegerList;
+  iterator : TIntegerList.TIterator;
+begin
+  list := TIntegerList.Create;
+
+  list.Append(43);
+  AssertTrue('1: List length is not correct', list.Length = 1);
+  iterator := list.FirstEntry;
+  AssertTrue('1: List item 0 value is not correct', iterator.Value = 43);
+
+  iterator.InsertNext(67);
+  iterator.InsertPrev(-11);
+  iterator := list.FirstEntry;
+  iterator.InsertPrev(683);
+
+  AssertTrue('2: List length is not correct', list.Length = 4);
+  iterator := list.FirstEntry;
+  AssertTrue('2: List item 0 value is not correct', iterator.Value = 683);
+  iterator := iterator.Next;
+  AssertTrue('2: List item 1 value is not correct', iterator.Value = -11);
+  iterator := iterator.Next;
+  AssertTrue('2: List item 0 value is not correct', iterator.Value = 43);
+  iterator := iterator.Next;
+  AssertTrue('2: List item 1 value is not correct', iterator.Value = 67);
+
+  list.Clear;
+
+  AssertTrue('3: List length is not correct', list.Length = 0);
 
   FreeAndNil(list);
 end;

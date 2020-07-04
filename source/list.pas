@@ -74,6 +74,12 @@ type
 
         { Remove an entry from a list. }
         procedure Remove;
+
+        { Insert new entry in prev position. }
+        procedure InsertPrev (AData : T);
+
+        { Insert new entry in next position. }
+        procedure InsertNext (AData : T);
       protected
         { Get item value. }
         function GetValue : T;
@@ -123,6 +129,9 @@ type
 
     { Sort a list. }
     procedure Sort;
+
+    { Clear the list. }
+    procedure Clear;
   protected
     var
       FFirstNode : PListEntry;
@@ -199,6 +208,40 @@ begin
   FreeAndNil(FItem);
 end;
 
+procedure TList.TIterator.InsertPrev (AData : T);
+var
+  NewItem : PListEntry;
+begin
+  New(NewItem);
+
+  { Insert new entry in list first position. }
+  if FItem^.Prev = nil then
+  begin
+    NewItem^.Next := FItem;
+    FList^.FFirstNode := NewItem;
+  end;
+
+  NewItem^.Value := AData;
+  Inc(FList^.FLength);
+end;
+
+procedure TList.TIterator.InsertNext (AData : T);
+var
+  NewItem : PListEntry;
+begin
+  New(NewItem);
+
+  { Insert new entry is list last position. }
+  if FItem^.Next = nil then
+  begin
+    NewItem^.Prev := FItem;
+    FList^.FLastNode := NewItem;
+  end;
+
+  NewItem^.Value := AData;
+  Inc(FList^.FLength);
+end;
+
 function TList.TIterator.GetValue : T;
 begin
   if FItem = nil then
@@ -225,17 +268,8 @@ begin
 end;
 
 destructor TList.Destroy;
-var
-  CurrItem, NextItem : PListEntry;
 begin
-  { Iterate over each entry, freeing each list entry, until the end is reached }
-  CurrItem := FFirstNode;
-  while CurrItem <> nil do
-  begin
-    NextItem := CurrItem^.Next;
-    Dispose(CurrItem);
-    CurrItem := NextItem;
-  end;
+  Clear;  
 
   inherited Destroy;
 end;
@@ -336,6 +370,24 @@ end;
 procedure TList.Sort;
 begin
 
+end;
+
+procedure TList.Clear;
+var
+  CurrItem, NextItem : PListEntry;
+begin
+  { Iterate over each entry, freeing each list entry, until the end is reached }
+  CurrItem := FFirstNode;
+  while CurrItem <> nil do
+  begin
+    NextItem := CurrItem^.Next;
+    Dispose(CurrItem);
+    CurrItem := NextItem;
+  end;
+  
+  FFirstNode := nil;
+  FLastNode := nil;
+  FLength := 0;
 end;
 
 end.
