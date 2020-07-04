@@ -49,7 +49,7 @@ type
   protected
     type
       { TList pointer type. }
-      PList = ^(specialize TList<T>);
+      PList = ^TList;
 
       { TList item entry type. }
       PListEntry = ^TListEntry;
@@ -145,22 +145,22 @@ function TList.TIterator.Prev : TIterator;
 begin
   if FItem = nil then
   begin
-    Result := TIterator.Create(nil);
+    Result := TIterator.Create(@Self, nil);
     Exit;
   end;
 
-  Result := TIterator.Create(FItem^.Prev);
+  Result := TIterator.Create(@Self, FItem^.Prev);
 end;
 
 function TList.TIterator.Next : TIterator;
 begin
   if FItem = nil then
   begin
-    Result := TIterator.Create(nil);
+    Result := TIterator.Create(@Self, nil);
     Exit;
   end;
 
-  Result := TIterator.Create(FItem^.Next);
+  Result := TIterator.Create(@Self, FItem^.Next);
 end;
 
 procedure TList.TIterator.Remove;
@@ -233,7 +233,7 @@ begin
   while CurrItem <> nil do
   begin
     NextItem := CurrItem^.Next;
-    FreeAndNil(CurrItem);
+    Dispose(CurrItem);
     CurrItem := NextItem;
   end;
 
@@ -266,6 +266,13 @@ begin
   NewItem^.Prev := nil;
   NewItem^.Next := FFirstNode;
   FFirstNode := NewItem;
+
+  { If list is empty, first and last node are the same }
+  if FLastNode = nil then
+  begin
+    FLastNode := FFirstNode;
+  end;
+
   Inc(FLength);
   Result := True;
 end;
@@ -285,8 +292,50 @@ begin
   NewItem^.Prev := FLastNode;
   NewItem^.Next := nil;
   FLastNode := NewItem;
+
+  { If list is empty, first and last node are the same }
+  if FFirstNode = nil then
+  begin
+    FFirstNode := FLastNode;
+  end;
+
   Inc(FLength);
   Result := True;
+end;
+
+function TList.NthEntry (AIndex : Cardinal) : TIterator;
+var
+  Entry : PListEntry;
+  i : Cardinal;
+begin  
+  { Iterate through n list entries to reach the desired entry. Make sure we do 
+    not reach the end of the list. }
+  Entry := FFirstNode;
+  for i := 0 to AIndex do
+  begin
+    if Entry = nil then
+    begin
+      Result := TIterator.Create(@Self, nil);
+      Exit;
+    end;
+  end;
+
+  Result := TIterator.Create(@Self, Entry);
+end;
+
+function TList.Remove (AData : T) : Cardinal;
+begin
+  Result := 0;
+end;
+
+function TList.FindEntry (AData : T) : TIterator;
+begin
+  Result := TIterator.Create(@Self, nil);
+end;
+
+procedure TList.Sort;
+begin
+
 end;
 
 end.
