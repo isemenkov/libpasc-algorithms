@@ -65,6 +65,9 @@ type
         {%H-}constructor Create (APFirstNode : PPListEntry; APLastNode : 
           PPListEntry; APLength : PLongWord; AItem : PListEntry);
       public
+        { Return true if iterator has correct value }
+        function HasValue : Boolean;
+
         { Retrieve the previous entry in a list. }
         function Prev : TIterator;
 
@@ -174,6 +177,11 @@ begin
   FItem := AItem;
 end;
 
+function TList.TIterator.HasValue : Boolean;
+begin
+  Result := FItem <> nil;
+end;
+
 function TList.TIterator.Prev : TIterator;
 begin
   if FItem = nil then
@@ -225,11 +233,16 @@ begin
     if FItem^.Next <> nil then
     begin
       FItem^.Next^.Prev := FItem^.Prev;
+    end else
+    begin
+      FItem^.Prev^.Next := nil;
+      FPLastNode^ := FItem^.Prev;
     end;
   end;
   Dec(FPLength^);
   { Free the list entry }
   Dispose(FItem);
+  FItem := nil;
 end;
 
 procedure TList.TIterator.InsertPrev (AData : T);
@@ -385,25 +398,52 @@ begin
   { Iterate through n list entries to reach the desired entry. Make sure we do 
     not reach the end of the list. }
   Entry := FFirstNode;
-  for i := 0 to AIndex do
+  i := 0;
+  while (i < AIndex) do
   begin
     if Entry = nil then
     begin
       Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, nil);
       Exit;
     end;
+    Entry := Entry^.Next;
+    Inc(i);
   end;
 
   Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, Entry);
 end;
 
 function TList.Remove (AData : T) : Cardinal;
+var
+  Iterator : TIterator;
 begin
   Result := 0;
+  Iterator := FindEntry(AData);
+  while Iterator.HasValue do
+  begin
+    Iterator.Remove;
+    Inc(Result);
+    Iterator := FindEntry(AData);
+  end; 
 end;
 
 function TList.FindEntry (AData : T) : TIterator;
-begin
+var
+  Entry : PListEntry;
+begin  
+  { Iterate through list entries to find the desired entry. Make sure we do 
+    not reach the end of the list. }
+  Entry := FFirstNode;
+  while (Entry <> nil) do
+  begin
+    if Entry^.Value = AData then
+    begin
+      Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, Entry);
+      Exit;
+    end;
+    Entry := Entry^.Next;
+  end;
+
   Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, nil);
 end;
 
