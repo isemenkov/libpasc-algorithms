@@ -48,10 +48,8 @@ type
   generic TList<T> = class
   protected
     type
-      { TList pointer type. }
-      PList = ^TList;
-
       { TList item entry type. }
+      PPListEntry = ^PListEntry;
       PListEntry = ^TListEntry;
       TListEntry = record
         Value : T;
@@ -62,10 +60,11 @@ type
     type
       { TList iterator. }
       TIterator = class
-      public
+      private
         { Create new iterator for list item entry. }
-        constructor Create (AList : PList; AItem : PListEntry);
-
+        {%H-}constructor Create (APFirstNode : PPListEntry; APLastNode : 
+          PPListEntry; APLength : PLongWord; AItem : PListEntry);
+      public
         { Retrieve the previous entry in a list. }
         function Prev : TIterator;
 
@@ -88,7 +87,29 @@ type
         procedure SetValue (AValue : T);
       protected
         var
-          FList : PList;
+          { We cann't store pointer to list because if generics in pascal it is
+            not "real" class see: https://wiki.freepascal.org/Generics 
+            
+            Other Points
+            ============
+            1. The compiler parses a generic, but instead of generating code it 
+            stores all tokens in a token buffer inside the PPU file.
+            2. The compiler parses a specialization; for this it loads the token 
+            buffer from the PPU file and parses that again. It replaces the 
+            generic parameters (in most examples "T") by the particular given 
+            type (e.g. LongInt, TObject).
+              The code basically appears as if the same class had been written 
+            as the generic but with T replaced by the given type. 
+              Therefore in theory there should be no speed differences between a
+            "normal" class and a generic one.  
+
+            In this reason we cann't take pointer to list class inside TIterator
+            class. But in some methods we need modify original list data, so we
+            store pointers to list data. }
+          FPFirstNode : PPListEntry;
+          FPLastNode : PPListEntry;
+          FPLength : PLongWord;
+
           FItem : PListEntry;
       public
         { Read/Write list item value. If value not exists raise 
@@ -144,9 +165,12 @@ type
 
 implementation
 
-constructor TList.TIterator.Create (AList : PList; AItem : PListEntry);
+constructor TList.TIterator.Create (APFirstNode : PPListEntry; APLastNode : 
+  PPListEntry; APLength : PLongWord; AItem : PListEntry);
 begin
-  FList := AList;
+  FPFirstNode := APFirstNode;
+  FPLastNode := APLastNode;
+  FPLength := APLength;
   FItem := AItem;
 end;
 
@@ -154,22 +178,22 @@ function TList.TIterator.Prev : TIterator;
 begin
   if FItem = nil then
   begin
-    Result := TIterator.Create(@Self, nil);
+    Result := TIterator.Create(FPFirstNode, FPLastNode, FPLength, nil);
     Exit;
   end;
 
-  Result := TIterator.Create(@Self, FItem^.Prev);
+  Result := TIterator.Create(FPFirstNode, FPLastNode, FPLength, FItem^.Prev);
 end;
 
 function TList.TIterator.Next : TIterator;
 begin
   if FItem = nil then
   begin
-    Result := TIterator.Create(@Self, nil);
+    Result := TIterator.Create(FPFirstNode, FPLastNode, FPLength, nil);
     Exit;
   end;
 
-  Result := TIterator.Create(@Self, FItem^.Next);
+  Result := TIterator.Create(FPFirstNode, FPLastNode, FPLength, FItem^.Next);
 end;
 
 procedure TList.TIterator.Remove;
@@ -183,7 +207,7 @@ begin
   { Action to take is different if the entry is the first in the list }
   if FItem^.Prev = nil then
   begin
-    FList^.FFirstNode := FItem^.Next;
+    FPFirstNode^ := FItem^.Next;
 
     {  Update the second entry's prev pointer, if there is a second entry }
     if FItem^.Next <> nil then
@@ -203,9 +227,9 @@ begin
       FItem^.Next^.Prev := FItem^.Prev;
     end;
   end;
-
+  Dec(FPLength^);
   { Free the list entry }
-  FreeAndNil(FItem);
+  Dispose(FItem);
 end;
 
 procedure TList.TIterator.InsertPrev (AData : T);
@@ -218,11 +242,11 @@ begin
   if FItem^.Prev = nil then
   begin
     NewItem^.Next := FItem;
-    FList^.FFirstNode := NewItem;
+    FPFirstNode^ := NewItem;
   end;
 
   NewItem^.Value := AData;
-  Inc(FList^.FLength);
+  Inc(FPLength^);
 end;
 
 procedure TList.TIterator.InsertNext (AData : T);
@@ -235,11 +259,11 @@ begin
   if FItem^.Next = nil then
   begin
     NewItem^.Prev := FItem;
-    FList^.FLastNode := NewItem;
+    FPLastNode^ := NewItem;
   end;
 
   NewItem^.Value := AData;
-  Inc(FList^.FLength);
+  Inc(FPLength^);
 end;
 
 function TList.TIterator.GetValue : T;
@@ -276,12 +300,12 @@ end;
 
 function TList.FirstEntry : TIterator;
 begin
-  Result := TIterator.Create(@Self, FFirstNode);
+  Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, FFirstNode);
 end;
 
 function TList.LastEntry : TIterator;
 begin
-  Result := TIterator.Create(@Self, FLastNode);
+  Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, FLastNode);
 end;
 
 function TList.Prepend (AData : T) : Boolean;
@@ -349,12 +373,12 @@ begin
   begin
     if Entry = nil then
     begin
-      Result := TIterator.Create(@Self, nil);
+      Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, nil);
       Exit;
     end;
   end;
 
-  Result := TIterator.Create(@Self, Entry);
+  Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, Entry);
 end;
 
 function TList.Remove (AData : T) : Cardinal;
@@ -364,7 +388,7 @@ end;
 
 function TList.FindEntry (AData : T) : TIterator;
 begin
-  Result := TIterator.Create(@Self, nil);
+  Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, nil);
 end;
 
 procedure TList.Sort;
