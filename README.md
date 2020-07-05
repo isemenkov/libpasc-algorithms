@@ -13,3 +13,15 @@ type
 ```
 
 Automatically resizing array. ArrayLists are generic arrays of T which automatically increase in size.
+
+##### TList
+
+```pascal
+uses
+  list;
+
+type
+  generic TList<T> = class
+```
+
+A doubly-linked list stores a collection of values. Each entry in the list contains a link to the next entry and the previous entry. It is therefore possible to iterate over entries in the list in either direction.
