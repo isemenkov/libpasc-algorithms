@@ -60,7 +60,7 @@ type
     type
       { TList iterator. }
       TIterator = class
-      private
+      protected
         { Create new iterator for list item entry. }
         {%H-}constructor Create (APFirstNode : PPListEntry; APLastNode : 
           PPListEntry; APLength : PLongWord; AItem : PListEntry);
@@ -90,7 +90,7 @@ type
         procedure SetValue (AValue : T);
       protected
         var
-          { We cann't store pointer to list because if generics in pascal it is
+          { We cann't store pointer to list because generics in pascal it is
             not "real" class see: https://wiki.freepascal.org/Generics 
             
             Other Points
@@ -156,6 +156,10 @@ type
 
     { Clear the list. }
     procedure Clear;
+  protected
+    { Function used internally for sorting.  Returns the last entry in the new 
+      sorted list }
+    function SortInternal (list : PPListEntry) : PListEntry;  
   protected
     var
       FFirstNode : PListEntry;
@@ -447,9 +451,108 @@ begin
   Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, nil);
 end;
 
+function TList.SortInternal (list : PPListEntry) : PListEntry;
+var
+  pivot, rover : PListEntry;
+  less_list, more_list : PListEntry;
+  less_list_end, more_list_end : PListEntry;
+  next : PListEntry;
+begin
+  if list = nil then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+  { If there are less than two entries in this list, it is already sorted }
+  if (list^ = nil) or ((list^)^.Next = nil) then
+  begin
+    Result := list^;
+    Exit;
+  end;
+
+  { The first entry is the pivot }
+  pivot := list^;
+
+  { Iterate over the list, starting from the second entry. Sort all entries into
+    the less and more lists based on comparisons with the pivot }
+  less_list := nil;
+  more_list := nil;
+  rover := (list^)^.Next;
+
+  while rover <> nil do
+  begin
+    next := rover^.Next;
+
+    if rover^.Value < pivot^.Value then
+    begin
+      { Place this in the less list }
+      rover^.Prev := nil;
+      rover^.Next := less_list;
+
+      if less_list <> nil then
+      begin
+        less_list^.Prev := rover;
+      end;
+      less_list := rover;
+    end else
+    begin
+      { Place this in the more list }
+      rover^.Prev := nil;
+      rover^.Next := more_list;
+
+      if more_list <> nil then
+      begin
+        more_list^.Prev := rover;
+      end;
+      more_list := rover;
+    end;
+    rover := next;
+  end;
+
+  { Sort the sublists recursively }
+  less_list_end := SortInternal(@less_list);
+  more_list_end := SortInternal(@more_list);
+
+  { Create the new list starting from the less list }
+  list^ := less_list;
+
+  { Append the pivot to the end of the less list. If the less list was empty, 
+    start from the pivot }
+  if less_list = nil then
+  begin
+    pivot^.Prev := nil;
+    list^ := pivot;
+  end else
+  begin
+    pivot^.Prev := less_list_end;
+    less_list_end^.Next := pivot;
+  end;
+
+  { Append the more list after the pivot }
+  pivot^.Next := more_list;
+  if more_list <> nil then
+  begin
+    more_list^.Prev := pivot;
+  end;
+
+  { Work out what the last entry in the list is. If the more list was empty, the 
+    pivot was the last entry. Otherwise, the end of the more list is the end of 
+    the total list. }
+  if more_list = nil then
+  begin
+    Result := pivot;
+    Exit;
+  end else
+  begin
+    Result := more_list_end;
+    Exit;
+  end;
+end;
+
 procedure TList.Sort;
 begin
-
+  SortInternal(@FFirstNode);
 end;
 
 procedure TList.Clear;

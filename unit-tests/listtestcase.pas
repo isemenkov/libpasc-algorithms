@@ -19,6 +19,7 @@ type
     procedure TestListRemove;
     procedure TestListNthIndexFind;
     procedure TestListRemoveData;
+    procedure TestListSort;
   end;
 
 implementation
@@ -241,7 +242,6 @@ end;
 procedure TListTestCase.TestListRemoveData;
 var
   list : TIntegerList;
-  iterator : TIntegerList.TIterator;
   count : Cardinal;
 begin
   list := TIntegerList.Create;
@@ -267,6 +267,40 @@ begin
   AssertTrue('3: List count remove elements is not correct', count = 1);
 
   AssertTrue('4: List length is not correct', list.Length = 1);
+
+  FreeAndNil(list);
+end;
+
+procedure TListTestCase.TestListSort;
+var
+  list : TIntegerList;
+  iterator : TIntegerList.TIterator;
+begin
+  list := TIntegerList.Create;
+
+  list.Append(4);
+  list.Append(3);
+  list.Append(11);
+  list.Append(9);
+  list.Append(6);
+
+  list.Sort;
+  AssertTrue('1: List length is not correct', list.Length = 5);
+  iterator := list.FirstEntry;
+  AssertTrue('1: List item 0 haven''t value', iterator.HasValue);
+  AssertTrue('1: List item 0 value is not correct', iterator.Value = 3);
+  iterator := iterator.Next;
+  AssertTrue('1: List item 1 haven''t value', iterator.HasValue);
+  AssertTrue('1: List item 1 value is not correct', iterator.Value = 4);
+  iterator := iterator.Next;
+  AssertTrue('1: List item 2 haven''t value', iterator.HasValue);
+  AssertTrue('1: List item 2 value is not correct', iterator.Value = 6);
+  iterator := iterator.Next;
+  AssertTrue('1: List item 3 haven''t value', iterator.HasValue);
+  AssertTrue('1: List item 3 value is not correct', iterator.Value = 9);
+  iterator := iterator.Next;
+  AssertTrue('1: List item 4 haven''t value', iterator.HasValue);
+  AssertTrue('1: List item 4 value is not correct', iterator.Value = 11);
 
   FreeAndNil(list);
 end;
