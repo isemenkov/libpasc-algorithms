@@ -241,10 +241,18 @@ begin
   { Insert new entry in list first position. }
   if FItem^.Prev = nil then
   begin
+    FItem^.Prev := NewItem;
+    NewItem^.Prev := nil;
     NewItem^.Next := FItem;
     FPFirstNode^ := NewItem;
+  end else
+  { Insert new entry in custom list position }
+  begin
+    FItem^.Prev^.Next := NewItem;
+    NewItem^.Prev := FItem^.Prev;
+    FItem^.Prev := NewItem;
+    NewItem^.Next := FItem;
   end;
-
   NewItem^.Value := AData;
   Inc(FPLength^);
 end;
@@ -258,10 +266,18 @@ begin
   { Insert new entry is list last position. }
   if FItem^.Next = nil then
   begin
+    FItem^.Next := NewItem;
     NewItem^.Prev := FItem;
+    NewItem^.Next := nil;
     FPLastNode^ := NewItem;
+  end else
+  { Insert new entry in custom list position }
+  begin
+    NewItem^.Next := FItem^.Next;
+    FItem^.Next^.Prev := NewItem;
+    FItem^.Next := NewItem;
+    NewItem^.Prev := FItem;
   end;
-
   NewItem^.Value := AData;
   Inc(FPLength^);
 end;

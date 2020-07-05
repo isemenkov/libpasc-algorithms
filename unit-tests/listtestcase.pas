@@ -81,10 +81,9 @@ begin
   iterator := list.FirstEntry;
   AssertTrue('1: List item 0 value is not correct', iterator.Value = 43);
 
-  iterator.InsertNext(67);
-  iterator.InsertPrev(-11);
-  iterator := list.FirstEntry;
-  iterator.InsertPrev(683);
+  list.FirstEntry.InsertNext(67);
+  list.FirstEntry.InsertPrev(-11);
+  list.FirstEntry.InsertPrev(683);
 
   AssertTrue('2: List length is not correct', list.Length = 4);
   iterator := list.FirstEntry;
