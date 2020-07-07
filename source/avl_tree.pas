@@ -66,8 +66,53 @@ type
     { Search an AVL tree for a value corresponding to a particular key. This 
       uses the tree as a mapping. }
     function Search (Key : K) : V;
+  protected
+    type
+      TAvlTreeNodeSide = (
+        AVL_TREE_NODE_LEFT                                               = 0,
+        AVL_TREE_NODE_RIGHT                                              = 1
+      );
 
+      PAvlTreeNode = ^TAvlTreeNode;
+      TAvlTreeNode = record
+        children : array [0 .. 1] of PAvlTreeNode;
+        parent : PAvlTreeNode;
+        key : K;
+        value : V;
+        height : Integer;
+      end;
+
+      PAvlTree = ^TAvlTree;
+      TAvlTree = record
+        root_node : PAvlTreeNode;
+        num_nodes : Cardinal;
+      end;  
+  protected
+    { Remove a node from a tree. }
+    procedure RemoveNode (node : PAvlTreeNode);
+
+    { Search an AVL tree for a node with a particular key.  This uses the tree 
+      as a mapping. }
+    function SearchNode (key : K) : PAvlTreeNode;
+
+    { Find the root node of a tree. }
+    function RootNode : PAvlTreeNode;
+
+    { Retrieve the key for a given tree node. }
+    function NodeKey (node : PAvlTreeNode) : K;
+
+    { Retrieve the value at a given tree node. }
+    function NodeValue (node : PAvlTreeNode) : V;
+
+    { Find the child of a given tree node. }
+    function NodeChild (node : PAvlTreeNode; side : TAvlTreeNodeSide) : 
+      PAvlTreeNode;
     
+    { Find the parent node of a given tree node. }
+    function NodeParent (node : PAvlTreeNode) : PAvlTreeNode;
+
+    { Find the height of a subtree. }
+    function SubtreeHeight (node : PAvlTreeNode) : Integer;
   end;
 
 
