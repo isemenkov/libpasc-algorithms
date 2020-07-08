@@ -47,7 +47,7 @@ type
     Balanced binary trees have several uses. They can be used as a mapping 
     (searching for a value based on its key), or as a set of keys which is 
     always ordered. }
-  generic AvlTree<K, V> = class
+  generic TAvlTree<K, V> = class
   public
     { Create a new AVL tree. }
     constructor Create;
@@ -88,6 +88,9 @@ type
         num_nodes : Cardinal;
       end;  
   protected
+    { Free node. }
+    procedure FreeSubtreeNode (node : PAvlTreeNode);
+
     { Remove a node from a tree. }
     procedure RemoveNode (node : PAvlTreeNode);
 
@@ -113,9 +116,51 @@ type
 
     { Find the height of a subtree. }
     function SubtreeHeight (node : PAvlTreeNode) : Integer;
+  protected
+    FTree : PAvlTree;
   end;
 
-
 implementation
+
+constructor TAvlTree.Create;
+begin
+  New(FTree);
+  FTree^.root_node := nil;
+  FTree^.num_nodes := 0;
+end;
+
+procedure TAvlTree.FreeSubtreeNode (node : PAvlTreeNode);
+begin
+  if node <> nil then
+  begin
+    FreeSubtreeNode(node^.children[AVL_TREE_NODE_LEFT]);
+    FreeSubtreeNode(node^.children[AVL_TREE_NODE_RIGHT]);
+
+    Dispose(node);
+    node := nil;
+  end;
+end;
+
+destructor TAvlTree.Destroy;
+begin
+  { Destroy all nodes }
+  FreeSubtreeNode(FTree^.root_node);
+  { Free back the main tree data structure }
+  Dispose(FTree);
+  FTree := nil;
+
+  inherited Destroy;
+end;
+
+function TAvlTree.SubtreeHeight (node : PAvlTreeNode) : Integer;
+begin
+  if node <> nil then
+  begin
+    Result := node^.height;
+  end else
+  begin
+    Result := 0;
+  end;
+end;
 
 end.
