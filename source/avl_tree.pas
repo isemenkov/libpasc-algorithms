@@ -89,7 +89,7 @@ type
       end;  
   protected
     { Free node. }
-    procedure FreeSubtreeNode (node : PAvlTreeNode);
+    procedure FreeSubTreeNode (node : PAvlTreeNode);
 
     { Remove a node from a tree. }
     procedure RemoveNode (node : PAvlTreeNode);
@@ -115,7 +115,14 @@ type
     function NodeParent (node : PAvlTreeNode) : PAvlTreeNode;
 
     { Find the height of a subtree. }
-    function SubtreeHeight (node : PAvlTreeNode) : Integer;
+    function SubTreeHeight (node : PAvlTreeNode) : Integer;
+  protected
+    { Update the "height" variable of a node, from the heights of its children. 
+      This does not update the height variable of any parent nodes. }
+    procedure UpdateTreeHeight (node : PAvlTreeNode);
+
+    { Find what side a node is relative to its parent. }
+    function TreeNodeParentSide (node : TAvlTreeNode) : TAvlTreeNodeSide;
   protected
     FTree : PAvlTree;
   end;
@@ -129,7 +136,7 @@ begin
   FTree^.num_nodes := 0;
 end;
 
-procedure TAvlTree.FreeSubtreeNode (node : PAvlTreeNode);
+procedure TAvlTree.FreeSubTreeNode (node : PAvlTreeNode);
 begin
   if node <> nil then
   begin
@@ -152,7 +159,7 @@ begin
   inherited Destroy;
 end;
 
-function TAvlTree.SubtreeHeight (node : PAvlTreeNode) : Integer;
+function TAvlTree.SubTreeHeight (node : PAvlTreeNode) : Integer;
 begin
   if node <> nil then
   begin
@@ -160,6 +167,37 @@ begin
   end else
   begin
     Result := 0;
+  end;
+end;
+
+procedure TAlvTree.UpdateTreeHeight (node : PAvlTreeNode);
+var
+  left_subtree : PAvlTreeNode;
+  right_subtree : PAvlTreeNode;
+  left_height, right_height : Integer;
+begin
+  left_subtree := node^.children[AVL_TREE_NODE_LEFT];
+  right_subtree := node^.children[AVL_TREE_NODE_RIGHT];
+  left_height := SubTreeHeight(left_subtree);
+  right_height := SubTreeHeight(right_subtree);
+
+  if left_height > right_height then
+  begin
+    node^.height := left_height + 1;
+  end else 
+  begin
+    node^.height := right_height + 1;
+  end;
+end;
+
+function TAvlTree.TreeNodeParentSide (node : TAvlTreeNode) : TAvlTreeNodeSide;
+begin
+  if node^.parent^.children[AVL_TREE_NODE_LEFT] = node then
+  begin
+    Result := AVL_TREE_NODE_LEFT;
+  end else
+  begin
+    Result := AVL_TREE_NODE_RIGHT;
   end;
 end;
 
