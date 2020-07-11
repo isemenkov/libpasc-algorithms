@@ -123,6 +123,30 @@ type
 
     { Find what side a node is relative to its parent. }
     function TreeNodeParentSide (node : TAvlTreeNode) : TAvlTreeNodeSide;
+
+    { Replace node1 with node2 at its parent. }
+    procedure TreeNodeReplace (node1 : PAvlTreeNode; node2 : PAvlTreeNode);
+
+    { Rotate a section of the tree. 'node' is the node at the top of the section 
+      to be rotated. 'direction' is the direction in which to rotate the tree: 
+      left or right, as shown in the following diagram: 
+
+      Left rotation:              Right rotation:
+ 
+           B                             D
+          / \                           / \
+         A   D                         B   E
+            / \                       / \
+           C   E                     A   C
+      is rotated to:              is rotated to:
+      
+             D                           B
+            / \                         / \
+           B   E                       A   D
+          / \                             / \
+         A   C                           C   E                                    }
+    function TreeRotate(node : PAvlTreeNode; direction : TAVLTreeNodeSide) :
+      PAvlTreeNode;
   protected
     FTree : PAvlTree;
   end;
@@ -199,6 +223,58 @@ begin
   begin
     Result := AVL_TREE_NODE_RIGHT;
   end;
+end;
+
+procedure TAvlTree.TreeNodeReplace (node1 : PAvlTreeNode; node2 : PAvlTreeNode);
+var
+  side : Integer;
+begin
+  { Set the node's parent pointer. }
+  if node2 <> nil then
+  begin
+    node2^.parent := node1^.parent;
+  end;
+
+  { The root node? }
+  if node1^.parent = nil then
+  begin
+    FTree^.root_node := node2;
+  end else begin
+    side := TreeNodeParentSide(node1);
+    node1^.parent^.children[side] := node2;
+    UpdateTreeHeight(node1^.parent);
+  end;
+end;
+
+function TAvlTree.TreeRotate (node : PAvlTreeNode; direction : TAVLTreeNodeSide) 
+  : PAvlTreeNode;
+var
+  new_root : PAvlTreeNode;
+begin
+  { The child of this node will take its place:
+	  for a left rotation, it is the right child, and vice versa. }
+  new_root := node^.children[1 - direction];
+
+  { Make new_root the root, update parent pointers. }
+  TreeNodeReplace(node, new_root);
+
+  { Rearrange pointers }
+  node^.children[1 - direction] := new_root^.children[direction];
+  new_root^.children[direction] := node;
+
+  { Update parent references }
+  node^.parent := new_root;
+
+  if node^.children[1 - direction] <> nil then
+  begin
+    node^.children[1 - direction]^.parent := node;
+  end;
+
+  { Update heights of the affected nodes }
+  UpdateTreeHeight(new_root);
+  UpdateTreeHeight(node);
+
+  Result := new_root;
 end;
 
 end.
