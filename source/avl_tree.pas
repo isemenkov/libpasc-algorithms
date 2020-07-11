@@ -73,6 +73,7 @@ type
         AVL_TREE_NODE_RIGHT                                              = 1
       );
 
+      PPAvlTreeNode = ^PAvlTreeNode;
       PAvlTreeNode = ^TAvlTreeNode;
       TAvlTreeNode = record
         children : array [0 .. 1] of PAvlTreeNode;
@@ -145,8 +146,16 @@ type
            B   E                       A   D
           / \                             / \
          A   C                           C   E                                    }
-    function TreeRotate(node : PAvlTreeNode; direction : TAVLTreeNodeSide) :
+    function TreeRotate (node : PAvlTreeNode; direction : TAVLTreeNodeSide) :
       PAvlTreeNode;
+
+    { Balance a particular tree node. 
+
+      Returns the root node of the new subtree which is replacing the old one. }
+    function TreeNodeBalance (node : PAvlTreeNode) : PAvlTreeNode;
+
+    { Walk up the tree from the given node, performing any needed rotations. }
+    procedure TreeBalanceToRoot (node : PAvlTreeNode);
   protected
     FTree : PAvlTree;
   end;
@@ -275,6 +284,116 @@ begin
   UpdateTreeHeight(node);
 
   Result := new_root;
+end;
+
+function TAvlTree.TreeNodeBalance (node : PAvlTreeNode) : PAvlTreeNode;
+var
+  left_subtree : PAvlTreeNode;
+  right_subtree : PAvlTreeNode;
+  child : PAvlTreeNode;
+  diff : Integer;
+begin
+  left_subtree := node^.children[AVL_TREE_NODE_LEFT];
+  right_subtree := node^.children[AVL_TREE_NODE_RIGHT];
+
+  { Check the heights of the child trees. If there is an unbalance (difference 
+    between left and right > 2), then rotate nodes around to fix it. }
+  diff := SubTreeHeight(right_subtree) - SubTreeHeight(left_subtree);
+
+  if diff >= 2 then
+  begin
+    { Biased toward the right side too much. }
+    child := right_subtree;
+
+    if SubTreeHeight(child^.children[AVL_TREE_NODE_RIGHT]) <
+       SubTreeHeight(child^.children[AVL_TREE_NODE_LEFT]) then
+    begin
+      { If the right child is biased toward the left side, it must be rotated 
+        right first (double rotation). }
+      TreeRotate(right_subtree, AVL_TREE_NODE_RIGHT);
+    end;  
+
+    { Perform a left rotation. After this, the right child will take the place 
+      of this node. Update the node pointer. }
+    node := TreeRotate(node, AVL_TREE_NODE_LEFT);
+  end else if diff <= -2 then
+  begin
+    { Biased toward the left side too much. }
+    child := node^.children[AVL_TREE_NODE_LEFT];
+
+    if SubTreeHeight(child^.children[AVL_TREE_NODE_LEFT]) <
+       SubTreeHeight(child^.children[AVL_TREE_NODE_RIGHT]) then
+    begin
+      { If the left child is biased toward the right side, it must be rotated 
+        right left (double rotation). }
+      TreeRotate(left_subtree, AVL_TREE_NODE_LEFT);
+    end; 
+
+    { Perform a right rotation. After this, the left child will take the place 
+      of this node. Update the node pointer. }
+    node := TreeRotate(node, AVL_TREE_NODE_RIGHT);
+  end;
+
+  { Update the height of this node. }
+  UpdateTreeHeight(node);
+  Result := node;
+end;
+
+procedure TAvlTree.TreeBalanceToRoot (node : PAvlTreeNode);
+var
+  rover : PAvlTreeNode;
+begin
+  rover := node;
+  while rover <> nil do
+  begin
+    { Balance this node if necessary. }
+    rover := TreeNodeBalance(rover);  
+
+    { Go to this node's parent. }
+    rover := rover^.parent;
+  end;
+end;
+
+procedure TAvlTree.Insert (Key : K; Value : V);
+var
+  rover : PPAvlTreeNode;
+  new_node : PAvlTreeNode;
+  previous_node : PAvlTreeNode;
+begin
+  { Walk down the tree until we reach a NULL pointer. }
+  rover := @(FTree^.root_node);
+  previous_node := nil;
+
+  while rover^ <> nil do
+  begin
+    previous_node := rover^;
+    if Key < (rover^)^.key then
+    begin
+      rover := @((rover^)^.children[AVL_TREE_NODE_LEFT]);
+    end else
+    begin
+      rover := @((rover^)^.children[AVL_TREE_NODE_RIGHT]);
+    end;
+  end;
+
+  { Create a new node. Use the last node visited as the parent link. }
+  New(new_node);
+  new_node^.children[AVL_TREE_NODE_LEFT] := nil;
+  new_node^.children[AVL_TREE_NODE_RIGHT] := nil;
+  new_node^.parent := previous_node;
+  new_node^.key := Key;
+  new_node^.value := Value;
+  new_node^.height := 1;
+
+  { Insert at the NULL pointer that was reached. }
+  rover^ := new_node;
+
+  { Rebalance the tree, starting from the previous node. }
+  TreeBalanceToRoot(previous_node);
+
+  { Keep track of the number of entries. }
+  Inc(FTree^.num_nodes);
+  Result := new_node;
 end;
 
 end.
