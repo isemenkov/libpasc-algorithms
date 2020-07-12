@@ -37,6 +37,9 @@ uses
   SysUtils;
 
 type
+  { Item key value not exists. }
+  EKeyNotExistsException = class(Exception);
+
   { The AVL tree structure is a balanced binary tree which stores a collection 
     of nodes. Each node has a key and a value associated with it. The nodes are 
     sorted within the tree based on the order of their keys. Modifications to 
@@ -115,6 +118,9 @@ type
     { Find the parent node of a given tree node. }
     function NodeParent (node : PAvlTreeNode) : PAvlTreeNode;
 
+    { Retrieve the number of entries in the tree. }
+    function NumEntries : Cardinal;
+
     { Find the height of a subtree. }
     function SubTreeHeight (node : PAvlTreeNode) : Integer;
   protected
@@ -156,6 +162,10 @@ type
 
     { Walk up the tree from the given node, performing any needed rotations. }
     procedure TreeBalanceToRoot (node : PAvlTreeNode);
+
+    { Find the nearest node to the given node, to replace it. The node returned 
+      is unlinked from the tree. Returns NULL if the node has no children. }
+    function TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;  
   protected
     FTree : PAvlTree;
   end;
@@ -394,6 +404,218 @@ begin
   { Keep track of the number of entries. }
   Inc(FTree^.num_nodes);
   Result := new_node;
+end;
+
+function TAvlTree.TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;
+var
+  left_subtree : PAvlTreeNode;
+  right_subtree : PAvlTreeNode;
+  res : PAvlTreeNode;
+  child : PAvlTreeNode;
+  left_height, right_height : Integer;
+  side : Integer;
+begin
+  left_subtree := node^.children[AVL_TREE_NODE_LEFT];
+  right_subtree := node^.children[AVL_TREE_NODE_RIGHT];
+
+  { No children? }
+  if (left_subtree = nil) and (right_subtree = nil) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+  { Pick a node from whichever subtree is taller. This helps to keep the tree 
+    balanced. }
+  left_height := SubTreeHeight(left_subtree);
+  right_height := SubTreeHeight(right_subtree);
+
+  if left_height < right_height then
+  begin
+    side := AVL_TREE_NODE_RIGHT;
+  end else
+  begin
+    side := AVL_TREE_NODE_LEFT;
+  end;
+
+  { Search down the tree, back towards the center. }
+  res := node^.children[side];
+
+  while res^.children[1 - side] <> nil do
+  begin
+    res := res^.children[1 - side];
+  end;
+
+  { Unlink the result node, and hook in its remaining child (if it has one) to 
+    replace it. }
+  child := res^.children[side];
+  TreeNodeReplace(res, child);
+
+  { Update the subtree height for the result node's old parent. }
+  UpdateTreeHeight(res^.parent);
+
+  Result := res;
+end;
+
+procedure TAvlTree.RemoveNode (node : PAvlTreeNode);
+var
+  swap_node : PAvlTreeNode;
+  balance_startpoint : PAvlTreeNode;
+  i : Integer;
+begin
+  { The node to be removed must be swapped with an "adjacent" node, ie. one 
+    which has the closest key to this one. Find a node to swap with. }
+  swap_node := TreeNodeGetReplacement(node);
+
+  if swap_node = nil then
+  begin
+    { This is a leaf node and has no children, therefore it can be immediately 
+      removed. }
+
+    { Unlink this node from its parent. }
+    TreeNodeReplace(node, nil);
+
+    { Start rebalancing from the parent of the original node. }
+    balance_startpoint := node^.parent;
+  end else
+  begin
+    { We will start rebalancing from the old parent of the swap node. Sometimes,
+      the old parent is the node we are removing, in which case we must start 
+      rebalancing from the swap node. }
+    if swap_node = node then
+    begin
+      balance_startpoint := swap_node;
+    end else
+    begin
+      balance_startpoint := swap_node^.parent;
+    end;
+
+    { Copy references in the node into the swap node. }
+    for i := 0 to 1 do
+    begin
+      swap_node^.children[i] := node^.children[i];
+
+      if swap_node^.children[i] <> nil then
+      begin
+        swap_node^.children[i]^.parent := swap_node;
+      end;
+    end;
+
+    swap_node^.height := node^.height;
+
+    { Link the parent's reference to this node. }
+    TreeNodeReplace(node, swap_node);
+  end;
+
+  { Destroy the node }
+  Dispose(node);
+  node := nil;
+
+  { Keep track of the number of nodes }
+  Dec(FTree^.num_nodes);
+
+  { Rebalance the tree }
+  TreeBalanceToRoot(balance_startpoint);
+end;
+
+function TAvlTree.Remove(Key : K) : Boolean;
+var
+  node : PAvlTreeNode;
+begin
+  { Find the node to remove }
+  node := SearchNode(Key);
+
+  if node = nil then
+  begin
+    { Not found in tree }
+    Result := False;
+    Exit;
+  end;
+
+  { Remove the node }
+  RemoveNode(node);
+  Result := True;
+end;
+
+function TAvlTree.SearchNode (Key : K) : PAvlTreeNode;
+var
+  node : PAvlTreeNode;
+begin
+  { Search down the tree and attempt to find the node which has the specified 
+    key }
+  node := FTree^.root_node;
+
+  while node <> nil do
+  begin
+    if Key = node^.key then
+    begin
+      { Keys are equal: return this node }
+      Result := node;
+      Exit;
+    end else if Key < node^.key then
+    begin
+      node := node^.children[AVL_TREE_NODE_LEFT];
+    end else
+    begin
+      node := node^.children[AVL_TREE_NODE_RIGHT];
+    end;
+  end; 
+
+  { Not found }
+  Result := nil; 
+end;
+
+function TAvlTree.Search (Key : K) : V;
+var
+  node : PAvlTreeNode;
+begin
+  { Find the node }
+  node := SearchNode(Key);
+
+  if node = nil then
+  begin
+    raise EKeyNotExistsException.Create('Key not exists.');
+  end else
+  begin
+    Result := node^.value;
+  end;
+end;
+
+function TAvlTree.RootNode : PAvlTreeNode;
+begin
+  Result := FTree^.root_node;
+end;
+
+function TAvlTree.NodeKey (node : PAvlTreeNode) : K;
+begin
+  Result := node^.key;
+end;
+
+function TAvlTree.NodeValue (node : PAvlTreeNode) : V;
+begin
+  Result := node^.value;
+end;
+
+function TAvlTree.NodeChild (node : PAvlTreeNode; side : TAvlTreeNodeSide) :
+  PAvlTreeNode;
+begin
+  if (side = AVL_TREE_NODE_LEFT) or (side = AVL_TREE_NODE_RIGHT) then
+  begin
+    Result := node^.children[side];
+  end else
+  begin
+    Result := nil;
+  end;
+end;
+
+function TAvlTree.NodeParent (node : PAvlTreeNode) : PAvlTreeNode;
+begin
+  Result := node^.parent;
+end;
+
+function TAvlTree.NumEntries : Cardinal;
+begin
+  Result := FTree^.num_nodes;
 end;
 
 end.
