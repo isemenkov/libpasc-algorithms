@@ -32,7 +32,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="libpascalgorithmstestcase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -57,6 +57,10 @@
         <Filename Value="../source/avl_tree.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="avltreetestcase.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

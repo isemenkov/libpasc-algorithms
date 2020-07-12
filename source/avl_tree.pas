@@ -86,12 +86,15 @@ type
         height : Integer;
       end;
 
-      PAvlTree = ^TAvlTree;
-      TAvlTree = record
+      PAvlTreeStruct = ^TAvlTreeStruct;
+      TAvlTreeStruct = record
         root_node : PAvlTreeNode;
         num_nodes : Cardinal;
-      end;  
+      end;
   protected
+    { Compare two nodes. }
+    function CompareAvlTreeNode (A, B : TAvlTreeNode) : Boolean;
+
     { Free node. }
     procedure FreeSubTreeNode (node : PAvlTreeNode);
 
@@ -151,7 +154,7 @@ type
             / \                         / \
            B   E                       A   D
           / \                             / \
-         A   C                           C   E                                    }
+         A   C                           C   E                                 }
     function TreeRotate (node : PAvlTreeNode; direction : TAVLTreeNodeSide) :
       PAvlTreeNode;
 
@@ -167,10 +170,20 @@ type
       is unlinked from the tree. Returns NULL if the node has no children. }
     function TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;  
   protected
-    FTree : PAvlTree;
+    FTree : PAvlTreeStruct;
   end;
 
 implementation
+
+function TAvlTree.CompareAvlTreeNode (A, B : TAvlTreeNode) : Boolean;
+begin
+  Result := (A.children[0] = B.children[0]) and
+            (A.children[1] = B.children[1]) and
+            (A.parent = B.parent) and
+            (A.key = B.key) and
+            (A.value = B.value) and
+            (A.height = B.height);
+end;
 
 constructor TAvlTree.Create;
 begin
@@ -183,8 +196,8 @@ procedure TAvlTree.FreeSubTreeNode (node : PAvlTreeNode);
 begin
   if node <> nil then
   begin
-    FreeSubtreeNode(node^.children[AVL_TREE_NODE_LEFT]);
-    FreeSubtreeNode(node^.children[AVL_TREE_NODE_RIGHT]);
+    FreeSubtreeNode(node^.children[Shortint(AVL_TREE_NODE_LEFT)]);
+    FreeSubtreeNode(node^.children[Shortint(AVL_TREE_NODE_RIGHT)]);
 
     Dispose(node);
     node := nil;
@@ -213,14 +226,14 @@ begin
   end;
 end;
 
-procedure TAlvTree.UpdateTreeHeight (node : PAvlTreeNode);
+procedure TAvlTree.UpdateTreeHeight (node : PAvlTreeNode);
 var
   left_subtree : PAvlTreeNode;
   right_subtree : PAvlTreeNode;
   left_height, right_height : Integer;
 begin
-  left_subtree := node^.children[AVL_TREE_NODE_LEFT];
-  right_subtree := node^.children[AVL_TREE_NODE_RIGHT];
+  left_subtree := node^.children[Shortint(AVL_TREE_NODE_LEFT)];
+  right_subtree := node^.children[Shortint(AVL_TREE_NODE_RIGHT)];
   left_height := SubTreeHeight(left_subtree);
   right_height := SubTreeHeight(right_subtree);
 
@@ -235,7 +248,8 @@ end;
 
 function TAvlTree.TreeNodeParentSide (node : TAvlTreeNode) : TAvlTreeNodeSide;
 begin
-  if node^.parent^.children[AVL_TREE_NODE_LEFT] = node then
+  if CompareAvlTreeNode(node.parent^.children[Shortint(AVL_TREE_NODE_LEFT)]^,
+    node) then
   begin
     Result := AVL_TREE_NODE_LEFT;
   end else
@@ -259,7 +273,7 @@ begin
   begin
     FTree^.root_node := node2;
   end else begin
-    side := TreeNodeParentSide(node1);
+    side := Integer(TreeNodeParentSide(node1^));
     node1^.parent^.children[side] := node2;
     UpdateTreeHeight(node1^.parent);
   end;
@@ -272,21 +286,22 @@ var
 begin
   { The child of this node will take its place:
 	  for a left rotation, it is the right child, and vice versa. }
-  new_root := node^.children[1 - direction];
+  new_root := node^.children[1 - Shortint(direction)];
 
   { Make new_root the root, update parent pointers. }
   TreeNodeReplace(node, new_root);
 
   { Rearrange pointers }
-  node^.children[1 - direction] := new_root^.children[direction];
-  new_root^.children[direction] := node;
+  node^.children[1 - Shortint(direction)] :=
+    new_root^.children[Shortint(direction)];
+  new_root^.children[Shortint(direction)] := node;
 
   { Update parent references }
   node^.parent := new_root;
 
-  if node^.children[1 - direction] <> nil then
+  if node^.children[1 - Shortint(direction)] <> nil then
   begin
-    node^.children[1 - direction]^.parent := node;
+    node^.children[1 - Shortint(direction)]^.parent := node;
   end;
 
   { Update heights of the affected nodes }
@@ -303,8 +318,8 @@ var
   child : PAvlTreeNode;
   diff : Integer;
 begin
-  left_subtree := node^.children[AVL_TREE_NODE_LEFT];
-  right_subtree := node^.children[AVL_TREE_NODE_RIGHT];
+  left_subtree := node^.children[Shortint(AVL_TREE_NODE_LEFT)];
+  right_subtree := node^.children[Shortint(AVL_TREE_NODE_RIGHT)];
 
   { Check the heights of the child trees. If there is an unbalance (difference 
     between left and right > 2), then rotate nodes around to fix it. }
@@ -315,8 +330,8 @@ begin
     { Biased toward the right side too much. }
     child := right_subtree;
 
-    if SubTreeHeight(child^.children[AVL_TREE_NODE_RIGHT]) <
-       SubTreeHeight(child^.children[AVL_TREE_NODE_LEFT]) then
+    if SubTreeHeight(child^.children[Shortint(AVL_TREE_NODE_RIGHT)]) <
+       SubTreeHeight(child^.children[Shortint(AVL_TREE_NODE_LEFT)]) then
     begin
       { If the right child is biased toward the left side, it must be rotated 
         right first (double rotation). }
@@ -329,10 +344,10 @@ begin
   end else if diff <= -2 then
   begin
     { Biased toward the left side too much. }
-    child := node^.children[AVL_TREE_NODE_LEFT];
+    child := node^.children[Shortint(AVL_TREE_NODE_LEFT)];
 
-    if SubTreeHeight(child^.children[AVL_TREE_NODE_LEFT]) <
-       SubTreeHeight(child^.children[AVL_TREE_NODE_RIGHT]) then
+    if SubTreeHeight(child^.children[Shortint(AVL_TREE_NODE_LEFT)]) <
+       SubTreeHeight(child^.children[Shortint(AVL_TREE_NODE_RIGHT)]) then
     begin
       { If the left child is biased toward the right side, it must be rotated 
         right left (double rotation). }
@@ -379,17 +394,17 @@ begin
     previous_node := rover^;
     if Key < (rover^)^.key then
     begin
-      rover := @((rover^)^.children[AVL_TREE_NODE_LEFT]);
+      rover := @((rover^)^.children[Shortint(AVL_TREE_NODE_LEFT)]);
     end else
     begin
-      rover := @((rover^)^.children[AVL_TREE_NODE_RIGHT]);
+      rover := @((rover^)^.children[Shortint(AVL_TREE_NODE_RIGHT)]);
     end;
   end;
 
   { Create a new node. Use the last node visited as the parent link. }
   New(new_node);
-  new_node^.children[AVL_TREE_NODE_LEFT] := nil;
-  new_node^.children[AVL_TREE_NODE_RIGHT] := nil;
+  new_node^.children[Shortint(AVL_TREE_NODE_LEFT)] := nil;
+  new_node^.children[Shortint(AVL_TREE_NODE_RIGHT)] := nil;
   new_node^.parent := previous_node;
   new_node^.key := Key;
   new_node^.value := Value;
@@ -403,7 +418,6 @@ begin
 
   { Keep track of the number of entries. }
   Inc(FTree^.num_nodes);
-  Result := new_node;
 end;
 
 function TAvlTree.TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;
@@ -415,8 +429,8 @@ var
   left_height, right_height : Integer;
   side : Integer;
 begin
-  left_subtree := node^.children[AVL_TREE_NODE_LEFT];
-  right_subtree := node^.children[AVL_TREE_NODE_RIGHT];
+  left_subtree := node^.children[Shortint(AVL_TREE_NODE_LEFT)];
+  right_subtree := node^.children[Shortint(AVL_TREE_NODE_RIGHT)];
 
   { No children? }
   if (left_subtree = nil) and (right_subtree = nil) then
@@ -432,10 +446,10 @@ begin
 
   if left_height < right_height then
   begin
-    side := AVL_TREE_NODE_RIGHT;
+    side := Shortint(AVL_TREE_NODE_RIGHT);
   end else
   begin
-    side := AVL_TREE_NODE_LEFT;
+    side := Shortint(AVL_TREE_NODE_LEFT);
   end;
 
   { Search down the tree, back towards the center. }
@@ -554,10 +568,10 @@ begin
       Exit;
     end else if Key < node^.key then
     begin
-      node := node^.children[AVL_TREE_NODE_LEFT];
+      node := node^.children[Shortint(AVL_TREE_NODE_LEFT)];
     end else
     begin
-      node := node^.children[AVL_TREE_NODE_RIGHT];
+      node := node^.children[Shortint(AVL_TREE_NODE_RIGHT)];
     end;
   end; 
 
@@ -601,7 +615,7 @@ function TAvlTree.NodeChild (node : PAvlTreeNode; side : TAvlTreeNodeSide) :
 begin
   if (side = AVL_TREE_NODE_LEFT) or (side = AVL_TREE_NODE_RIGHT) then
   begin
-    Result := node^.children[side];
+    Result := node^.children[Shortint(side)];
   end else
   begin
     Result := nil;
