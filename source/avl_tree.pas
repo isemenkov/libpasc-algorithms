@@ -248,8 +248,7 @@ end;
 
 function TAvlTree.TreeNodeParentSide (node : PAvlTreeNode) : TAvlTreeNodeSide;
 begin
-  if CompareAvlTreeNode(node^.parent^.children[Shortint(AVL_TREE_NODE_LEFT)],
-    node) then
+  if node^.parent^.children[Shortint(AVL_TREE_NODE_LEFT)] = node then
   begin
     Result := AVL_TREE_NODE_LEFT;
   end else
