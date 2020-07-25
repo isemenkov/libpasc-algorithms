@@ -93,7 +93,7 @@ type
       end;
   protected
     { Compare two nodes. }
-    function CompareAvlTreeNode (A, B : TAvlTreeNode) : Boolean;
+    function CompareAvlTreeNode (A, B : PAvlTreeNode) : Boolean;
 
     { Free node. }
     procedure FreeSubTreeNode (node : PAvlTreeNode);
@@ -132,7 +132,7 @@ type
     procedure UpdateTreeHeight (node : PAvlTreeNode);
 
     { Find what side a node is relative to its parent. }
-    function TreeNodeParentSide (node : TAvlTreeNode) : TAvlTreeNodeSide;
+    function TreeNodeParentSide (node : PAvlTreeNode) : TAvlTreeNodeSide;
 
     { Replace node1 with node2 at its parent. }
     procedure TreeNodeReplace (node1 : PAvlTreeNode; node2 : PAvlTreeNode);
@@ -175,14 +175,14 @@ type
 
 implementation
 
-function TAvlTree.CompareAvlTreeNode (A, B : TAvlTreeNode) : Boolean;
+function TAvlTree.CompareAvlTreeNode (A, B : PAvlTreeNode) : Boolean;
 begin
-  Result := (A.children[0] = B.children[0]) and
-            (A.children[1] = B.children[1]) and
-            (A.parent = B.parent) and
-            (A.key = B.key) and
-            (A.value = B.value) and
-            (A.height = B.height);
+  Result := (A^.children[0] = B^.children[0]) and
+            (A^.children[1] = B^.children[1]) and
+            (A^.parent = B^.parent) and
+            (A^.key = B^.key) and
+            (A^.value = B^.value) and
+            (A^.height = B^.height);
 end;
 
 constructor TAvlTree.Create;
@@ -246,9 +246,9 @@ begin
   end;
 end;
 
-function TAvlTree.TreeNodeParentSide (node : TAvlTreeNode) : TAvlTreeNodeSide;
+function TAvlTree.TreeNodeParentSide (node : PAvlTreeNode) : TAvlTreeNodeSide;
 begin
-  if CompareAvlTreeNode(node.parent^.children[Shortint(AVL_TREE_NODE_LEFT)]^,
+  if CompareAvlTreeNode(node^.parent^.children[Shortint(AVL_TREE_NODE_LEFT)],
     node) then
   begin
     Result := AVL_TREE_NODE_LEFT;
@@ -273,7 +273,7 @@ begin
   begin
     FTree^.root_node := node2;
   end else begin
-    side := Integer(TreeNodeParentSide(node1^));
+    side := Integer(TreeNodeParentSide(node1));
     node1^.parent^.children[side] := node2;
     UpdateTreeHeight(node1^.parent);
   end;
