@@ -47,7 +47,7 @@ type
     type
       { Hash function used to generate hash values for keys used in a hash
         table. }
-      THashTableHashFunc = function (Key : K) : Integer of object;   
+      THashTableHashFunc = function (Key : K) : Cardinal;
   public
     { Create a new hash table. }
     constructor Create (HashFunc : THashTableHashFunc);
@@ -118,7 +118,58 @@ type
     FHashTable : PHashTableStruct;
   end;  
 
+  { Generate a hash key for a pointer. The value pointed at by the pointer is 
+    not used, only the pointer itself. }
+  function HashPointer(location : Pointer) : Cardinal;
+
+  {  Generate a hash key for a pointer to an integer. The value pointed at is 
+    used to generate the key. }
+  function HashInteger(location : Integer) : Cardinal;
+
+  { Generate a hash key from a string. }
+  function HashString(location : String) : Cardinal;
+
+  { Generate a hash key from a string, ignoring the case of letters. }
+  function HashStringNoCase(location : String) : Cardinal;
+
 implementation
+
+function HashPointer(location : Pointer) : Cardinal;
+begin
+  Result := Cardinal({%H-}Longint(location));
+end;
+
+function HashInteger(location : Integer) : Cardinal;
+begin
+  Result := Cardinal(location);
+end;
+
+function HashString(location : String) : Cardinal;
+var
+  p : PByte;
+begin
+  { This is the djb2 string hash function }
+  Result := 5381;
+  p := PByte(PChar(location));
+  
+  while p^ <> PByte(PChar('\0'))^ do
+  begin
+    Result := (Result shl 5) + Result + p^;
+  end;
+end;
+
+function HashStringNoCase (location : String) : Cardinal;
+var
+  p : PByte;
+begin
+  Result := 5381;
+  p := PByte(PChar(location));
+
+  while p^ <> PByte(PChar('\0'))^ do
+  begin
+    Result := (Result shl 5) + Result + PByte(PChar(LowerCase(PChar(p))))^;
+  end;
+end;
 
 constructor THashTable.Create(HashFunc : THashTable.THashTableHashFunc);
 begin
@@ -139,16 +190,13 @@ begin
 end;
 
 destructor THashTable.Destroy;
-{
 var
   rover : PHashTableEntry;
   next : PHashTableEntry;
   i : Cardinal;
-  }
 begin
   { Free all entries in all chains }
-  {
-  for i := 0 to i < FHashTable^.table_size do
+  for i := 0 to FHashTable^.table_size - 1 do
   begin
     rover := FHashTable^.table[i];
   
@@ -156,9 +204,10 @@ begin
     begin
       next := rover^.next;
       HashTableFreeEntry(rover);
+      rover := next;
     end; 
   end;
-  }
+  
   { Free the table }
   Dispose(FHashTable^.table);
   FHashTable^.table := nil;
@@ -188,7 +237,9 @@ begin
   FHashTable^.table_size := new_table_size;
 
   { Allocate the table and initialise to NULL for all entries. }
-  New(FhashTable^.table);
+  FHashTable^.table := GetMem(Sizeof(PHashTableEntry) * FHashTable^.table_size);
+  FillByte(FHashTable^.table^, Sizeof(PHashTableEntry) * FHashTable^.table_size,
+    0);
 
   Result := FHashTable^.table <> nil;
 end;
@@ -234,7 +285,7 @@ begin
   end;
 
   { Link all entries from all chains into the new table }
-  for i := 0 to old_table_size do
+  for i := 0 to old_table_size - 1 do
   begin
     rover := old_table[i];
 
