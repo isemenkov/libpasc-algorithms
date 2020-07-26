@@ -39,3 +39,15 @@ type
 The AVL tree structure is a balanced binary tree which stores a collection of nodes. Each node has a key and a value associated with it. The nodes are sorted within the tree based on the order of their keys. Modifications to the tree are constructed such that the tree remains balanced at all times (there are always roughly equal numbers of nodes on either side of the tree).
 
 Balanced binary trees have several uses. They can be used as a mapping (searching for a value based on its key), or as a set of keys which is always ordered.
+
+##### THashTable
+
+```pascal
+uses
+  hash_table;
+ 
+type
+  generic THashTable<K, V> = class
+```
+
+A hash table stores a set of values which can be addressed by a key. Given the key, the corresponding value can be looked up quickly.

@@ -146,28 +146,24 @@ end;
 
 function HashString(location : String) : Cardinal;
 var
-  p : PByte;
+  i : Cardinal;
 begin
   { This is the djb2 string hash function }
   Result := 5381;
-  p := PByte(PChar(location));
-  
-  while p^ <> PByte(PChar('\0'))^ do
+  for i := 0 to Length(location) - 1 do
   begin
-    Result := (Result shl 5) + Result + p^;
+    Result := (Result shl 5) + Result + Byte(location[i]);
   end;
 end;
 
 function HashStringNoCase (location : String) : Cardinal;
 var
-  p : PByte;
+  i : Cardinal;
 begin
   Result := 5381;
-  p := PByte(PChar(location));
-
-  while p^ <> PByte(PChar('\0'))^ do
+  for i := 0 to Length(location) - 1 do
   begin
-    Result := (Result shl 5) + Result + PByte(PChar(LowerCase(PChar(p))))^;
+    Result := (Result shl 5) + Result + Byte(Lowercase(location[i]));
   end;
 end;
 
@@ -418,6 +414,7 @@ begin
     being inspected. ie. the entry in the table, or the "next" pointer of the 
     previous entry in the chain. This allows us to unlink the entry when we find
     it. }
+  Result := False;
   rover := @FHashTable^.table[index];
 
   while rover^ <> nil do
@@ -445,8 +442,6 @@ begin
     { Advance to the next entry }
     rover := @(rover^)^.next;
   end;
-
-  Result := False;
 end;
 
 function THashTable.NumEntries : Cardinal;
