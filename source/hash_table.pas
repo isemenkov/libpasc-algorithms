@@ -37,6 +37,9 @@ uses
   SysUtils;
 
 type
+  { Item key value not exists. }
+  EKeyNotExistsException = class(Exception);
+
   { A hash table stores a set of values which can be addressed by a key. Given 
     the key, the corresponding value can be looked up quickly. }
   generic THashTable<K, V> = class 
@@ -51,8 +54,22 @@ type
 
     { Destroy a hash table. }
     destructor Destroy; override;
+
+    { Insert a value into a hash table, overwriting any existing entry using the
+      same key. }
+    function Insert (Key : K; Value : V) : Boolean;
+
+    { Look up a value in a hash table by key. }
+    function Search (Key : K) : V;
+
+    { Remove a value from a hash table. }
+    function Remove (Key : K) : Boolean;
+
+    { Retrieve the number of entries in a hash table. }
+    function NumEntries : Cardinal;
   protected
     type
+      PHashTablePair = ^THashTablePair;
       THashTablePair = record
         key : K;
         value : V;  
@@ -81,11 +98,11 @@ type
         http://planetmath.org/encyclopedia/GoodHashTablePrimes.html
         Each prime is roughly double the previous value, and as far as
         possible from the nearest powers of two. }
-      HashTablePrimes : array [0 .. HashTableNumPrimes - 1] of Cardinal = (
-        193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, 98317,
-	      196613, 393241, 786433, 1572869, 3145739, 6291469,
-	      12582917, 25165843, 50331653, 100663319, 201326611,
-	      402653189, 805306457, 1610612741
+      HashTablePrimes : array [0 .. 23] of Cardinal =
+      (
+        193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, 98317, 196613,
+        393241, 786433, 1572869, 3145739, 6291469, 12582917, 25165843, 50331653,
+        100663319, 201326611, 402653189, 805306457, 1610612741
       );
   protected
     { Internal function used to allocate the table on hash table creation and 
@@ -94,6 +111,8 @@ type
 
     { Free an entry, calling the free functions if there are any registered }
     procedure HashTableFreeEntry (entry : PHashTableEntry);
+
+    function HashTableEnlarge : Boolean;
   protected
     FHashFunc : THashTableHashFunc;
     FHashTable : PHashTableStruct;
@@ -102,8 +121,6 @@ type
 implementation
 
 constructor THashTable.Create(HashFunc : THashTable.THashTableHashFunc);
-var
-  new_table_size : Cardinal;
 begin
   FHashFunc := HashFunc;
 
@@ -122,23 +139,26 @@ begin
 end;
 
 destructor THashTable.Destroy;
+{
 var
   rover : PHashTableEntry;
   next : PHashTableEntry;
   i : Cardinal;
+  }
 begin
   { Free all entries in all chains }
+  {
   for i := 0 to i < FHashTable^.table_size do
   begin
     rover := FHashTable^.table[i];
-    
+  
     while rover <> nil do
     begin
       next := rover^.next;
       HashTableFreeEntry(rover);
-    end;
+    end; 
   end;
-
+  }
   { Free the table }
   Dispose(FHashTable^.table);
   FHashTable^.table := nil;
@@ -182,6 +202,205 @@ begin
   { Free the data structure }
   Dispose(pair);
   pair := nil;
+end;
+
+function THashTable.HashTableEnlarge : Boolean;
+var
+  old_table : PPHashTableEntry;
+  old_table_size : Cardinal;
+  old_prime_index : Cardinal;
+  rover : PHashTableEntry;
+  pair : PHashTablePair;
+  next : PHashTableEntry;
+  index : Cardinal;
+  i : Cardinal;
+begin
+  { Store a copy of the old table }
+  old_table := FHashTable^.table;
+  old_table_size := FHashTable^.table_size;
+  old_prime_index := FHashTable^.prime_index;
+
+  { Allocate a new, larger table }
+  Inc(FHashTable^.prime_index);
+
+  if not HashTableAllocateTable then
+  begin
+    { Failed to allocate the new table }
+    FHashTable^.table := old_table;
+    FHashTable^.table_size := old_table_size;
+    FHashTable^.prime_index := old_prime_index;
+
+    Exit(False);
+  end;
+
+  { Link all entries from all chains into the new table }
+  for i := 0 to old_table_size do
+  begin
+    rover := old_table[i];
+
+    while rover <> nil do
+    begin
+      next := rover^.next;
+
+      { Fetch rover HashTablePair }
+      pair := @rover^.pair;
+
+      { Find the index into the new table }
+      index := FHashFunc(pair^.key) mod FHashTable^.table_size;
+
+      { Link this entry into the chain }
+      rover^.next := FHashTable^.table[index];
+      FHashTable^.table[index] := rover;
+
+      { Advance to next in the chain }
+      rover := next;
+    end;
+  end;
+
+  { Free the old table }
+  Dispose(old_table);
+  Result := True;
+end;
+
+function THashTable.Insert (Key : K; Value : V) : Boolean;
+var
+  rover : PHashTableEntry;
+  pair : PHashTablePair;
+  newentry : PHashTableEntry;
+  index : Cardinal;
+begin
+  { If there are too many items in the table with respect to the table size, the 
+    number of hash collisions increases and performance decreases. Enlarge the 
+    table size to prevent this happening }
+  if ((FHashTable^.entries * 3) / FHashTable^.table_size) > 0 then
+  begin
+    { Table is more than 1/3 full }
+    if not HashTableEnlarge then
+    begin
+      { Failed to enlarge the table }
+      Exit(False);  
+    end;
+  end;
+
+  { Generate the hash of the key and hence the index into the table }
+  index := FHashFunc(key) mod FHashTable^.table_size;
+
+  { Traverse the chain at this location and look for an existing entry with the 
+    same key }
+  rover := FHashTable^.table[index];
+
+  while rover <> nil do
+  begin
+    { Fetch rover's HashTablePair entry }
+    pair := @rover^.pair;
+
+    if pair^.key = key then
+    begin
+      { Same key: overwrite this entry with new data. }
+      { Same with the key: use the new key value and free the old one }
+      pair^.key := key;
+      pair^.value := value;
+
+      { Finished }
+      Exit(True);
+    end;
+
+    rover := rover^.next;
+  end;
+
+  { Not in the hash table yet. Create a new entry }
+  New(newentry);
+
+  newentry^.pair.key := key;
+  newentry^.pair.value := value;
+
+  { Link into the list }
+  newentry^.next := FHashTable^.table[index];
+  FHashTable^.table[index] := newentry;
+
+  { Maintain the count of the number of entries }
+  Inc(FHashTable^.entries);
+
+  { Added successfully }
+  Result := True;
+end;
+
+function THashTable.Search (Key : K) : V;
+var
+  rover : PHashTableEntry;
+  pair : PHashTablePair;
+  index : Cardinal;
+begin
+  { Generate the hash of the key and hence the index into the table }
+  index := FHashFunc(key) mod FHashTable^.table_size;
+
+  { Walk the chain at this index until the corresponding entry is found }
+  rover := FHashTable^.table[index];
+
+  while rover <> nil do
+  begin
+    pair := @rover^.pair;
+
+    if pair^.key = key then
+    begin
+      { Found the entry. Return the data. }
+      Exit(pair^.value);
+    end;
+
+    rover := rover^.next;
+  end;
+
+  raise EKeyNotExistsException.Create('Key not exists.');
+end;
+
+function THashTable.Remove (Key : K) : Boolean;
+var
+  rover : PPHashTableEntry;
+  entry : PHashTableEntry;
+  pair : PHashTablePair;
+  index : Cardinal;
+begin
+  { Generate the hash of the key and hence the index into the table }
+  index := FHashFunc(key) mod FHashTable^.table_size;
+
+  { Rover points at the pointer which points at the current entry in the chain 
+    being inspected. ie. the entry in the table, or the "next" pointer of the 
+    previous entry in the chain. This allows us to unlink the entry when we find
+    it. }
+  rover := @FHashTable^.table[index];
+
+  while rover^ <> nil do
+  begin
+    pair := @(rover^)^.pair;
+
+    if pair^.key = key then 
+    begin
+      { This is the entry to remove }
+      entry := rover^;
+
+      { Unlink from the list }
+      rover^ := entry^.next;
+
+      { Destroy the entry structure }
+      HashTableFreeEntry(entry);
+
+      { Track count of entries }
+      Dec(FHashTable^.entries);
+      
+      Result := True;
+      Break;
+    end;
+
+    { Advance to the next entry }
+    rover := @(rover^)^.next;
+  end;
+
+  Result := False;
+end;
+
+function THashTable.NumEntries : Cardinal;
+begin
+  Result := FHashTable^.entries;
 end;
 
 end.

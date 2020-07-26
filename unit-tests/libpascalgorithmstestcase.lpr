@@ -4,7 +4,7 @@ program libpascalgorithmstestcase;
 
 uses
   Interfaces, Forms, GuiTestRunner, arraylisttestcase, listtestcase,
-  avltreetestcase;
+  avltreetestcase, hashtabletestcase;
 
 {$R *.res}
 
