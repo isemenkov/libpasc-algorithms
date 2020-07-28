@@ -20,6 +20,7 @@ type
     procedure TestListNthIndexFind;
     procedure TestListRemoveData;
     procedure TestListSort;
+    procedure TestListStoreOneMillionItems;
   end;
 
 implementation
@@ -303,6 +304,32 @@ begin
   AssertTrue('1: List item 4 value is not correct', iterator.Value = 11);
 
   FreeAndNil(list);
+end;
+
+procedure TListTestCase.TestListStoreOneMillionItems;
+var
+  list : TIntegerList;
+  index : Integer;
+  iterator : TIntegerList.TIterator;
+begin
+  list := TIntegerList.Create;
+
+  for index := 0 to 1000000 do
+  begin
+    list.Append(index);
+  end;
+
+  AssertTrue('1: List length is not correct', list.Length = 1000001);
+
+  index := 0;
+  iterator := list.FirstEntry;
+  while iterator.HasValue do
+  begin
+    AssertTrue('2: List item ' + IntToStr(index) + ' value is not correct',
+      iterator.Value = index);
+    iterator := iterator.Next;
+    Inc(index);
+  end;
 end;
 
 initialization

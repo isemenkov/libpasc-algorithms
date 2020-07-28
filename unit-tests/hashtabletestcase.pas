@@ -19,6 +19,7 @@ type
     procedure TestHashStringIntInsert;
     procedure TestHashIntIntRemove;
     procedure TestHashStringIntRemove;
+    procedure TestHashIntIntStoreOneMillionItems;
   end;
 
 implementation
@@ -129,6 +130,28 @@ begin
   AssertTrue('Hash table value test121 is not removed', hash.Remove('test121'));
 
   AssertTrue('HashTable must be empty', hash.NumEntries = 0);
+
+  FreeAndNil(hash);
+end;
+
+procedure THashTableTestCase.TestHashIntIntStoreOneMillionItems;
+var
+  hash : TIntIntHashTable;
+  index : Integer;
+begin
+  hash := TIntIntHashTable.Create(@HashInteger);
+
+  for index := 0 to 1000000 do
+  begin
+    AssertTrue('1: HashTable index ' + IntToStr(index) + ' value not insert',
+      hash.Insert(index, index * 10 + 4));
+  end;
+
+  for index := 0 to 1000000 do
+  begin
+    AssertTrue('2: Hash table value index ' + IntToStr(index) +
+     ' is not correct', hash.Search(index) = index * 10 + 4);
+  end;
 
   FreeAndNil(hash);
 end;

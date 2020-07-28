@@ -17,6 +17,7 @@ type
     procedure TestIntIntTreeRemove;
     procedure TestStringIntTreeInsert;
     procedure TestStringIntTreeRemove;
+    procedure TestIntIntTreeStoreOneMillionItems;
   end;
 
 implementation
@@ -107,6 +108,27 @@ begin
   AssertTrue('Tree value test2 is not removed', tree.Remove('test2'));
   AssertTrue('Tree value test4 is not removed', tree.Remove('test4'));
   AssertTrue('Tree not exists value is removed', not tree.Remove('test5'));
+
+  FreeAndNil(tree);
+end;
+
+procedure TAvlTreeTestCase.TestIntIntTreeStoreOneMillionItems;
+var
+  tree : TIntIntTree;
+  index : Integer;
+begin
+  tree := TIntIntTree.Create;
+
+  for index := 0 to 1000000 do
+  begin
+    tree.Insert(index, index * 10 + 3);
+  end;
+
+  for index := 0 to 1000000 do
+  begin
+    AssertTrue('Tree value index ' + IntToStr(index) + ' value is not correct',
+      tree.Search(index) = index * 10 + 3);
+  end;
 
   FreeAndNil(tree);
 end;

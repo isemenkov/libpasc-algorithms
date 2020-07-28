@@ -17,6 +17,7 @@ type
     procedure TestArrayListsPrepend;
     procedure TestArrayListInsertRemove;
     procedure TestArrayListSort;
+    procedure TestArrayListStoreOneMillionItems;
   end;
 
 implementation
@@ -156,6 +157,29 @@ begin
   AssertTrue('2: ArrayLists index 4 value is not correct', arr.Value[4] = 12);
   AssertTrue('2: ArrayLists index 5 value is not correct', arr.Value[5] = 17);
   AssertTrue('2: ArrayLists index 6 value is not correct', arr.Value[6] = 43);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListsTestCase.TestArrayListStoreOneMillionItems;
+var
+  arr : TIntegerArrayLists;
+  index : Integer;
+begin
+  arr := TIntegerArrayLists.Create;
+
+  for index := 0 to 1000000 do
+  begin
+    arr.Append(index);
+  end;
+
+  AssertTrue('1: ArrayLists length is not correct', arr.Length = 1000001);
+
+  for index := 0 to 1000000 do
+  begin
+    AssertTrue('2: ArrayLists index ' + IntToStr(index) + ' value is not correct',
+      arr.Value[index] = index);
+  end;
 
   FreeAndNil(arr);
 end;

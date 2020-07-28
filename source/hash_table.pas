@@ -34,7 +34,7 @@ unit hash_table;
 interface
 
 uses
-  SysUtils;
+  SysUtils, Math;
 
 type
   { Item key value not exists. }
@@ -319,7 +319,7 @@ begin
   { If there are too many items in the table with respect to the table size, the 
     number of hash collisions increases and performance decreases. Enlarge the 
     table size to prevent this happening }
-  if ((FHashTable^.entries * 3) / FHashTable^.table_size) > 0 then
+  if ((FHashTable^.entries * 3) div FHashTable^.table_size) > 0 then
   begin
     { Table is more than 1/3 full }
     if not HashTableEnlarge then
