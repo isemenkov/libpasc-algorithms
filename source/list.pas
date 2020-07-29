@@ -58,6 +58,12 @@ type
       end;
   public
     type
+      { Callback function used to determine of two values in a list are equal. 
+        Return a negative value if AValue1 should be sorted before AValue2, a
+        positive value if AValue1 should be sorted after AValue2, zero if
+        AValue1 and AValue2 are equal. }
+      TListEqualCallback = function (AValue1 : T; AValue2 : T) : Integer;
+
       { TList iterator. }
       TIterator = class
       protected
@@ -165,9 +171,13 @@ type
       FFirstNode : PListEntry;
       FLastNode : PListEntry;     
       FLength : Cardinal;
+      FEqual : TListEqualCallback;
   public
     { Get List length. }
-    property Length : Cardinal read FLength;  
+    property Length : Cardinal read FLength; 
+
+    { List equal callback function }
+    property EqualCallback : TListEqualCallback read FEqual write FEqual; 
   end;
 
 implementation
@@ -484,7 +494,8 @@ begin
   begin
     next := rover^.Next;
 
-    if rover^.Value < pivot^.Value then
+    if ((Assigned(FEqual) and FEqual(rover^.Value, pivot^.Value) < 0) or  
+      (rover^.Value < pivot^.Value) then
     begin
       { Place this in the less list }
       rover^.Prev := nil;
