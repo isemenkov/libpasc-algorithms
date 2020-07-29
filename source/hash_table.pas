@@ -34,7 +34,7 @@ unit hash_table;
 interface
 
 uses
-  SysUtils, Math;
+  SysUtils;
 
 type
   { Item key value not exists. }
