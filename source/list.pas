@@ -62,7 +62,7 @@ type
         Return a negative value if AValue1 should be sorted before AValue2, a
         positive value if AValue1 should be sorted after AValue2, zero if
         AValue1 and AValue2 are equal. }
-      TListEqualCallback = function (AValue1 : T; AValue2 : T) : Integer;
+      TListElementLess = function (AValue1, AValue2 : T) : Boolean;
 
       { TList iterator. }
       TIterator = class
@@ -174,10 +174,7 @@ type
       FEqual : TListEqualCallback;
   public
     { Get List length. }
-    property Length : Cardinal read FLength; 
-
-    { List equal callback function }
-    property EqualCallback : TListEqualCallback read FEqual write FEqual; 
+    property Length : Cardinal read FLength;  
   end;
 
 implementation
@@ -495,7 +492,7 @@ begin
     next := rover^.Next;
 
     if ((Assigned(FEqual) and FEqual(rover^.Value, pivot^.Value) < 0) or  
-      (rover^.Value < pivot^.Value) then
+      (rover^.Value < pivot^.Value)) then
     begin
       { Place this in the less list }
       rover^.Prev := nil;
