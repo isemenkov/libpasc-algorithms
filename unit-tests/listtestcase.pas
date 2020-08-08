@@ -5,10 +5,10 @@ unit listtestcase;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, list;
+  Classes, SysUtils, fpcunit, testregistry, list, utils.functor;
 
 type
-  TIntegerList = specialize TList<Integer>;
+  TIntegerList = specialize TList<Integer, TBinaryLogicLessFunctorInteger>;
 
   TListTestCase= class(TTestCase)
   published

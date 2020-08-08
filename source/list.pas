@@ -45,7 +45,7 @@ type
     (represented by a pointer a @ref ListEntry structure) contains a link to the 
     next entry and the previous entry. It is therefore possible to iterate over 
     entries in the list in either direction. }
-  generic TList<T> = class
+  generic TList<T, BinaryLogicLessFunctor> = class
   protected
     type
       { TList item entry type. }
@@ -58,12 +58,6 @@ type
       end;
   public
     type
-      { Callback function used to determine of two values in a list are equal. 
-        Return a negative value if AValue1 should be sorted before AValue2, a
-        positive value if AValue1 should be sorted after AValue2, zero if
-        AValue1 and AValue2 are equal. }
-      TListElementLess = function (AValue1, AValue2 : T) : Boolean;
-
       { TList iterator. }
       TIterator = class
       protected
@@ -171,7 +165,7 @@ type
       FFirstNode : PListEntry;
       FLastNode : PListEntry;     
       FLength : Cardinal;
-      FEqual : TListEqualCallback;
+      FLessFunctor : BinaryLogicLessFunctor;
   public
     { Get List length. }
     property Length : Cardinal read FLength;  
@@ -329,6 +323,7 @@ begin
   FFirstNode := nil;
   FLastNode := nil;
   FLength := 0;
+  FLessFunctor := BinaryLogicLessFunctor.Create;
 end;
 
 destructor TList.Destroy;
@@ -491,8 +486,7 @@ begin
   begin
     next := rover^.Next;
 
-    if ((Assigned(FEqual) and FEqual(rover^.Value, pivot^.Value) < 0) or  
-      (rover^.Value < pivot^.Value)) then
+    if FLessFunctor.Call(rover^.Value, pivot^.Value) then
     begin
       { Place this in the less list }
       rover^.Prev := nil;
