@@ -24,7 +24,7 @@
 (*                                                                            *)
 (******************************************************************************)
 
-unit hash_table;
+unit container.hashtable;
 
 {$mode objfpc}{$H+}
 {$IFOPT D+}

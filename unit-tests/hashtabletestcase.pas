@@ -5,7 +5,7 @@ unit hashtabletestcase;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, hash_table;
+  Classes, SysUtils, fpcunit, testregistry, container.hashtable;
 
 type
   TIntIntHashTable = specialize THashTable<Integer, Integer>;

@@ -5,7 +5,7 @@ unit listtestcase;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, list, utils.functor;
+  Classes, SysUtils, fpcunit, testregistry, container.list, utils.functor;
 
 type
   TIntegerList = specialize TList<Integer, TBinaryLogicLessFunctorInteger>;

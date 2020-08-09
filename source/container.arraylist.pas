@@ -24,7 +24,7 @@
 (*                                                                            *)
 (******************************************************************************)
 
-unit arraylist;
+unit container.arraylist;
 
 {$mode objfpc}{$H+}
 {$IFOPT D+}
@@ -42,7 +42,7 @@ type
 
   { Automatically resizing array. 
     ArrayLists are generic arrays of T which automatically increase in size. }
-  generic TArrayLists<T> = class
+  generic TArrayList<T> = class
   public
     constructor Create (ALength : Cardinal = 0);
     destructor Destroy; override;
@@ -107,7 +107,7 @@ type
 
 implementation
 
-constructor TArrayLists.Create(ALength : Cardinal);
+constructor TArrayList.Create(ALength : Cardinal);
 begin
   if ALength = 0 then
   begin
@@ -119,13 +119,13 @@ begin
   FLength := 0;
 end;
 
-destructor TArrayLists.Destroy;
+destructor TArrayList.Destroy;
 begin
   SetLength(FData, 0);
   inherited Destroy;
 end;
 
-function TArrayLists.GetValue (AIndex : Cardinal) : T;
+function TArrayList.GetValue (AIndex : Cardinal) : T;
 begin
   if AIndex > FLength then
   begin
@@ -135,7 +135,7 @@ begin
   Result := FData[AIndex];
 end;
 
-procedure TArrayLists.SetValue (AIndex : Cardinal; AData : T);
+procedure TArrayList.SetValue (AIndex : Cardinal; AData : T);
 begin
   if AIndex > FLength then
   begin
@@ -145,7 +145,7 @@ begin
   FData[AIndex] := AData;
 end;
 
-function TArrayLists.Enlarge : Boolean;
+function TArrayList.Enlarge : Boolean;
 var
   NewSize : Cardinal;
 begin
@@ -159,7 +159,7 @@ begin
   Result := True;  
 end;
 
-procedure TArrayLists.SortInternal (var AData : array of T; ALength : Cardinal);
+procedure TArrayList.SortInternal (var AData : array of T; ALength : Cardinal);
 var
   pivot, tmp : T;
   list1_length, list2_length : Cardinal;
@@ -219,7 +219,7 @@ begin
   SortInternal(AData[list1_length + 1], list2_length);
 end;
 
-function TArrayLists.Insert (AIndex : Cardinal; AData : T) : Boolean;
+function TArrayList.Insert (AIndex : Cardinal; AData : T) : Boolean;
 begin
   { Sanity check the index }
   if AIndex > FLength then
@@ -248,17 +248,17 @@ begin
   Result := True;
 end;
 
-function TArrayLists.Append (AValue : T) : Boolean;
+function TArrayList.Append (AValue : T) : Boolean;
 begin
   Result := Insert(FLength, AValue);
 end;
 
-function TArrayLists.Prepend (AValue : T) : Boolean;
+function TArrayList.Prepend (AValue : T) : Boolean;
 begin
   Result := Insert(0, AValue);
 end;
 
-procedure TArrayLists.RemoveRange (AIndex : Cardinal; ALength : Cardinal);
+procedure TArrayList.RemoveRange (AIndex : Cardinal; ALength : Cardinal);
 begin
   { Check this is a valid range }
   if (AIndex > FLength) or (AIndex + ALength > FLength) then
@@ -272,12 +272,12 @@ begin
   Dec(FLength, ALength);
 end;
 
-procedure TArrayLists.Remove (AIndex : Cardinal);
+procedure TArrayList.Remove (AIndex : Cardinal);
 begin
   RemoveRange(AIndex, 1);
 end;
 
-function TArrayLists.IndexOf (AData : T) : Integer;
+function TArrayList.IndexOf (AData : T) : Integer;
 var
   i : Cardinal;
 begin
@@ -292,12 +292,12 @@ begin
   Result := -1;
 end;
 
-procedure TArrayLists.Clear;
+procedure TArrayList.Clear;
 begin
   FLength := 0;
 end;
 
-procedure TArrayLists.Sort;
+procedure TArrayList.Sort;
 begin
   { Perform the recursive sort. }
   SortInternal(FData, FLength);

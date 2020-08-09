@@ -5,7 +5,7 @@ unit avltreetestcase;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, avl_tree;
+  Classes, SysUtils, fpcunit, testregistry, container.avltree;
 
 type
   TIntIntTree = specialize TAvlTree<Integer, Integer>;

@@ -5,16 +5,16 @@ unit arraylisttestcase;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, arraylist;
+  Classes, SysUtils, fpcunit, testregistry, container.arraylist;
 
 type
-  TIntegerArrayLists = specialize TArrayLists<Integer>;
+  TIntegerArrayList = specialize TArrayList<Integer>;
 
-  TArrayListsTestCase= class(TTestCase)
+  TArrayListTestCase= class(TTestCase)
   published
-    procedure TestCreateArrayLists;
-    procedure TestArrayListsRealloc;
-    procedure TestArrayListsPrepend;
+    procedure TestCreateArrayList;
+    procedure TestArrayListRealloc;
+    procedure TestArrayListPrepend;
     procedure TestArrayListInsertRemove;
     procedure TestArrayListSort;
     procedure TestArrayListStoreOneMillionItems;
@@ -22,11 +22,11 @@ type
 
 implementation
 
-procedure TArrayListsTestCase.TestCreateArrayLists;
+procedure TArrayListTestCase.TestCreateArrayList;
 var
-  arr : TIntegerArrayLists;
+  arr : TIntegerArrayList;
 begin
-  arr := TIntegerArrayLists.Create(3);
+  arr := TIntegerArrayList.Create(3);
   arr.Append(1);
   arr.Append(4);
   arr.Append(5);
@@ -39,11 +39,11 @@ begin
   FreeAndNil(arr);
 end;
 
-procedure TArrayListsTestCase.TestArrayListsRealloc;
+procedure TArrayListTestCase.TestArrayListRealloc;
 var
-  arr : TIntegerArrayLists;
+  arr : TIntegerArrayList;
 begin
-  arr := TIntegerArrayLists.Create(3);
+  arr := TIntegerArrayList.Create(3);
   arr.Append(12);
   arr.Append(432);
   arr.Append(-34);
@@ -64,11 +64,11 @@ begin
   FreeAndNil(arr);
 end;
 
-procedure TArrayListsTestCase.TestArrayListsPrepend;
+procedure TArrayListTestCase.TestArrayListPrepend;
 var
-  arr : TIntegerArrayLists;
+  arr : TIntegerArrayList;
 begin
-  arr := TIntegerArrayLists.Create;
+  arr := TIntegerArrayList.Create;
 
   arr.Append(43);
   arr.Append(67);
@@ -88,11 +88,11 @@ begin
   FreeAndNil(arr);
 end;
 
-procedure TArrayListsTestCase.TestArrayListInsertRemove;
+procedure TArrayListTestCase.TestArrayListInsertRemove;
 var
-  arr : TIntegerArrayLists;
+  arr : TIntegerArrayList;
 begin
-  arr := TIntegerArrayLists.Create;
+  arr := TIntegerArrayList.Create;
   arr.Append(342);
   arr.Insert(0, -100);
 
@@ -127,11 +127,11 @@ begin
   FreeAndNil(arr);
 end;
 
-procedure TArrayListsTestCase.TestArrayListSort;
+procedure TArrayListTestCase.TestArrayListSort;
 var
-  arr : TIntegerArrayLists;
+  arr : TIntegerArrayList;
 begin
-  arr := TIntegerArrayLists.Create;
+  arr := TIntegerArrayList.Create;
   arr.Append(9);
   arr.Append(3);
   arr.Append(-4);
@@ -161,12 +161,12 @@ begin
   FreeAndNil(arr);
 end;
 
-procedure TArrayListsTestCase.TestArrayListStoreOneMillionItems;
+procedure TArrayListTestCase.TestArrayListStoreOneMillionItems;
 var
-  arr : TIntegerArrayLists;
+  arr : TIntegerArrayList;
   index : Integer;
 begin
-  arr := TIntegerArrayLists.Create;
+  arr := TIntegerArrayList.Create;
 
   for index := 0 to 1000000 do
   begin
@@ -186,6 +186,6 @@ end;
 
 initialization
 
-  RegisterTest(TArrayListsTestCase);
+  RegisterTest(TArrayListTestCase);
 end.
 
