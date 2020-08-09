@@ -34,15 +34,17 @@ unit container.arraylist;
 interface
 
 uses
-  SysUtils;
+  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
+  {$IFNDEF USE_OPTIONAL}
   { ArrayList index is not exists. }
   EIndexOutOfRangeException = class(Exception);
+  {$ENDIF}
 
   { Automatically resizing array. 
     ArrayLists are generic arrays of T which automatically increase in size. }
-  generic TArrayList<T> = class
+  generic TArrayList<T, BinaryLogicLessFunctor> = class
   public
     constructor Create (ALength : Cardinal = 0);
     destructor Destroy; override;
@@ -79,6 +81,12 @@ type
 
     { Sort the values in an ArrayList. }
     procedure Sort;
+
+  {$IFDEF USE_OPTIONAL}
+  protected
+    type
+      TOptionalValue = specialize TOptional<T>;
+  {$ENDIF} 
   protected
     { Reallocate the array to the new size }
     function Enlarge : Boolean;
@@ -87,19 +95,23 @@ type
     procedure SortInternal (var AData : array of T; ALength : Cardinal);
 
     { Get value by index. }
-    function GetValue (AIndex : Cardinal) : T;
+    function GetValue (AIndex : Cardinal) : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+      TOptionalValue{$ENDIF};
 
     { Set new value by index. }
-    procedure SetValue (AIndex : Cardinal; AData : T);
+    procedure SetValue (AIndex : Cardinal; AData : {$IFNDEF USE_OPTIONAL}T
+      {$ELSE}TOptionalValue{$ENDIF});
   protected
     var
       FData : array of T;
       FLength : Cardinal;
       FAlloced : Cardinal;
+      FLessFunctor : BinaryLogicLessFunctor;
   public
     { Read/Write value in an ArrayList. If index not exists raise
       EIndexOutOfRangeException. }
-    property Value [AIndex : Cardinal] : T read GetValue write SetValue;
+    property Value [AIndex : Cardinal] : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+      TOptionalValue{$ENDIF} read GetValue write SetValue;
 
     { Get ArrayList length. }
     property Length : Cardinal read FLength;
@@ -117,6 +129,7 @@ begin
   SetLength(FData, ALength);
   FAlloced := ALength;
   FLength := 0;
+  FLessFunctor := BinaryLogicLessFunctor.Create;
 end;
 
 destructor TArrayList.Destroy;
@@ -125,24 +138,35 @@ begin
   inherited Destroy;
 end;
 
-function TArrayList.GetValue (AIndex : Cardinal) : T;
+function TArrayList.GetValue (AIndex : Cardinal) : {$IFNDEF USE_OPTIONAL}T
+  {$ELSE}TOptionalValue{$ENDIF};
 begin
   if AIndex > FLength then
   begin
+    {$IFNDEF USE_OPTIONAL}
     raise EIndexOutOfRangeException.Create('Index out of range.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
   end;
 
-  Result := FData[AIndex];
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}FData[AIndex]
+    {$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
-procedure TArrayList.SetValue (AIndex : Cardinal; AData : T);
+procedure TArrayList.SetValue (AIndex : Cardinal; AData : {$IFNDEF USE_OPTIONAL}
+  T{$ELSE}TOptionalValue{$ENDIF});
 begin
   if AIndex > FLength then
   begin
+    {$IFNDEF USE_OPTIONAL}
     raise EIndexOutOfRangeException.Create('Index out of range.');
+    {$ELSE}
+    Exit;
+    {$ENDIF}
   end;  
 
-  FData[AIndex] := AData;
+  FData[AIndex] := AData{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
 end;
 
 function TArrayList.Enlarge : Boolean;
@@ -186,7 +210,7 @@ begin
 
   for i := 0 to ALength - 1 do
   begin
-    if AData[i] < pivot then
+    if FLessFunctor.Call(AData[i], pivot) then
     begin
       { This should be in list 1. Therefore it is in the wrong position. Swap 
         the data immediately following the last item in list 1 with this data. }

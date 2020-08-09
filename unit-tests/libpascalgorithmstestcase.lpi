@@ -101,7 +101,6 @@
       </Options>
     </Linking>
     <Other>
-      <CustomOptions Value="-dUSE_OPTIONAL"/>
       <OtherDefines Count="1">
         <Define0 Value="USE_OPTIONAL"/>
       </OtherDefines>
