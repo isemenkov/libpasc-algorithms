@@ -34,11 +34,13 @@ unit container.list;
 interface
 
 uses
-  SysUtils;
+  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
+  {$IFNDEF USE_OPTIONAL}
   { List item value not exists. }
   EValueNotExistsException = class(Exception);
+  {$ENDIF}
 
   { Doubly-linked list.
     A doubly-linked list stores a collection of values. Each entry in the list 
@@ -56,6 +58,10 @@ type
         Prev : PListEntry;
         Next : PListEntry; 
       end;
+
+      {$IFDEF USE_OPTIONAL}
+      TOptionalValue = specialize TOptional<T>;
+      {$ENDIF}
   public
     type
       { TList iterator. }
@@ -84,10 +90,12 @@ type
         procedure InsertNext (AData : T);
       protected
         { Get item value. }
-        function GetValue : T;
+        function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
+          {$ENDIF};
 
         { Set new item value. }
-        procedure SetValue (AValue : T);
+        procedure SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+          TOptionalValue{$ENDIF});
       protected
         var
           { We cann't store pointer to list because generics in pascal it is
@@ -117,7 +125,8 @@ type
       public
         { Read/Write list item value. If value not exists raise 
           EValueNotExistsException. }
-        property Value : T read GetValue write SetValue;
+        property Value : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF} 
+          read GetValue write SetValue;
       end;
   public
     { Create new list. }
@@ -300,21 +309,28 @@ begin
   Inc(FPLength^);
 end;
 
-function TList.TIterator.GetValue : T;
+function TList.TIterator.GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
+  {$ENDIF};
 begin
   if FItem = nil then
   begin
+    {$IFNDEF USE_OPTIONAL}
     raise EValueNotExistsException.Create('Value not exists.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
   end;
 
-  Result := FItem^.Value;
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}FItem^.Value
+    {$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
-procedure TList.TIterator.SetValue (AValue : T);
+procedure TList.TIterator.SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF});
 begin
   if FItem <> nil then
   begin
-    FItem^.Value := AValue;
+    FItem^.Value := {$IFNDEF USE_OPTIONAL}AValue{$ELSE}AValue.Unwrap{$ENDIF};
   end;
 end;
 

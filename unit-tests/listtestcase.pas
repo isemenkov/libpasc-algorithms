@@ -38,13 +38,16 @@ begin
   AssertTrue('List length is not correct', list.Length = 3);
   iterator := list.FirstEntry;
   AssertTrue('List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('List item 0 value is not correct', iterator.Value = 1);
+  AssertTrue('List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1);
   iterator := iterator.Next;
   AssertTrue('List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('List item 1 value is not correct', iterator.Value = 4);
+  AssertTrue('List item 1 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
   iterator := iterator.Next;
   AssertTrue('List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('Lists item 2 value is not correct', iterator.Value = 5);
+  AssertTrue('Lists item 2 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 5);
 
   FreeAndNil(list);
 end;
@@ -64,16 +67,20 @@ begin
   AssertTrue('List length is not correct', list.Length = 4);
   iterator := list.LastEntry;
   AssertTrue('List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('List item 3 value is not correct', iterator.Value = 42);
+  AssertTrue('List item 3 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 42);
   iterator := iterator.Prev;
   AssertTrue('List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('List item 2 value is not correct', iterator.Value = 1000);
+  AssertTrue('List item 2 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1000);
   iterator := iterator.Prev;
   AssertTrue('List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('List item 1 value is not correct', iterator.Value = 9);
+  AssertTrue('List item 1 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 9);
   iterator := iterator.Prev;
   AssertTrue('List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('List item 0 value is not correct', iterator.Value = -1);
+  AssertTrue('List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -1);
 
   FreeAndNil(list);
 end;
@@ -93,16 +100,20 @@ begin
   AssertTrue('1: List length is not correct', list.Length = 4);
   iterator := list.FirstEntry;
   AssertTrue('1: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 0 value is not correct', iterator.Value = 683);
+  AssertTrue('1: List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 683);
   iterator := iterator.Next;
   AssertTrue('1: List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 1 value is not correct', iterator.Value = -11);
+  AssertTrue('1: List item 1 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -11);
   iterator := iterator.Next;
   AssertTrue('1: List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 2 value is not correct', iterator.Value = 43);
+  AssertTrue('1: List item 2 value is not correct', iterator.Value
+   {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 43);
   iterator := iterator.Next;
   AssertTrue('1: List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 3 value is not correct', iterator.Value = 67);
+  AssertTrue('1: List item 3 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 67);
 
   list.Clear;
 
@@ -122,7 +133,8 @@ begin
   AssertTrue('1: List length is not correct', list.Length = 1);
   iterator := list.FirstEntry;
   AssertTrue('1: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 0 value is not correct', iterator.Value = 43);
+  AssertTrue('1: List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 43);
 
   list.FirstEntry.InsertNext(67);
   list.FirstEntry.InsertPrev(-11);
@@ -131,16 +143,20 @@ begin
   AssertTrue('2: List length is not correct', list.Length = 4);
   iterator := list.FirstEntry;
   AssertTrue('2: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('2: List item 0 value is not correct', iterator.Value = 683);
+  AssertTrue('2: List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 683);
   iterator := iterator.Next;
   AssertTrue('2: List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('2: List item 1 value is not correct', iterator.Value = -11);
+  AssertTrue('2: List item 1 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -11);
   iterator := iterator.Next;
   AssertTrue('2: List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('2: List item 2 value is not correct', iterator.Value = 43);
+  AssertTrue('2: List item 2 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 43);
   iterator := iterator.Next;
   AssertTrue('2: List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('2: List item 3 value is not correct', iterator.Value = 67);
+  AssertTrue('2: List item 3 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 67);
 
   list.Clear;
 
@@ -164,16 +180,20 @@ begin
   AssertTrue('1: List length is not correct', list.Length = 4);
   iterator := list.FirstEntry;
   AssertTrue('1: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 0 value is not correct', iterator.Value = 32);
+  AssertTrue('1: List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 32);
   iterator := iterator.Next;
   AssertTrue('1: List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 1 value is not correct', iterator.Value = 431);
+  AssertTrue('1: List item 1 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 431);
   iterator := iterator.Next;
   AssertTrue('1: List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 2 value is not correct', iterator.Value = -321);
+  AssertTrue('1: List item 2 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -321);
   iterator := iterator.Next;
   AssertTrue('1: List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 3 value is not correct', iterator.Value = 0);
+  AssertTrue('1: List item 3 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 0);
 
   iterator := list.LastEntry;
   iterator.Remove;
@@ -185,10 +205,12 @@ begin
   AssertTrue('3: List length is not correct', list.Length = 2);
   iterator := list.FirstEntry;
   AssertTrue('3: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('3: List item 0 value is not correct', iterator.Value = 32);
+  AssertTrue('3: List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 32);
   iterator := iterator.Next;
   AssertTrue('3: List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('3: List item 1 value is not correct', iterator.Value = 431);
+  AssertTrue('3: List item 1 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 431);
 
   list.FirstEntry.Remove;
   list.FirstEntry.Remove;
@@ -215,24 +237,30 @@ begin
   AssertTrue('1: List length is not correct', list.Length = 6);
   iterator := list.NthEntry(0);
   AssertTrue('1: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 0 value is not correct', iterator.Value = 1);
+  AssertTrue('1: List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1);
   iterator := list.NthEntry(3);
   AssertTrue('1: List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 3 value is not correct', iterator.Value = 11);
+  AssertTrue('1: List item 3 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 11);
   iterator := list.NthEntry(5);
   AssertTrue('1: List item 5 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 5 value is not correct', iterator.Value = 30);
+  AssertTrue('1: List item 5 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 30);
   iterator := list.NthEntry(2);
   AssertTrue('1: List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 2 value is not correct', iterator.Value = 5);
+  AssertTrue('1: List item 2 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 5);
 
   iterator := list.FindEntry(1);
   AssertTrue('2: List item value 1 not find', iterator.HasValue);
-  AssertTrue('2: List find item value is not correct', iterator.Value = 1);
+  AssertTrue('2: List find item value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1);
 
   iterator := list.FindEntry(20);
   AssertTrue('3: List item value 20 not find', iterator.HasValue);
-  AssertTrue('3: List find item value is not correct', iterator.Value = 20);
+  AssertTrue('3: List find item value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 20);
 
   iterator := list.FindEntry(-7);
   AssertTrue('2: List item value -7 find', not iterator.HasValue);
@@ -289,19 +317,24 @@ begin
   AssertTrue('1: List length is not correct', list.Length = 5);
   iterator := list.FirstEntry;
   AssertTrue('1: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 0 value is not correct', iterator.Value = 3);
+  AssertTrue('1: List item 0 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
   iterator := iterator.Next;
   AssertTrue('1: List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 1 value is not correct', iterator.Value = 4);
+  AssertTrue('1: List item 1 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
   iterator := iterator.Next;
   AssertTrue('1: List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 2 value is not correct', iterator.Value = 6);
+  AssertTrue('1: List item 2 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 6);
   iterator := iterator.Next;
   AssertTrue('1: List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 3 value is not correct', iterator.Value = 9);
+  AssertTrue('1: List item 3 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 9);
   iterator := iterator.Next;
   AssertTrue('1: List item 4 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 4 value is not correct', iterator.Value = 11);
+  AssertTrue('1: List item 4 value is not correct', iterator.Value
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 11);
 
   FreeAndNil(list);
 end;
@@ -326,7 +359,7 @@ begin
   while iterator.HasValue do
   begin
     AssertTrue('2: List item ' + IntToStr(index) + ' value is not correct',
-      iterator.Value = index);
+      iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = index);
     iterator := iterator.Next;
     Inc(index);
   end;

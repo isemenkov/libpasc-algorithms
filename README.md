@@ -21,7 +21,7 @@ uses
   container.list;
 
 type
-  generic TList<T> = class
+  generic TList<T, BinaryLogicLessFunctor> = class
 ```
 
 A doubly-linked list stores a collection of values. Each entry in the list contains a link to the next entry and the previous entry. It is therefore possible to iterate over entries in the list in either direction.
