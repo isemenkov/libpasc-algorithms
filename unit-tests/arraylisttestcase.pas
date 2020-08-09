@@ -9,7 +9,7 @@ uses
 
 type
   TIntegerArrayList = specialize TArrayList<Integer,
-    TBinaryLogicLessFunctorInteger>;
+    TCompareFunctorInteger>;
 
   TArrayListTestCase= class(TTestCase)
   published

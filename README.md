@@ -9,7 +9,7 @@ uses
   container.arraylist;
   
 type
-  generic TArrayList<T> = class
+  generic TArrayList<T, BinaryCompareFunctor> = class
 ```
 
 Automatically resizing array. ArrayList are generic arrays of T which automatically increase in size.
@@ -21,7 +21,7 @@ uses
   container.list;
 
 type
-  generic TList<T, BinaryLogicLessFunctor> = class
+  generic TList<T, BinaryCompareFunctor> = class
 ```
 
 A doubly-linked list stores a collection of values. Each entry in the list contains a link to the next entry and the previous entry. It is therefore possible to iterate over entries in the list in either direction.

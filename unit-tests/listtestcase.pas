@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, fpcunit, testregistry, container.list, utils.functor;
 
 type
-  TIntegerList = specialize TList<Integer, TBinaryLogicLessFunctorInteger>;
+  TIntegerList = specialize TList<Integer, TCompareFunctorInteger>;
 
   TListTestCase= class(TTestCase)
   published

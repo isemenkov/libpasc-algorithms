@@ -44,7 +44,7 @@ type
 
   { Automatically resizing array. 
     ArrayLists are generic arrays of T which automatically increase in size. }
-  generic TArrayList<T, BinaryLogicLessFunctor> = class
+  generic TArrayList<T, BinaryCompareFunctor> = class
   public
     constructor Create (ALength : Cardinal = 0);
     destructor Destroy; override;
@@ -106,7 +106,7 @@ type
       FData : array of T;
       FLength : Cardinal;
       FAlloced : Cardinal;
-      FLessFunctor : BinaryLogicLessFunctor;
+      FCompareFunctor : BinaryCompareFunctor;
   public
     { Read/Write value in an ArrayList. If index not exists raise
       EIndexOutOfRangeException. }
@@ -129,7 +129,7 @@ begin
   SetLength(FData, ALength);
   FAlloced := ALength;
   FLength := 0;
-  FLessFunctor := BinaryLogicLessFunctor.Create;
+  FCompareFunctor := BinaryCompareFunctor.Create;
 end;
 
 destructor TArrayList.Destroy;
@@ -210,7 +210,7 @@ begin
 
   for i := 0 to ALength - 1 do
   begin
-    if FLessFunctor.Call(AData[i], pivot) then
+    if FCompareFunctor.Call(AData[i], pivot) < 0 then
     begin
       { This should be in list 1. Therefore it is in the wrong position. Swap 
         the data immediately following the last item in list 1 with this data. }
@@ -307,7 +307,7 @@ var
 begin
   for i := 0 to FLength - 1 do
   begin
-    if FData[i] = AData then
+    if FCompareFunctor.Call(FData[i], AData) = 0 then
     begin
       Result := i;
       Exit;

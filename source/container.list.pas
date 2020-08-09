@@ -47,7 +47,7 @@ type
     (represented by a pointer a @ref ListEntry structure) contains a link to the 
     next entry and the previous entry. It is therefore possible to iterate over 
     entries in the list in either direction. }
-  generic TList<T, BinaryLogicLessFunctor> = class
+  generic TList<T, BinaryCompareFunctor> = class
   protected
     type
       { TList item entry type. }
@@ -174,10 +174,10 @@ type
       FFirstNode : PListEntry;
       FLastNode : PListEntry;     
       FLength : Cardinal;
-      FLessFunctor : BinaryLogicLessFunctor;
+      FCompareFunctor : BinaryCompareFunctor;
   public
     { Get List length. }
-    property Length : Cardinal read FLength;  
+    property Length : Cardinal read FLength;
   end;
 
 implementation
@@ -339,7 +339,7 @@ begin
   FFirstNode := nil;
   FLastNode := nil;
   FLength := 0;
-  FLessFunctor := BinaryLogicLessFunctor.Create;
+  FCompareFunctor := BinaryCompareFunctor.Create;
 end;
 
 destructor TList.Destroy;
@@ -458,7 +458,7 @@ begin
   Entry := FFirstNode;
   while (Entry <> nil) do
   begin
-    if Entry^.Value = AData then
+    if FCompareFunctor.Call(Entry^.Value, AData) = 0 then
     begin
       Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, Entry);
       Exit;
@@ -502,7 +502,7 @@ begin
   begin
     next := rover^.Next;
 
-    if FLessFunctor.Call(rover^.Value, pivot^.Value) then
+    if FCompareFunctor.Call(rover^.Value, pivot^.Value) < 0 then
     begin
       { Place this in the less list }
       rover^.Prev := nil;
