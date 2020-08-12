@@ -47,7 +47,7 @@ uses
   container.hashtable;
  
 type
-  generic THashTable<K, V> = class
+  generic THashTable<K, V, KeyBinaryCompareFunctor> = class
 ```
 
 A hash table stores a set of values which can be addressed by a key. Given the key, the corresponding value can be looked up quickly.

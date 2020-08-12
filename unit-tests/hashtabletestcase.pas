@@ -5,11 +5,13 @@ unit hashtabletestcase;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.hashtable;
+  Classes, SysUtils, fpcunit, testregistry, container.hashtable, utils.functor;
 
 type
-  TIntIntHashTable = specialize THashTable<Integer, Integer>;
-  TStringIntHashTable = specialize THashTable<String, Integer>;
+  TIntIntHashTable = specialize THashTable<Integer, Integer,
+    TCompareFunctorInteger>;
+  TStringIntHashTable = specialize THashTable<String, Integer,
+    TCompareFunctorString>;
 
   THashTableTestCase = class(TTestCase)
   published

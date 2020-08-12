@@ -42,7 +42,7 @@ type
 
   { A hash table stores a set of values which can be addressed by a key. Given 
     the key, the corresponding value can be looked up quickly. }
-  generic THashTable<K, V> = class 
+  generic THashTable<K, V, KeyBinaryCompareFunctor> = class 
   public 
     type
       { Hash function used to generate hash values for keys used in a hash
@@ -116,6 +116,7 @@ type
   protected
     FHashFunc : THashTableHashFunc;
     FHashTable : PHashTableStruct;
+    FCompareFunctor : KeyBinaryCompareFunctor;
   end;  
 
   { Generate a hash key for a pointer. The value pointed at by the pointer is 
@@ -170,6 +171,7 @@ end;
 constructor THashTable.Create(HashFunc : THashTable.THashTableHashFunc);
 begin
   FHashFunc := HashFunc;
+  FCompareFunctor := KeyBinaryCompareFunctor.Create;
 
   { Allocate a new hash table structure }
   New(FHashTable);
@@ -341,7 +343,7 @@ begin
     { Fetch rover's HashTablePair entry }
     pair := @rover^.pair;
 
-    if pair^.key = key then
+    if FCompareFunctor.Call(pair^.key, key) = 0 then
     begin
       { Same key: overwrite this entry with new data. }
       { Same with the key: use the new key value and free the old one }
@@ -388,7 +390,7 @@ begin
   begin
     pair := @rover^.pair;
 
-    if pair^.key = key then
+    if FCompareFunctor.Call(pair^.key, key) = 0 then
     begin
       { Found the entry. Return the data. }
       Exit(pair^.value);
@@ -421,7 +423,7 @@ begin
   begin
     pair := @(rover^)^.pair;
 
-    if pair^.key = key then 
+    if FCompareFunctor.Call(pair^.key, key) = 0 then 
     begin
       { This is the entry to remove }
       entry := rover^;
