@@ -35,12 +35,18 @@ begin
   tree.Insert(12, 1200);
   tree.Insert(132, 13200);
 
-  AssertTrue('Tree value 1 is not correct', tree.Search(1) = 100);
-  AssertTrue('Tree value 2 is not correct', tree.Search(2) = 200);
-  AssertTrue('Tree value 4 is not correct', tree.Search(4) = 400);
-  AssertTrue('Tree value 10 is not correct', tree.Search(10) = 1000);
-  AssertTrue('Tree value 12 is not correct', tree.Search(12) = 1200);
-  AssertTrue('Tree value 132 is not correct', tree.Search(132) = 13200);
+  AssertTrue('Tree value 1 is not correct', tree.Search(1)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Tree value 2 is not correct', tree.Search(2)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 200);
+  AssertTrue('Tree value 4 is not correct', tree.Search(4)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 400);
+  AssertTrue('Tree value 10 is not correct', tree.Search(10)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1000);
+  AssertTrue('Tree value 12 is not correct', tree.Search(12)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1200);
+  AssertTrue('Tree value 132 is not correct', tree.Search(132)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 13200);
 
   FreeAndNil(tree);
 end;
@@ -55,9 +61,12 @@ begin
   tree.Insert(2, 40);
   tree.Insert(5, 100);
 
-  AssertTrue('Tree value 1 is not correct', tree.Search(1) = 20);
-  AssertTrue('Tree value 2 is not correct', tree.Search(2) = 40);
-  AssertTrue('Tree value 5 is not correct', tree.Search(5) = 100);
+  AssertTrue('Tree value 1 is not correct', tree.Search(1)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 20);
+  AssertTrue('Tree value 2 is not correct', tree.Search(2)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 40);
+  AssertTrue('Tree value 5 is not correct', tree.Search(5)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
 
   AssertTrue('Tree value 1 is not removed', tree.Remove(1));
   AssertTrue('Tree value 2 is not removed', tree.Remove(2));
@@ -80,12 +89,18 @@ begin
   tree.Insert('test12', 12);
   tree.Insert('test132', 132);
 
-  AssertTrue('Tree value test1 is not correct', tree.Search('test1') = 1);
-  AssertTrue('Tree value test2 is not correct', tree.Search('test2') = 2);
-  AssertTrue('Tree value test4 is not correct', tree.Search('test4') = 4);
-  AssertTrue('Tree value test10 is not correct', tree.Search('test10') = 10);
-  AssertTrue('Tree value test12 is not correct', tree.Search('test12') = 12);
-  AssertTrue('Tree value test132 is not correct', tree.Search('test132') = 132);
+  AssertTrue('Tree value test1 is not correct', tree.Search('test1')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1);
+  AssertTrue('Tree value test2 is not correct', tree.Search('test2')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 2);
+  AssertTrue('Tree value test4 is not correct', tree.Search('test4')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
+  AssertTrue('Tree value test10 is not correct', tree.Search('test10')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 10);
+  AssertTrue('Tree value test12 is not correct', tree.Search('test12')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12);
+  AssertTrue('Tree value test132 is not correct', tree.Search('test132')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 132);
 
   FreeAndNil(tree);
 end;
@@ -100,9 +115,12 @@ begin
   tree.Insert('test2', 2);
   tree.Insert('test4', 4);
 
-  AssertTrue('Tree value test1 is not correct', tree.Search('test1') = 1);
-  AssertTrue('Tree value test2 is not correct', tree.Search('test2') = 2);
-  AssertTrue('Tree value test4 is not correct', tree.Search('test4') = 4);
+  AssertTrue('Tree value test1 is not correct', tree.Search('test1')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1);
+  AssertTrue('Tree value test2 is not correct', tree.Search('test2')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 2);
+  AssertTrue('Tree value test4 is not correct', tree.Search('test4')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
 
   AssertTrue('Tree value test1 is not removed', tree.Remove('test1'));
   AssertTrue('Tree value test2 is not removed', tree.Remove('test2'));
@@ -127,7 +145,7 @@ begin
   for index := 0 to 1000000 do
   begin
     AssertTrue('Tree value index ' + IntToStr(index) + ' value is not correct',
-      tree.Search(index) = index * 10 + 3);
+      tree.Search(index){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = index * 10 + 3);
   end;
 
   FreeAndNil(tree);

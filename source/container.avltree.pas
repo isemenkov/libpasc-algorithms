@@ -34,11 +34,13 @@ unit container.avltree;
 interface
 
 uses
-  SysUtils;
+  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
+  {$IFNDEF USE_OPTIONAL}
   { Item key value not exists. }
   EKeyNotExistsException = class(Exception);
+  {$ENDIF}
 
   { The AVL tree structure is a balanced binary tree which stores a collection 
     of nodes. Each node has a key and a value associated with it. The nodes are 
@@ -51,6 +53,11 @@ type
     (searching for a value based on its key), or as a set of keys which is 
     always ordered. }
   generic TAvlTree<K, V, KeyBinaryCompareFunctor> = class
+  public 
+    type
+      {$IFDEF USE_OPTIONAL}
+      TOptionalValue = specialize TOptional<V>;
+      {$ENDIF}  
   public
     { Create a new AVL tree. }
     constructor Create;
@@ -68,7 +75,8 @@ type
 
     { Search an AVL tree for a value corresponding to a particular key. This 
       uses the tree as a mapping. }
-    function Search (Key : K) : V;
+    function Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
+      {$ENDIF};
   protected
     type
       TAvlTreeNodeSide = (
@@ -582,7 +590,8 @@ begin
   Result := nil; 
 end;
 
-function TAvlTree.Search (Key : K) : V;
+function TAvlTree.Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}
+  TOptionalValue{$ENDIF};
 var
   node : PAvlTreeNode;
 begin
@@ -591,10 +600,15 @@ begin
 
   if node = nil then
   begin
+    {$IFNDEF USE_OPTIONAL}
     raise EKeyNotExistsException.Create('Key not exists.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
   end else
   begin
-    Result := node^.value;
+    Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}node^.value
+      {$IFDEF USE_OPTIONAL}){$ENDIF};
   end;
 end;
 

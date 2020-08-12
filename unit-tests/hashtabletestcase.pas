@@ -58,9 +58,12 @@ begin
   AssertTrue('HashTable value 5 not insert', hash.Insert(5, 100));
   AssertTrue('HashTable value 121 not insert', hash.Insert(121, 12100));
 
-  AssertTrue('Hash table value 1 is not correct', hash.Search(1) = 100);
-  AssertTrue('Hash table value 5 is not correct', hash.Search(5) = 100);
-  AssertTrue('Hash table value 121 is not correct', hash.Search(121) = 12100);
+  AssertTrue('Hash table value 1 is not correct', hash.Search(1)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Hash table value 5 is not correct', hash.Search(5)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Hash table value 121 is not correct', hash.Search(121)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12100);
 
   FreeAndNil(hash);
 end;
@@ -76,12 +79,12 @@ begin
   AssertTrue('HashTable value test121 not insert', hash.Insert('test121',
     12100));
 
-  AssertTrue('Hash table value test1 is not correct', hash.Search('test1') =
-    100);
-  AssertTrue('Hash table value test5 is not correct', hash.Search('test5') =
-    100);
-  AssertTrue('Hash table value test121 is not correct', hash.Search('test121') =
-    12100);
+  AssertTrue('Hash table value test1 is not correct', hash.Search('test1')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Hash table value test5 is not correct', hash.Search('test5')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Hash table value test121 is not correct', hash.Search('test121')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12100);
 
   FreeAndNil(hash);
 end;
@@ -96,9 +99,12 @@ begin
   AssertTrue('HashTable value 5 not insert', hash.Insert(5, 100));
   AssertTrue('HashTable value 121 not insert', hash.Insert(121, 12100));
 
-  AssertTrue('Hash table value 1 is not correct', hash.Search(1) = 100);
-  AssertTrue('Hash table value 5 is not correct', hash.Search(5) = 100);
-  AssertTrue('Hash table value 121 is not correct', hash.Search(121) = 12100);
+  AssertTrue('Hash table value 1 is not correct', hash.Search(1)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Hash table value 5 is not correct', hash.Search(5)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Hash table value 121 is not correct', hash.Search(121)
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12100);
 
   AssertTrue('Hash table value 1 is not removed', hash.Remove(1));
   AssertTrue('Hash table value 5 is not removed', hash.Remove(5));
@@ -120,12 +126,12 @@ begin
   AssertTrue('HashTable value test121 not insert', hash.Insert('test121',
     12100));
 
-  AssertTrue('Hash table value test1 is not correct', hash.Search('test1') =
-    100);
-  AssertTrue('Hash table value test5 is not correct', hash.Search('test5') =
-    100);
-  AssertTrue('Hash table value test121 is not correct', hash.Search('test121') =
-    12100);
+  AssertTrue('Hash table value test1 is not correct', hash.Search('test1')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Hash table value test5 is not correct', hash.Search('test5')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
+  AssertTrue('Hash table value test121 is not correct', hash.Search('test121')
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12100);
 
   AssertTrue('Hash table value test1 is not removed', hash.Remove('test1'));
   AssertTrue('Hash table value test5 is not removed', hash.Remove('test5'));
@@ -152,7 +158,8 @@ begin
   for index := 0 to 1000000 do
   begin
     AssertTrue('2: Hash table value index ' + IntToStr(index) +
-     ' is not correct', hash.Search(index) = index * 10 + 4);
+     ' is not correct', hash.Search(index){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}
+     = index * 10 + 4);
   end;
 
   FreeAndNil(hash);

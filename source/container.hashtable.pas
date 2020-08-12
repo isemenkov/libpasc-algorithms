@@ -34,11 +34,13 @@ unit container.hashtable;
 interface
 
 uses
-  SysUtils;
+  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
+  {$IFNDEF USE_OPTIONAL}
   { Item key value not exists. }
   EKeyNotExistsException = class(Exception);
+  {$ENDIF}
 
   { A hash table stores a set of values which can be addressed by a key. Given 
     the key, the corresponding value can be looked up quickly. }
@@ -48,6 +50,10 @@ type
       { Hash function used to generate hash values for keys used in a hash
         table. }
       THashTableHashFunc = function (Key : K) : Cardinal;
+
+      {$IFDEF USE_OPTIONAL}
+      TOptionalValue = specialize TOptional<V>;
+      {$ENDIF}
   public
     { Create a new hash table. }
     constructor Create (HashFunc : THashTableHashFunc);
@@ -60,7 +66,8 @@ type
     function Insert (Key : K; Value : V) : Boolean;
 
     { Look up a value in a hash table by key. }
-    function Search (Key : K) : V;
+    function Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
+      {$ENDIF};
 
     { Remove a value from a hash table. }
     function Remove (Key : K) : Boolean;
@@ -393,13 +400,18 @@ begin
     if FCompareFunctor.Call(pair^.key, key) = 0 then
     begin
       { Found the entry. Return the data. }
-      Exit(pair^.value);
+      Exit({$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}pair^.value
+        {$IFDEF USE_OPTIONAL}){$ENDIF});
     end;
 
     rover := rover^.next;
   end;
 
+  {$IFNDEF USE_OPTIONAL}
   raise EKeyNotExistsException.Create('Key not exists.');
+  {$ELSE}
+  Exit(TOptionalValue.Create);
+  {$ENDIF}
 end;
 
 function THashTable.Remove (Key : K) : Boolean;
