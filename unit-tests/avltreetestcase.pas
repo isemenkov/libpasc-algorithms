@@ -5,11 +5,11 @@ unit avltreetestcase;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.avltree;
+  Classes, SysUtils, fpcunit, testregistry, container.avltree, utils.functor;
 
 type
-  TIntIntTree = specialize TAvlTree<Integer, Integer>;
-  TStringIntTree = specialize TAvlTree<String, Integer>;
+  TIntIntTree = specialize TAvlTree<Integer, Integer, TCompareFunctorInteger>;
+  TStringIntTree = specialize TAvlTree<String, Integer, TCompareFunctorString>;
 
   TAvlTreeTestCase = class(TTestCase)
   published

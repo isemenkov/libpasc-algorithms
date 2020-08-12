@@ -50,7 +50,7 @@ type
     Balanced binary trees have several uses. They can be used as a mapping 
     (searching for a value based on its key), or as a set of keys which is 
     always ordered. }
-  generic TAvlTree<K, V> = class
+  generic TAvlTree<K, V, KeyBinaryCompareFunctor> = class
   public
     { Create a new AVL tree. }
     constructor Create;
@@ -171,6 +171,7 @@ type
     function TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;  
   protected
     FTree : PAvlTreeStruct;
+    FCompareFunctor : KeyBinaryCompareFunctor;
   end;
 
 implementation
@@ -190,6 +191,7 @@ begin
   New(FTree);
   FTree^.root_node := nil;
   FTree^.num_nodes := 0;
+  FCompareFunctor := KeyBinaryCompareFunctor.Create;
 end;
 
 procedure TAvlTree.FreeSubTreeNode (node : PAvlTreeNode);
@@ -391,7 +393,7 @@ begin
   while rover^ <> nil do
   begin
     previous_node := rover^;
-    if Key < (rover^)^.key then
+    if FCompareFunctor.Call(Key, (rover^)^.key) < 0 then
     begin
       rover := @((rover^)^.children[Shortint(AVL_TREE_NODE_LEFT)]);
     end else
@@ -553,6 +555,7 @@ end;
 function TAvlTree.SearchNode (Key : K) : PAvlTreeNode;
 var
   node : PAvlTreeNode;
+  diff : Integer;
 begin
   { Search down the tree and attempt to find the node which has the specified 
     key }
@@ -560,12 +563,13 @@ begin
 
   while node <> nil do
   begin
-    if Key = node^.key then
+    diff := FCompareFunctor.Call(Key, node^.key);
+    if diff = 0 then
     begin
       { Keys are equal: return this node }
       Result := node;
       Exit;
-    end else if Key < node^.key then
+    end else if diff < 0 then
     begin
       node := node^.children[Shortint(AVL_TREE_NODE_LEFT)];
     end else

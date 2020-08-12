@@ -33,7 +33,7 @@ uses
   container.avltree;
  
 type
-  generic TAvlTree<K, V> = class
+  generic TAvlTree<K, V, KeyBinaryCompareFunctor> = class
 ```
 
 The AVL tree structure is a balanced binary tree which stores a collection of nodes. Each node has a key and a value associated with it. The nodes are sorted within the tree based on the order of their keys. Modifications to the tree are constructed such that the tree remains balanced at all times (there are always roughly equal numbers of nodes on either side of the tree).
