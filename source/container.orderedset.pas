@@ -24,7 +24,7 @@
 (*                                                                            *)
 (******************************************************************************)
 
-unit container.sortedset;
+unit container.orderedset;
 
 {$mode objfpc}{$H+}
 {$IFOPT D+}
@@ -39,14 +39,14 @@ uses
 type
   { A set stores a collection of values.  Each value can only exist once in the 
     set. }
-  generic TSortedSet<V, BinaryCompareFunctor> = class
+  generic TOrderedSet<V, BinaryCompareFunctor> = class
   public
     type
       { Hash function.  Generates a hash key for values to be stored in a set. }
-      THashSortedSetFunc = function (Value : V) : Cardinal;  
+      THashOrderedSetFunc = function (Value : V) : Cardinal;  
   public
     { Create a new set. }
-    constructor Create (HashFunc : THashSortedSetFunc);
+    constructor Create (HashFunc : THashOrderedSetFunc);
 
     { Destroy a set. }
     destructor Destroy; override;
@@ -66,15 +66,50 @@ type
     { Perform a union of two sets.
       A new set containing all values which are in the first or second sets, or 
       empty set if it was not possible to allocate memory for the new set. }
-    function Union (SortedSet : specialize TSortedSet<V, BinaryCompareFunctor>)
-     : specialize TSortedSet<V, BinaryCompareFunctor>;
+    function Union (OrderedSet : specialize TOrderedSet<V, 
+      BinaryCompareFunctor>) : specialize TSortedSet<V, BinaryCompareFunctor>;
 
     { Perform an intersection of two sets.
       A new set containing all values which are in both set, or empty set if it 
       was not possible to allocate memory for the new set. }
-    function Intersection (SortedSet : specialize TSortedSet<V,
-      BinaryCompareFunctor>) : specialize TSortedSet<V, BinaryCompareFunctor>;
+    function Intersection (OrderedSet : specialize TOrderedSet<V,
+      BinaryCompareFunctor>) : specialize TOrderedSet<V, BinaryCompareFunctor>;
+  protected
+    type
+      PPOrderedSetEntry = ^POrderedSetEntry;
+      POrderedSetEntry = ^TOrderedSetEntry;
+      TOrderedSetEntry = record
+        data : V;
+        next : POrderedSetEntry;
+      end;
 
+    const
+      OrderedSetNumPrimes : Cardinal = 24;
+
+      { This is a set of good hash table prime numbers, from:
+        http://planetmath.org/encyclopedia/GoodHashTablePrimes.html
+        Each prime is roughly double the previous value, and as far as possible 
+        from the nearest powers of two. }
+      OrderedSetPrimes : array [0 .. 23] of Cardinal =
+      (
+        193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, 98317, 196613, 
+        393241, 786433, 1572869, 3145739, 6291469, 12582917, 25165843, 50331653, 
+        100663319, 201326611, 402653189, 805306457, 1610612741
+      ); 
+  protected
+    { Internal function used to allocate the ordered set on creation and when 
+      enlarging the table. }
+    function OrderedSetAllocateTable : Boolean;
+
+    { Free an entry }
+    procedure OrderedSetFreeEntry (entry : POrderedSetEntry);
+  protected
+    FTable : PPOrderedSetEntry;
+    FEntries : Cardinal;
+    FTable_size : Cardinal;
+    FPrime_index : Cardinal;
+    FHashFunc : THashOrderedSetFunc;
+    FCompareFunctor : BinaryCompareFunctor;
   end;
 
 implementation
