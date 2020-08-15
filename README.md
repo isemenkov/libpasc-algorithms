@@ -51,3 +51,15 @@ type
 ```
 
 A hash table stores a set of values which can be addressed by a key. Given the key, the corresponding value can be looked up quickly.
+
+##### TOrderedSet
+
+```pascal
+uses
+  container.orderedset;
+
+type
+  generic TOrderedSet<V, BinaryCompareFunctor> = class
+```
+
+A set stores a collection of values. Each value can only exist once in the set.
