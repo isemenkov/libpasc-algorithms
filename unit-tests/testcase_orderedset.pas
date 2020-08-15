@@ -1,4 +1,4 @@
-unit orderedsettestcase;
+unit testcase_orderedset;
 
 {$mode objfpc}{$H+}
 

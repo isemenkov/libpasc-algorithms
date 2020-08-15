@@ -1,4 +1,4 @@
-unit arraylisttestcase;
+unit testcase_arraylist;
 
 {$mode objfpc}{$H+}
 

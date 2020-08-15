@@ -3,8 +3,8 @@ program libpascalgorithmstestcase;
 {$mode objfpc}{$H+}
 
 uses
-  Interfaces, Forms, GuiTestRunner, arraylisttestcase, listtestcase,
-  avltreetestcase, hashtabletestcase, orderedsettestcase;
+  Interfaces, Forms, GuiTestRunner, listtestcase, testcase_arraylist,
+  testcase_avltree, testcase_orderedset, hashtabletestcase;
 
 {$R *.res}
 
