@@ -1,4 +1,4 @@
-unit listtestcase;
+unit testcase_list;
 
 {$mode objfpc}{$H+}
 
@@ -9,13 +9,16 @@ uses
 
 type
   TIntegerList = specialize TList<Integer, TCompareFunctorInteger>;
+  TStringList = specialize TList<String, TCompareFunctorString>;
 
   TListTestCase= class(TTestCase)
   published
-    procedure TestCreateList;
-    procedure TestListMove;
-    procedure TestListPrepend;
-    procedure TestListInsert;
+    procedure Test_IntegerList_CreateNewEmpty;
+    procedure Test_IntegerList_AppendNewValueInto;
+    procedure Test_IntegerList_PrependValueInto;
+    procedure Test_IntegerList_AppendNewValueAndClear;
+    procedure Test_IntegerList_InsertNewValueInto;
+
     procedure TestListRemove;
     procedure TestListNthIndexFind;
     procedure TestListRemoveData;
@@ -25,142 +28,223 @@ type
 
 implementation
 
-procedure TListTestCase.TestCreateList;
+procedure TListTestCase.Test_IntegerList_CreateNewEmpty;
+var
+  list : TIntegerList;
+begin
+  list := TIntegerList.Create;
+
+  AssertTrue('#Test_IntegerList_CreateNewEmpty -> ' +
+   'IntgerList must be empty', list.Length = 0);
+
+  FreeAndNil(list);
+end;
+
+procedure TListTestCase.Test_IntegerList_AppendNewValueInto;
 var
   list : TIntegerList;
   iterator : TIntegerList.TIterator;
 begin
   list := TIntegerList.Create;
-  list.Append(1);
-  list.Append(4);
-  list.Append(5);
 
-  AssertTrue('List length is not correct', list.Length = 3);
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'IntegerList value 1 not append', list.Append(1));
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'IntegerList value 4 not append', list.Append(4));
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'IntegerList value 5 not append', list.Append(5));
+
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'List length is not correct', list.Length = 3);
+
   iterator := list.FirstEntry;
-  AssertTrue('List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('List item 0 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'List item 0 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'List item 0 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1);
+
   iterator := iterator.Next;
-  AssertTrue('List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('List item 1 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'List item 1 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'List item 1 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
+
   iterator := iterator.Next;
-  AssertTrue('List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('Lists item 2 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'List item 2 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_AppendNewValueInto -> ' +
+    'Lists item 2 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 5);
 
   FreeAndNil(list);
 end;
 
-procedure TListTestCase.TestListMove;
+procedure TListTestCase.Test_IntegerList_PrependValueInto;
 var
   list : TIntegerList;
   iterator : TIntegerList.TIterator;
 begin
   list := TIntegerList.Create;
 
-  list.Prepend(42);
-  list.Prepend(1000);
-  list.Prepend(9);
-  list.Prepend(-1);
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'IntegerList value 42 not prepend', list.Prepend(42));
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'IntegerList value 1000 not prepend', list.Prepend(1000));
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'IntegerList value 9 not prepend', list.Prepend(9));
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'IntegerList value -1 not prepend', list.Prepend(-1));
 
-  AssertTrue('List length is not correct', list.Length = 4);
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List length is not correct', list.Length = 4);
+
   iterator := list.LastEntry;
-  AssertTrue('List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('List item 3 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List item 3 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List item 3 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 42);
+
   iterator := iterator.Prev;
-  AssertTrue('List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('List item 2 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List item 2 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List item 2 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1000);
+
   iterator := iterator.Prev;
-  AssertTrue('List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('List item 1 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List item 1 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List item 1 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 9);
+
   iterator := iterator.Prev;
-  AssertTrue('List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('List item 0 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List item 0 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_PrependValueInto -> ' +
+    'List item 0 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -1);
 
   FreeAndNil(list);
 end;
 
-procedure TListTestCase.TestListPrepend;
+procedure TListTestCase.Test_IntegerList_AppendNewValueAndClear;
 var
   list : TIntegerList;
   iterator : TIntegerList.TIterator;
 begin
   list := TIntegerList.Create;
 
-  list.Append(43);
-  list.Append(67);
-  list.Prepend(-11);
-  list.Prepend(683);
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'IntegerList value 43 not append', list.Append(43));
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'IntegerList value 67 not append', list.Append(67));
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'IntegerList value -11 not prepend', list.Prepend(-11));
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'IntegerList value 683 not prepend', list.Prepend(683));
 
-  AssertTrue('1: List length is not correct', list.Length = 4);
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List length is not correct', list.Length = 4);
+
   iterator := list.FirstEntry;
-  AssertTrue('1: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 0 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List item 0 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List item 0 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 683);
+
   iterator := iterator.Next;
-  AssertTrue('1: List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 1 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List item 1 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List item 1 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -11);
+
   iterator := iterator.Next;
-  AssertTrue('1: List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 2 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List item 2 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List item 2 value is not correct', iterator.Value
    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 43);
+
   iterator := iterator.Next;
-  AssertTrue('1: List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 3 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List item 3 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List item 3 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 67);
 
   list.Clear;
 
-  AssertTrue('2: List length is not correct', list.Length = 0);
+  AssertTrue('#Test_IntegerList_AppendNewValueAndClear -> ' +
+    'List length is not correct', list.Length = 0);
 
   FreeAndNil(list);
 end;
 
-procedure TListTestCase.TestListInsert;
+procedure TListTestCase.Test_IntegerList_InsertNewValueInto;
 var
   list : TIntegerList;
   iterator : TIntegerList.TIterator;
 begin
   list := TIntegerList.Create;
 
-  list.Append(43);
-  AssertTrue('1: List length is not correct', list.Length = 1);
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'IntegerList value 43 not append', list.Append(43));
+
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List length is not correct', list.Length = 1);
+
   iterator := list.FirstEntry;
-  AssertTrue('1: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('1: List item 0 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 0 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 0 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 43);
 
   list.FirstEntry.InsertNext(67);
   list.FirstEntry.InsertPrev(-11);
   list.FirstEntry.InsertPrev(683);
 
-  AssertTrue('2: List length is not correct', list.Length = 4);
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List length is not correct', list.Length = 4);
+
   iterator := list.FirstEntry;
-  AssertTrue('2: List item 0 haven''t value', iterator.HasValue);
-  AssertTrue('2: List item 0 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 0 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 0 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 683);
+
   iterator := iterator.Next;
-  AssertTrue('2: List item 1 haven''t value', iterator.HasValue);
-  AssertTrue('2: List item 1 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 1 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 1 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -11);
+
   iterator := iterator.Next;
-  AssertTrue('2: List item 2 haven''t value', iterator.HasValue);
-  AssertTrue('2: List item 2 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 2 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 2 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 43);
+
   iterator := iterator.Next;
-  AssertTrue('2: List item 3 haven''t value', iterator.HasValue);
-  AssertTrue('2: List item 3 value is not correct', iterator.Value
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 3 haven''t value', iterator.HasValue);
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List item 3 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 67);
 
   list.Clear;
 
-  AssertTrue('3: List length is not correct', list.Length = 0);
+  AssertTrue('#Test_IntegerList_InsertNewValueInto -> ' +
+    'List length is not correct', list.Length = 0);
 
   FreeAndNil(list);
 end;
