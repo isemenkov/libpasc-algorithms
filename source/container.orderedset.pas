@@ -89,7 +89,10 @@ type
       BinaryCompareFunctor>) : specialize TOrderedSet<V, BinaryCompareFunctor>;}
 
     { Retrive the first entry in orderedset. }
-    function FirstEntry : TIterator;  
+    function FirstEntry : TIterator; 
+
+    { Return enumerator for in operator. }
+    function GetEnumerator : TIterator; 
   protected
     type
       PPOrderedSetEntry = ^POrderedSetEntry;
@@ -145,10 +148,26 @@ type
 
         { Retrieve the next entry in a orderedset. }
         function Next : TIterator;
-
+      protected
         { Get item value. }
         function GetValue : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
           {$ENDIF};
+
+        { Return current item iterator and move it to next. }
+        function GetCurrent : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
+          {$ENDIF};  
+      public
+        { Return True if we can move to next element. }
+        function MoveNext : Boolean;
+
+        { Return enumerator for in operator. }
+        function GetEnumerator : TIterator;
+
+        property Value : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF}
+          read GetValue;
+
+        property Current : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF}
+          read GetCurrent;
       protected
         var
           FOrderedSet : POrderedSetStruct;
@@ -281,6 +300,18 @@ begin
   Result.next_chain := next_chain;
 end;
 
+function TOrderedSet.TIterator.MoveNext : Boolean;
+begin
+  Result := next_entry <> nil;
+end;
+
+function TOrderedSet.TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}V{$ELSE}
+  TOptionalValue{$ENDIF};
+begin
+  Result := GetValue;
+  Next;
+end;
+
 function TOrderedSet.TIterator.GetValue : {$IFNDEF USE_OPTIONAL}V{$ELSE}
   TOptionalValue{$ENDIF};
 begin
@@ -295,6 +326,11 @@ begin
 
   Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}next_entry^.data
     {$IFDEF USE_OPTIONAL}){$ENDIF};
+end;
+
+function TOrderedSet.TIterator.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(FOrderedSet);
 end;
 
 { TOrderedSet }
@@ -555,6 +591,11 @@ end;
 function TOrderedSet.FirstEntry : TIterator;
 begin
   Result := TIterator.Create (FOrderedSet);
+end;
+
+function TOrderedSet.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(FOrderedSet);
 end;
 
 end.

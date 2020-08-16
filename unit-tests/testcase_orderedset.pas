@@ -17,12 +17,14 @@ type
     procedure Test_IntOrderedSet_InsertNewValueInto;
     procedure Test_IntOrderedSet_RemoveValueFrom;
     procedure Test_IntOrderedSet_IterateValues;
+    procedure Test_IntOrderedSet_IterateRange;
     procedure Test_IntOrderedSet_InsertOneMillionValuesInto;
 
     procedure Test_StringOrderedSet_CreateNewEmpty;
     procedure Test_StringOrderedSet_InsertNewValueInto;
     procedure Test_StringOrderedSet_RemoveValueFrom;
     procedure Test_StringOrderedSet_IterateValues;
+    procedure Test_StringOrderedSet_IterateRange;
     procedure Test_StringOrderedSet_InsertOneMillionValuesInto;
   end;
 
@@ -182,22 +184,22 @@ begin
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.GetValue),
-    orderedset.HasValue(iterator.GetValue));
+    'OrderedSet hasn''t value ' + IntToStr(iterator.Value),
+    orderedset.HasValue(iterator.Value));
 
   iterator := iterator.Next;
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.GetValue),
-    orderedset.HasValue(iterator.GetValue));
+    'OrderedSet hasn''t value ' + IntToStr(iterator.Value),
+    orderedset.HasValue(iterator.Value));
 
   iterator := iterator.Next;
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.GetValue),
-    orderedset.HasValue(iterator.GetValue));
+    'OrderedSet hasn''t value ' + IntToStr(iterator.Value),
+    orderedset.HasValue(iterator.Value));
 
   iterator := iterator.Next;
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
@@ -224,26 +226,83 @@ begin
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.GetValue,
-    orderedset.HasValue(iterator.GetValue));
+    'OrderedSet hasn''t value ' + iterator.Value,
+    orderedset.HasValue(iterator.Value));
 
   iterator := iterator.Next;
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.GetValue,
-    orderedset.HasValue(iterator.GetValue));
+    'OrderedSet hasn''t value ' + iterator.Value,
+    orderedset.HasValue(iterator.Value));
 
   iterator := iterator.Next;
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.GetValue,
-    orderedset.HasValue(iterator.GetValue));
+    'OrderedSet hasn''t value ' + iterator.Value,
+    orderedset.HasValue(iterator.Value));
 
   iterator := iterator.Next;
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
     'OrderedSet iterator not correct', not iterator.HasValue);
+
+  FreeAndNil(orderedset);
+end;
+
+procedure TOrderedSetTestCase.Test_IntOrderedSet_IterateRange;
+var
+  orderedset : TIntOrderedSet;
+  value : Integer;
+  counter : Cardinal;
+begin
+  orderedset := TIntOrderedSet.Create(@hashInteger);
+
+  AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
+    'OrderedSet value 1 not insert', orderedset.Insert(1));
+  AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
+    'OrderedSet value 5 not insert', orderedset.Insert(5));
+  AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
+    'OrderedSet value 121 not insert', orderedset.Insert(121));
+
+  counter := 0;
+  for value in orderedset do
+  begin
+    AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
+      'OrderedSet hasn''t value ' + IntToStr(Value),
+      orderedset.HasValue(Value));
+    Inc(counter);
+  end;
+  AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
+    'OrderedSet iterate through not all elements', counter = 3);
+
+  FreeAndNil(orderedset);
+end;
+
+procedure TOrderedSetTestCase.Test_StringOrderedSet_IterateRange;
+var
+  orderedset : TStringOrderedSet;
+  value : String;
+  counter : Cardinal;
+begin
+  orderedset := TStringOrderedSet.Create(@hashString);
+
+  AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
+    'OrderedSet value test1 not insert', orderedset.Insert('test1'));
+  AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
+    'OrderedSet value test5 not insert', orderedset.Insert('test5'));
+  AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
+    'OrderedSet value test121 not insert', orderedset.Insert('test121'));
+
+  counter := 0;
+  for value in orderedset do
+  begin
+    AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
+      'OrderedSet hasn''t value ' + Value, orderedset.HasValue(Value));
+    Inc(counter);
+  end;
+  AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
+    'OrderedSet iterate through not all elements', counter = 3);
 
   FreeAndNil(orderedset);
 end;
