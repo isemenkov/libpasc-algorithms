@@ -46,6 +46,62 @@ type
     ArrayLists are generic arrays of T which automatically increase in size. }
   generic TArrayList<T, BinaryCompareFunctor> = class
   public
+    type
+      {$IFDEF USE_OPTIONAL}
+      TOptionalValue = specialize TOptional<T>;
+      {$ENDIF}
+
+      { TArrayList iterator. }
+      TIterator = class
+      protected
+      type
+        TDynArray = array of T;
+        PDynArray = ^TDynArray;
+      protected
+        { Create new iterator for arraylist item entry. }
+        {%H-}constructor Create (Arr : PDynArray; Len : Cardinal; Pos : 
+          Integer);
+      public
+        { Return true if iterator has correct value }
+        function HasValue : Boolean;
+
+        { Retrieve the previous entry in a list. }
+        function Prev : TIterator;
+
+        { Retrieve the next entry in a list. }
+        function Next : TIterator;
+
+        { Return True if we can move to next element. }
+        function MoveNext : Boolean;
+
+        { Return enumerator for in operator. }
+        function GetEnumerator : TIterator;
+      protected
+        { Get item value. }
+        function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
+          {$ENDIF};
+
+        { Set new item value. }
+        procedure SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+          TOptionalValue{$ENDIF});
+
+        { Return current item iterator and move it to next. }
+        function GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
+          {$ENDIF};
+      public
+        { Read/Write arraylist item value. If value not exists raise 
+          EValueNotExistsException. }
+        property Value : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF} 
+          read GetValue write SetValue;
+
+        property Current : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF}
+          read GetCurrent;
+      protected
+        FArray : PDynArray;
+        FLength : Cardinal;
+        FPosition : Integer;
+      end;
+  public
     constructor Create (ALength : Cardinal = 0);
     destructor Destroy; override;
 
@@ -76,17 +132,20 @@ type
       Return the index of the value if found, or -1 if not found. }
     function IndexOf (AData : T) : Integer;
 
+    { Retrive the first entry in a arraylist. }
+    function FirstEntry : TIterator;
+
+    { Retrive the last entry in a arraylist. }
+    function LastEntry : TIterator;
+
     { Remove all entries from an ArrayList. }
     procedure Clear;
 
     { Sort the values in an ArrayList. }
     procedure Sort;
 
-  {$IFDEF USE_OPTIONAL}
-  protected
-    type
-      TOptionalValue = specialize TOptional<T>;
-  {$ENDIF} 
+    { Return enumerator for in operator. }
+    function GetEnumerator : TIterator; 
   protected
     { Reallocate the array to the new size }
     function Enlarge : Boolean;
@@ -118,6 +177,91 @@ type
   end;
 
 implementation
+
+{ TArrayList.TIterator }
+
+constructor TArrayList.TIterator.Create (Arr : PDynArray; Len : Cardinal; Pos :
+  Integer);
+begin
+  FArray := Arr;
+  FLength := Len;
+  FPosition := Pos;
+end;
+
+function TArrayList.TIterator.HasValue : Boolean;
+begin
+  if FPosition >= FLength then
+  begin
+    Exit(False);
+  end;
+
+  Result := True;
+end;
+
+function TArrayList.TIterator.Prev : TIterator;
+begin
+  Result := TIterator.Create(FArray, FLength, FPosition - 1);
+
+  if Result.FPosition < 0 then
+  begin
+    Result.FPosition := 0;
+  end;
+end;
+
+function TArrayList.TIterator.Next : TIterator;
+begin
+  Result := TIterator.Create(FArray, FLength, FPosition + 1); 
+end;
+
+function TArrayList.TIterator.MoveNext : Boolean;
+begin
+  Result := FPosition < FLength;
+end;
+
+function TArrayList.TIterator.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(FArray, FLength, FPosition);
+end;
+
+function TArrayList.TIterator.GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF};
+begin
+  if FPosition > FLength then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EIndexOutOfRangeException.Create('Index out of range.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}
+    FArray^[FPosition]{$IFDEF USE_OPTIONAL}){$ENDIF};
+end;
+
+procedure TArrayList.TIterator.SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF});
+begin
+  if FPosition > FLength then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EIndexOutOfRangeException.Create('Index out of range.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  FArray^[FPosition] := AValue{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
+end;
+
+function TArrayList.TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF};
+begin
+  Result := GetValue;
+  Inc(FPosition);
+end;
+
+{ TArrayList }
 
 constructor TArrayList.Create(ALength : Cardinal);
 begin
@@ -316,6 +460,16 @@ begin
   Result := -1;
 end;
 
+function TArrayList.FirstEntry : TIterator;
+begin
+  Result := TIterator.Create(@FData, FLength, 0);
+end;
+
+function TArrayList.LastEntry : TIterator;
+begin
+  Result := TIterator.Create(@FData, FLength, FLength);
+end;
+
 procedure TArrayList.Clear;
 begin
   FLength := 0;
@@ -325,6 +479,11 @@ procedure TArrayList.Sort;
 begin
   { Perform the recursive sort. }
   SortInternal(FData, FLength);
+end;
+
+function TArrayList.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(@FData, FLength, 0);
 end;
 
 end.

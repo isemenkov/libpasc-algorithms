@@ -20,6 +20,8 @@ type
     procedure Test_IntegerArrayList_AppendNewValueAndClear;
     procedure Test_IntegerArrayList_RemoveValueFrom;
     procedure Test_IntegerArrayList_Sort;
+    procedure Test_IntegerArrayList_IterateValues;
+    procedure Test_IntegerArrayList_IterateRange;
     procedure Test_IntegerArrayList_InsertOneMillionValuesInto;
 
     procedure Test_StringArrayList_CreateNewEmpty;
@@ -29,6 +31,8 @@ type
     procedure Test_StringArrayList_AppendNewValueAndClear;
     procedure Test_StringArrayList_RemoveValueFrom;
     procedure Test_StringArrayList_Sort;
+    procedure Test_StringArrayList_IterateValues;
+    procedure Test_StringArrayList_IterateRange;
     procedure Test_StringArrayList_InsertOneMillionValuesInto;
   end;
 
@@ -658,6 +662,210 @@ begin
   AssertTrue('#Test_IntegerArrayList_Sort -> ' +
     'ArrayLists index 6 value is not correct', arr.Value[6]
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'tomato');
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_IntegerArrayList_IterateValues;
+var
+  arr : TIntegerArrayList;
+  iterator : TIntegerArrayList.TIterator;
+  counter : Cardinal;
+begin
+  arr := TIntegerArrayList.Create;
+
+  AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+    'ArrayList value 9 not append', arr.Append(9));
+  AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+    'ArrayList value 3 not append', arr.Append(3));
+  AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+    'ArrayList value -4 not append', arr.Append(-4));
+  AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+    'ArrayList value 12 not append', arr.Append(12));
+
+  counter := 0;
+  iterator := arr.FirstEntry;
+  while iterator.HasValue do
+  begin
+    case counter of
+      0 : begin
+        AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+          'ArrayList value 9 is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 9);
+      end;
+      1 : begin
+        AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+          'ArrayList value 3 is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
+      end;
+      2 : begin
+        AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+          'ArrayList value -4 is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -4);
+      end;
+      3 : begin
+        AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+          'ArrayList value 12 is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12);
+      end;
+    end;
+    iterator := iterator.Next;
+    Inc(counter);
+  end;
+  AssertTrue('#Test_IntegerArrayList_IterateValues -> ' +
+    'ArrayList iterate through not all elements', counter = 4);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_StringArrayList_IterateValues;
+var
+  arr : TStringArrayList;
+  iterator : TStringArrayList.TIterator;
+  counter : Cardinal;
+begin
+  arr := TStringArrayList.Create;
+
+  AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+    'ArrayList value test9 not append', arr.Append('test9'));
+  AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+    'ArrayList value test3 not append', arr.Append('test3'));
+  AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+    'ArrayList value test-4 not append', arr.Append('test-4'));
+  AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+    'ArrayList value test12 not append', arr.Append('test12'));
+
+  counter := 0;
+  iterator := arr.FirstEntry;
+  while iterator.HasValue do
+  begin
+    case counter of
+      0 : begin
+        AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+          'ArrayList value test9 is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test9');
+      end;
+      1 : begin
+        AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+          'ArrayList value test3 is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test3');
+      end;
+      2 : begin
+        AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+          'ArrayList value test-4 is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test-4');
+      end;
+      3 : begin
+        AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+          'ArrayList value test12 is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test12');
+      end;
+    end;
+    iterator := iterator.Next;
+    Inc(counter);
+  end;
+  AssertTrue('#Test_StringArrayList_IterateValues -> ' +
+    'ArrayList iterate through not all elements', counter = 4);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_IntegerArrayList_IterateRange;
+var
+  arr : TIntegerArrayList;
+  value : Integer;
+  counter : Cardinal;
+begin
+  arr := TIntegerArrayList.Create;
+
+  AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+    'ArrayList value 9 not append', arr.Append(9));
+  AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+    'ArrayList value 3 not append', arr.Append(3));
+  AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+    'ArrayList value -4 not append', arr.Append(-4));
+  AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+    'ArrayList value 12 not append', arr.Append(12));
+
+  counter := 0;
+  for value in arr do
+  begin
+    case counter of
+      0 : begin
+        AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+          'ArrayList value 9 is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 9);
+      end;
+      1 : begin
+        AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+          'ArrayList value 3 is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
+      end;
+      2 : begin
+        AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+          'ArrayList value -4 is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -4);
+      end;
+      3 : begin
+        AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+          'ArrayList value 12 is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12);
+      end;
+    end;
+    Inc(counter);
+  end;
+  AssertTrue('#Test_IntegerArrayList_IterateRange -> ' +
+    'ArrayList iterate through not all elements', counter = 4);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_StringArrayList_IterateRange;
+var
+  arr : TStringArrayList;
+  value : String;
+  counter : Cardinal;
+begin
+  arr := TStringArrayList.Create;
+
+  AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+    'ArrayList value test9 not append', arr.Append('test9'));
+  AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+    'ArrayList value test3 not append', arr.Append('test3'));
+  AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+    'ArrayList value test-4 not append', arr.Append('test-4'));
+  AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+    'ArrayList value test12 not append', arr.Append('test12'));
+
+  counter := 0;
+  for value in arr do
+  begin
+    case counter of
+      0 : begin
+        AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+          'ArrayList value test9 is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test9');
+      end;
+      1 : begin
+        AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+          'ArrayList value test3 is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test3');
+      end;
+      2 : begin
+        AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+          'ArrayList value test-4 is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test-4');
+      end;
+      3 : begin
+        AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+          'ArrayList value test12 is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test12');
+      end;
+    end;
+  Inc(counter);
+  end;
+  AssertTrue('#Test_StringArrayList_IterateRange -> ' +
+    'ArrayList iterate through not all elements', counter = 4);
 
   FreeAndNil(arr);
 end;

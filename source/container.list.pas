@@ -58,12 +58,12 @@ type
         Prev : PListEntry;
         Next : PListEntry; 
       end;
-
+  public
+    type
       {$IFDEF USE_OPTIONAL}
       TOptionalValue = specialize TOptional<T>;
       {$ENDIF}
-  public
-    type
+
       { TList iterator. }
       TIterator = class
       protected
