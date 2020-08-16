@@ -88,6 +88,12 @@ type
 
         { Insert new entry in next position. }
         procedure InsertNext (AData : T);
+
+        { Return True if we can move to next element. }
+        function MoveNext : Boolean;
+
+        { Return enumerator for in operator. }
+        function GetEnumerator : TIterator;
       protected
         { Get item value. }
         function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
@@ -96,6 +102,10 @@ type
         { Set new item value. }
         procedure SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
           TOptionalValue{$ENDIF});
+
+        { Return current item iterator and move it to next. }
+        function GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
+          {$ENDIF};  
       protected
         var
           { We cann't store pointer to list because generics in pascal it is
@@ -127,6 +137,9 @@ type
           EValueNotExistsException. }
         property Value : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF} 
           read GetValue write SetValue;
+
+        property Current : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF}
+          read GetCurrent;
       end;
   public
     { Create new list. }
@@ -165,6 +178,9 @@ type
 
     { Clear the list. }
     procedure Clear;
+
+    { Return enumerator for in operator. }
+    function GetEnumerator : TIterator;
   protected
     { Function used internally for sorting.  Returns the last entry in the new 
       sorted list }
@@ -309,6 +325,16 @@ begin
   Inc(FPLength^);
 end;
 
+function TList.TIterator.MoveNext : Boolean;
+begin
+  Result := FItem <> nil;
+end;
+
+function TList.TIterator.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(FPFirstNode, FPLastNode, FPLength, FItem);
+end;
+
 function TList.TIterator.GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
   {$ENDIF};
 begin
@@ -334,6 +360,13 @@ begin
   end;
 end;
 
+function TList.TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF};
+begin
+  Result := GetValue;
+  FItem := FItem^.Next;
+end;
+
 constructor TList.Create;
 begin
   FFirstNode := nil;
@@ -347,6 +380,11 @@ begin
   Clear;  
 
   inherited Destroy;
+end;
+
+function TList.GetEnumerator : TIterator;
+begin
+  Result := FirstEntry;
 end;
 
 function TList.FirstEntry : TIterator;

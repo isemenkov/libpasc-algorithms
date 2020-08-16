@@ -22,6 +22,8 @@ type
     procedure Test_IntegerList_FindNthIndexValueFrom;
     procedure Test_IntegerList_RemoveMultipleValuesFrom;
     procedure Test_IntegerList_Sort;
+    procedure Test_IntegerList_IterateValues;
+    procedure Test_IntegerList_IterateRange;
     procedure Test_IntegerList_InsertOneMillionValuesInto;
 
     procedure Test_StringList_CreateNewEmpty;
@@ -33,6 +35,8 @@ type
     procedure Test_StringList_FindNthIndexValueFrom;
     procedure Test_StringList_RemoveMultipleValuesFrom;
     procedure Test_StringList_Sort;
+    procedure Test_StringList_IterateValues;
+    procedure Test_StringList_IterateRange;
     procedure Test_StringList_InsertOneMillionValuesInto;
   end;
 
@@ -1004,6 +1008,238 @@ begin
   AssertTrue('#Test_StringList_Sort -> ' +
     'List item 4 value is not correct', iterator.Value
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'potato');
+
+  FreeAndNil(list);
+end;
+
+procedure TListTestCase.Test_IntegerList_IterateValues;
+var
+  list : TIntegerList;
+  iterator : TIntegerList.TIterator;
+  counter : Cardinal;
+begin
+  list := TIntegerList.Create;
+
+  AssertTrue('#Test_IntegerList_IterateValues -> ' +
+    'IntegerList value 4 not append', list.Append(4));
+  AssertTrue('#Test_IntegerList_IterateValues -> ' +
+    'IntegerList value 3 not append', list.Append(3));
+  AssertTrue('#Test_IntegerList_IterateValues -> ' +
+    'IntegerList value 11 not append', list.Append(11));
+  AssertTrue('#Test_IntegerList_IterateValues -> ' +
+    'IntegerList value 9 not append', list.Append(9));
+  AssertTrue('#Test_IntegerList_IterateValues -> ' +
+    'IntegerList value 6 not append', list.Append(6));
+
+  counter := 0;
+  iterator := list.FirstEntry;
+  while iterator.HasValue do
+  begin
+    case counter of
+      0 : begin
+        AssertTrue('#Test_IntegerList_IterateValues -> ' +
+          'List item 0 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
+      end;
+      1 : begin
+        AssertTrue('#Test_IntegerList_IterateValues -> ' +
+          'List item 1 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
+      end;
+      2 : begin
+        AssertTrue('#Test_IntegerList_IterateValues -> ' +
+          'List item 2 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 11);
+      end;
+      3 : begin
+        AssertTrue('#Test_IntegerList_IterateValues -> ' +
+          'List item 3 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 9);
+      end;
+      4 : begin
+        AssertTrue('#Test_IntegerList_IterateValues -> ' +
+          'List item 4 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 6);
+      end;
+    end;
+    iterator := iterator.Next;
+    Inc(counter);
+  end;
+  AssertTrue('#Test_IntegerList_IterateValues -> ' +
+    'List iterate through not all elements', counter = 5);
+
+  FreeAndNil(list);
+end;
+
+procedure TListTestCase.Test_StringList_IterateValues;
+var
+  list : TStringList;
+  iterator : TStringList.TIterator;
+  counter : Cardinal;
+begin
+  list := TStringList.Create;
+
+  AssertTrue('#Test_StringList_IterateValues -> ' +
+    'IntegerList value test4 not append', list.Append('test4'));
+  AssertTrue('#Test_StringList_IterateValues -> ' +
+    'IntegerList value test3 not append', list.Append('test3'));
+  AssertTrue('#Test_StringList_IterateValues -> ' +
+    'IntegerList value test11 not append', list.Append('test11'));
+  AssertTrue('#Test_StringList_IterateValues -> ' +
+    'IntegerList value test9 not append', list.Append('test9'));
+  AssertTrue('#Test_StringList_IterateValues -> ' +
+    'IntegerList value test6 not append', list.Append('test6'));
+
+  counter := 0;
+  iterator := list.FirstEntry;
+  while iterator.HasValue do
+  begin
+    case counter of
+      0 : begin
+        AssertTrue('#Test_StringList_IterateValues -> ' +
+          'List item 0 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test4');
+      end;
+      1 : begin
+        AssertTrue('#Test_StringList_IterateValues -> ' +
+          'List item 1 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test3');
+      end;
+      2 : begin
+        AssertTrue('#Test_StringList_IterateValues -> ' +
+          'List item 2 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test11');
+      end;
+      3 : begin
+        AssertTrue('#Test_StringList_IterateValues -> ' +
+          'List item 3 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test9');
+      end;
+      4 : begin
+        AssertTrue('#Test_StringList_IterateValues -> ' +
+          'List item 4 value is not correct', iterator.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test6');
+      end;
+    end;
+    iterator := iterator.Next;
+    Inc(counter);
+  end;
+  AssertTrue('#Test_StringList_IterateValues -> ' +
+    'List iterate through not all elements', counter = 5);
+
+  FreeAndNil(list);
+end;
+
+procedure TListTestCase.Test_IntegerList_IterateRange;
+var
+  list : TIntegerList;
+  value : Integer;
+  counter : Cardinal;
+begin
+  list := TIntegerList.Create;
+
+  AssertTrue('#Test_IntegerList_IterateRange -> ' +
+    'IntegerList value 4 not append', list.Append(4));
+  AssertTrue('#Test_IntegerList_IterateRange -> ' +
+    'IntegerList value 3 not append', list.Append(3));
+  AssertTrue('#Test_IntegerList_IterateRange -> ' +
+    'IntegerList value 11 not append', list.Append(11));
+  AssertTrue('#Test_IntegerList_IterateRange -> ' +
+    'IntegerList value 9 not append', list.Append(9));
+  AssertTrue('#Test_IntegerList_IterateRange -> ' +
+    'IntegerList value 6 not append', list.Append(6));
+
+  counter := 0;
+  for value in list do
+  begin
+    case counter of
+      0 : begin
+        AssertTrue('#Test_IntegerList_IterateRange -> ' +
+          'List item 0 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
+      end;
+      1 : begin
+        AssertTrue('#Test_IntegerList_IterateRange -> ' +
+          'List item 1 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
+      end;
+      2 : begin
+        AssertTrue('#Test_IntegerList_IterateRange -> ' +
+          'List item 2 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 11);
+      end;
+      3 : begin
+        AssertTrue('#Test_IntegerList_IterateRange -> ' +
+          'List item 3 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 9);
+      end;
+      4 : begin
+        AssertTrue('#Test_IntegerList_IterateRange -> ' +
+          'List item 4 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 6);
+      end;
+    end;
+    Inc(counter);
+  end;
+  AssertTrue('#Test_IntegerList_IterateRange -> ' +
+    'List iterate through not all elements', counter = 5);
+
+  FreeAndNil(list);
+end;
+
+procedure TListTestCase.Test_StringList_IterateRange;
+var
+  list : TStringList;
+  value : String;
+  counter : Cardinal;
+begin
+  list := TStringList.Create;
+
+  AssertTrue('#Test_StringList_IterateRange -> ' +
+    'IntegerList value test4 not append', list.Append('test4'));
+  AssertTrue('#Test_StringList_IterateRange -> ' +
+    'IntegerList value test3 not append', list.Append('test3'));
+  AssertTrue('#Test_StringList_IterateRange -> ' +
+    'IntegerList value test11 not append', list.Append('test11'));
+  AssertTrue('#Test_StringList_IterateRange -> ' +
+    'IntegerList value test9 not append', list.Append('test9'));
+  AssertTrue('#Test_StringList_IterateRange -> ' +
+    'IntegerList value test6 not append', list.Append('test6'));
+
+  counter := 0;
+  for value in list do
+  begin
+    case counter of
+      0 : begin
+        AssertTrue('#Test_StringList_IterateRange -> ' +
+          'List item 0 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test4');
+      end;
+      1 : begin
+        AssertTrue('#Test_StringList_IterateRange -> ' +
+          'List item 1 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test3');
+      end;
+      2 : begin
+        AssertTrue('#Test_StringList_IterateRange -> ' +
+          'List item 2 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test11');
+      end;
+      3 : begin
+        AssertTrue('#Test_StringList_IterateRange -> ' +
+          'List item 3 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test9');
+      end;
+      4 : begin
+        AssertTrue('#Test_StringList_IterateRange -> ' +
+          'List item 4 value is not correct', Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test6');
+      end;
+    end;
+    Inc(counter);
+  end;
+  AssertTrue('#Test_StringList_IterateRange -> ' +
+    'List iterate through not all elements', counter = 5);
 
   FreeAndNil(list);
 end;
