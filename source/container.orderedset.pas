@@ -147,7 +147,8 @@ type
         function Next : TIterator;
 
         { Get item value. }
-        function GetValue : V;
+        function GetValue : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
+          {$ENDIF};
       protected
         var
           FOrderedSet : POrderedSetStruct;
@@ -253,7 +254,7 @@ begin
   if current_entry^.next <> nil then
   begin
     { Use the next value in this chain }
-    Result.next_entry := current_entry^.next;
+    next_entry := current_entry^.next;
   end else
   begin
     { Default value if no valid chain is found }
@@ -267,19 +268,33 @@ begin
       if FOrderedSet^.table[chain] <> nil then
       begin
         { Valid chain found! }
-        Result.next_entry := FOrderedSet^.table[chain];
+        next_entry := FOrderedSet^.table[chain];
         Break;
       end;
       { Keep searching until we find an empty chain }
       Inc(chain);
     end;
-    Result.next_chain := chain;
+    next_chain := chain;
   end;
+
+  Result.next_entry := next_entry;
+  Result.next_chain := next_chain;
 end;
 
-function TOrderedSet.TIterator.GetValue : V;
+function TOrderedSet.TIterator.GetValue : {$IFNDEF USE_OPTIONAL}V{$ELSE}
+  TOptionalValue{$ENDIF};
 begin
-  Result := next_entry^.data;
+  if next_entry = nil then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EValueNotExistsException.Create('Value not exits.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}next_entry^.data
+    {$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
 { TOrderedSet }
