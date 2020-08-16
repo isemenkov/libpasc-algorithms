@@ -34,16 +34,29 @@ unit container.orderedset;
 interface
 
 uses
-  SysUtils;
+  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
+  {$IFNDEF USE_OPTIONAL}
+  { Item value not exists. }
+  EValueNotExistsException = class(Exception);
+  {$ENDIF}
+ 
   { A set stores a collection of values.  Each value can only exist once in the 
     set. }
   generic TOrderedSet<V, BinaryCompareFunctor> = class
   public
     type
       { Hash function.  Generates a hash key for values to be stored in a set. }
-      THashOrderedSetFunc = function (Value : V) : Cardinal;  
+      THashOrderedSetFunc = function (Value : V) : Cardinal;
+
+      {$IFDEF USE_OPTIONAL}
+      TOptionalValue = specialize TOptional<V>;
+      {$ENDIF}  
+  public
+    type
+      { TOrderedSet iterator. }
+      TIterator = class;
   public
     { Create a new set. }
     constructor Create (HashFunc : THashOrderedSetFunc);
@@ -74,6 +87,9 @@ type
       was not possible to allocate memory for the new set. }
     {function Intersection (OrderedSet : specialize TOrderedSet<V,
       BinaryCompareFunctor>) : specialize TOrderedSet<V, BinaryCompareFunctor>;}
+
+    { Retrive the first entry in orderedset. }
+    function FirstEntry : TIterator;  
   protected
     type
       PPOrderedSetEntry = ^POrderedSetEntry;
@@ -117,6 +133,27 @@ type
     FHashFunc : THashOrderedSetFunc;
     FOrderedSet : POrderedSetStruct;
     FCompareFunctor : BinaryCompareFunctor;
+  public
+    type
+      TIterator = class
+      protected
+        { Create new iterator for orderedset item entry. }
+        {%H-}constructor Create (OrderedSet : POrderedSetStruct);
+      public
+        { Return true if iterator has correct value }
+        function HasValue : Boolean;
+
+        { Retrieve the next entry in a orderedset. }
+        function Next : TIterator;
+
+        { Get item value. }
+        function GetValue : V;
+      protected
+        var
+          FOrderedSet : POrderedSetStruct;
+          next_entry : POrderedSetEntry;
+          next_chain : Cardinal;
+      end;
   end;
 
   { Generate a hash key for a pointer. The value pointed at by the pointer is 
@@ -167,6 +204,85 @@ begin
     Result := (Result shl 5) + Result + Byte(Lowercase(location[i]));
   end;
 end;
+
+{ TOrderedSet.TIterator }
+
+constructor TOrderedSet.TIterator.Create (OrderedSet : POrderedSetStruct);
+var
+  chain : Cardinal;
+begin
+  FOrderedSet := OrderedSet;
+  next_entry := nil;
+
+  { Find the first entry }
+  for chain := 0 to FOrderedSet^.table_size - 1 do
+  begin
+    { There is a value at the start of this chain }
+    if FOrderedSet^.table[chain] <> nil then
+    begin
+      next_entry := FOrderedSet^.table[chain];
+      Break;    
+    end;
+  end;
+  next_chain := chain;
+end;
+
+function TOrderedSet.TIterator.HasValue : Boolean;
+begin
+  Result := next_entry <> nil;
+end;
+
+function TOrderedSet.TIterator.Next : TIterator;
+var
+  current_entry : POrderedSetEntry;
+  chain : Cardinal;
+begin
+  Result := TIterator.Create (FOrderedSet);
+  
+  if next_entry = nil then
+  begin
+    Result.next_entry := nil;
+    Result.next_chain := next_chain;
+    Exit;
+  end;
+
+  { We have the result immediately }
+  current_entry := next_entry;
+
+  { Advance next_entry to the next SetEntry in the Set. }
+  if current_entry^.next <> nil then
+  begin
+    { Use the next value in this chain }
+    Result.next_entry := current_entry^.next;
+  end else
+  begin
+    { Default value if no valid chain is found }
+    next_entry := nil;
+
+    { No more entries in this chain. Search the next chain }
+    chain := next_chain + 1;
+    while chain < FOrderedSet^.table_size do
+    begin
+      { Is there a chain at this table entry? }
+      if FOrderedSet^.table[chain] <> nil then
+      begin
+        { Valid chain found! }
+        Result.next_entry := FOrderedSet^.table[chain];
+        Break;
+      end;
+      { Keep searching until we find an empty chain }
+      Inc(chain);
+    end;
+    Result.next_chain := chain;
+  end;
+end;
+
+function TOrderedSet.TIterator.GetValue : V;
+begin
+  Result := next_entry^.data;
+end;
+
+{ TOrderedSet }
 
 constructor TOrderedSet.Create (HashFunc : THashOrderedSetFunc);
 begin
@@ -421,6 +537,9 @@ begin
   Result := FOrderedSet^.entries;
 end;
 
-
+function TOrderedSet.FirstEntry : TIterator;
+begin
+  Result := TIterator.Create (FOrderedSet);
+end;
 
 end.
