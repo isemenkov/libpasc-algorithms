@@ -34,7 +34,7 @@ unit container.hashtable;
 interface
 
 uses
-  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
+  SysUtils, utils.pair {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
   {$IFNDEF USE_OPTIONAL}
@@ -54,6 +54,9 @@ type
       {$IFDEF USE_OPTIONAL}
       TOptionalValue = specialize TOptional<V>;
       {$ENDIF}
+
+      { THashTable iterator. }
+      TIterator = class;
   public
     { Create a new hash table. }
     constructor Create (HashFunc : THashTableHashFunc);
@@ -124,6 +127,46 @@ type
     FHashFunc : THashTableHashFunc;
     FHashTable : PHashTableStruct;
     FCompareFunctor : KeyBinaryCompareFunctor;
+  public
+    type
+      TIterator = class
+      public
+        type
+          TKeyValuePair = specialize TPair<K, V>;
+      protected
+        { Create new iterator for hashtable item entry. }
+        {%H-}constructor Create (HashTable : PHashTableStruct); 
+      
+        { Get item key. }
+        //function GetKey : K;
+        
+        { Get item value. }
+        //function GetValue : V;
+
+        { Return current item iterator and move it to next. }
+        //function GetCurrent : TKeyValuePair;
+      public
+        { Retrieve the next entry in a hashtable. }
+        function Next : TIterator;
+
+        { Return True if we can move to next element. }
+        //function MoveNext : Boolean;
+
+        { Return enumerator for in operator. }
+        //function GetEnumerator : TIterator;
+
+        //property Key : K read GetKey;
+        
+        //property Value : V read GetValue;
+
+        //property Current : TKeyValuePair read GetCurrent;
+      protected
+        var
+          FHashTable : PHashTableStruct;
+          FHashTablePair : THashTablePair;
+          next_entry : PHashTableEntry;
+          next_chain : Cardinal; 
+      end;   
   end;  
 
   { Generate a hash key for a pointer. The value pointed at by the pointer is 
@@ -174,6 +217,82 @@ begin
     Result := (Result shl 5) + Result + Byte(Lowercase(location[i]));
   end;
 end;
+
+{ THashTable.TIterator }
+
+constructor THashTable.TIterator.Create (HashTable : PHashTableStruct);
+var
+  chain : Cardinal;
+begin
+  FHashTable := HashTable;
+
+  { Default value of next if no entries are found. }
+  next_entry := nil;
+
+  { Find the first entry }
+  for chain := 0 to FHashTable^.table_size - 1 do
+  begin
+    if FHashTable^.table[chain] <> nil then
+    begin
+      next_entry := FHashTable^.table[chain];
+      next_chain := chain;
+      Break;
+    end;
+  end;
+end;
+
+function THashTable.TIterator.Next : TIterator;
+var
+  current_entry : PHashTableEntry;
+  pair : THashTablePair;
+  chain : Cardinal;
+begin
+  Result := TIterator.Create(FHashTable);
+
+  if next_entry = nil then
+  begin
+    Result.next_entry := nil;
+    Result.next_chain := next_chain;
+    Exit;
+  end;
+
+  { Result is immediately available }
+  current_entry := next_entry;
+  pair := current_entry^.pair;
+
+  { Find the next entry }
+  if current_entry^.next <> nil then
+  begin
+    { Next entry in current chain }
+    next_entry := current_entry^.next;
+  end else
+  begin
+    { None left in this chain, so advance to the next chain }
+    chain := next_chain + 1;
+
+    { Default value if no next chain found }
+    next_entry := nil;
+    while chain < FHashTable^.table_size do
+    begin
+      { Is there anything in this chain? }
+      if FHashTable^.table[chain] <> nil then
+      begin
+        next_entry := FHashTable^.table[chain];
+        Break;
+      end;
+      { Try the next chain }
+      Inc(chain);
+    end;
+    next_chain := chain;
+  end;
+
+  Result.next_entry := next_entry;
+  Result.next_chain := next_chain;
+  Result.FHashTablePair := pair;
+end;
+
+
+{ THashTable }
 
 constructor THashTable.Create(HashFunc : THashTable.THashTableHashFunc);
 begin

@@ -53,8 +53,7 @@ type
       {$IFDEF USE_OPTIONAL}
       TOptionalValue = specialize TOptional<V>;
       {$ENDIF}  
-  public
-    type
+  
       { TOrderedSet iterator. }
       TIterator = class;
   public
