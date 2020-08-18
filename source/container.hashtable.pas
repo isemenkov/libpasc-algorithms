@@ -77,6 +77,12 @@ type
 
     { Retrieve the number of entries in a hash table. }
     function NumEntries : Cardinal;
+
+     { Retrive the first entry in hashtable. }
+    function FirstEntry : TIterator; 
+
+    { Return enumerator for in operator. }
+    function GetEnumerator : TIterator;
   protected
     type
       PHashTablePair = ^THashTablePair;
@@ -135,31 +141,32 @@ type
           TKeyValuePair = specialize TPair<K, V>;
       protected
         { Create new iterator for hashtable item entry. }
-        {%H-}constructor Create (HashTable : PHashTableStruct); 
+        {%H-}constructor Create (HashTable : PHashTableStruct; 
+          Initialize : Boolean); 
       
         { Get item key. }
-        //function GetKey : K;
+        function GetKey : K;
         
         { Get item value. }
-        //function GetValue : V;
+        function GetValue : V;
 
         { Return current item iterator and move it to next. }
-        //function GetCurrent : TKeyValuePair;
+        function GetCurrent : TKeyValuePair;
       public
         { Retrieve the next entry in a hashtable. }
         function Next : TIterator;
 
         { Return True if we can move to next element. }
-        //function MoveNext : Boolean;
+        function MoveNext : Boolean;
 
         { Return enumerator for in operator. }
-        //function GetEnumerator : TIterator;
+        function GetEnumerator : TIterator;
 
-        //property Key : K read GetKey;
+        property Key : K read GetKey;
         
-        //property Value : V read GetValue;
+        property Value : V read GetValue;
 
-        //property Current : TKeyValuePair read GetCurrent;
+        property Current : TKeyValuePair read GetCurrent;
       protected
         var
           FHashTable : PHashTableStruct;
@@ -220,23 +227,32 @@ end;
 
 { THashTable.TIterator }
 
-constructor THashTable.TIterator.Create (HashTable : PHashTableStruct);
+constructor THashTable.TIterator.Create (HashTable : PHashTableStruct; 
+  Initialize : Boolean);
 var
   chain : Cardinal;
 begin
   FHashTable := HashTable;
 
-  { Default value of next if no entries are found. }
-  next_entry := nil;
-
-  { Find the first entry }
-  for chain := 0 to FHashTable^.table_size - 1 do
+  if Initialize then
   begin
-    if FHashTable^.table[chain] <> nil then
+    { Default value of next if no entries are found. }
+    next_entry := nil;
+
+    { Find the first entry }
+    for chain := 0 to FHashTable^.table_size - 1 do
     begin
-      next_entry := FHashTable^.table[chain];
-      next_chain := chain;
-      Break;
+      if FHashTable^.table[chain] <> nil then
+      begin
+        next_entry := FHashTable^.table[chain];
+        next_chain := chain;
+        Break;
+      end;
+    end;
+
+    if next_entry <> nil then
+    begin
+      FHashTablePair := next_entry^.pair;
     end;
   end;
 end;
@@ -244,10 +260,9 @@ end;
 function THashTable.TIterator.Next : TIterator;
 var
   current_entry : PHashTableEntry;
-  pair : THashTablePair;
   chain : Cardinal;
 begin
-  Result := TIterator.Create(FHashTable);
+  Result := TIterator.Create(FHashTable, False);
 
   if next_entry = nil then
   begin
@@ -258,7 +273,6 @@ begin
 
   { Result is immediately available }
   current_entry := next_entry;
-  pair := current_entry^.pair;
 
   { Find the next entry }
   if current_entry^.next <> nil then
@@ -286,11 +300,41 @@ begin
     next_chain := chain;
   end;
 
+  if next_entry <> nil then
+  begin
+    FHashTablePair := next_entry^.pair;
+    Result.FHashTablePair := next_entry^.pair;
+  end;
+
   Result.next_entry := next_entry;
   Result.next_chain := next_chain;
-  Result.FHashTablePair := pair;
 end;
 
+function THashTable.TIterator.MoveNext : Boolean;
+begin
+  Result := next_entry <> nil;
+end;
+
+function THashTable.TIterator.GetCurrent : TKeyValuePair;
+begin
+  Result := TKeyValuePair.Create(FHashTablePair.Key, FHashTablePair.Value);
+  Next;
+end;
+
+function THashTable.TIterator.GetKey : K;
+begin
+  Result := FHashTablePair.Key;
+end;
+
+function THashTable.TIterator.GetValue : V;
+begin
+  Result := FHashTablePair.Value;
+end;
+
+function THashTable.TIterator.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(FHashTable, True);
+end;
 
 { THashTable }
 
@@ -580,6 +624,16 @@ end;
 function THashTable.NumEntries : Cardinal;
 begin
   Result := FHashTable^.entries;
+end;
+
+function THashTable.FirstEntry : TIterator;
+begin
+  Result := TIterator.Create(FHashTable, True);
+end;
+
+function THashTable.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(FHashTable, True);
 end;
 
 end.

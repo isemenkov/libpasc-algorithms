@@ -18,11 +18,15 @@ type
     procedure Test_IntegerIntegerHashTable_CreateNewEmpty;
     procedure Test_IntegerIntegerHashTable_InsertNewValueInto;
     procedure Test_IntegerIntegerHashTable_RemoveValueFrom;
+    procedure Test_IntegerIntegerHashTable_IterateValues;
+    procedure Test_IntegerIntegerHashTable_IterateRange;
     procedure Test_IntegerIntegerHashTable_InsertOneMillionValuesInto;
 
     procedure Test_StringIntegerHashTable_CreateNewEmpty;
     procedure Test_StringIntegerHashTable_InsertNewValueInto;
     procedure Test_StringIntegerHashTable_RemoveValueFrom;
+    procedure Test_StringIntegerHashTable_IterateValues;
+    procedure Test_StringIntegerHashTable_IterateRange;
     procedure Test_StringIntegerHashTable_InsertOneMillionValuesInto;
   end;
 
@@ -172,6 +176,135 @@ begin
 
   AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
     'HashTable must be empty', hash.NumEntries = 0);
+
+  FreeAndNil(hash);
+end;
+
+procedure THashTableTestCase.Test_IntegerIntegerHashTable_IterateValues;
+var
+  hash : TIntIntHashTable;
+  iterator : TIntIntHashTable.TIterator;
+begin
+  hash := TIntIntHashTable.Create(@HashInteger);
+
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
+    'HashTable value 1 not insert', hash.Insert(1, 100));
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
+    'HashTable value 5 not insert', hash.Insert(5, 100));
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
+    'HashTable value 121 not insert', hash.Insert(121, 12100));
+
+  iterator := hash.FirstEntry;
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
+    'HashTable hasn''t key ' + IntToStr(iterator.Key),
+    hash.Remove(iterator.Key));
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
+    'HashTable hasn''t key ' + IntToStr(iterator.Key),
+    hash.Remove(iterator.Key));
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
+    'HashTable hasn''t key ' + IntToStr(iterator.Key),
+    hash.Remove(iterator.Key));
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
+    'HashTable iterator not correct', not hash.Remove(iterator.Key));
+
+  FreeAndNil(hash);
+end;
+
+procedure THashTableTestCase.Test_StringIntegerHashTable_IterateValues;
+var
+  hash : TStrIntHashTable;
+  iterator : TStrIntHashTable.TIterator;
+begin
+  hash := TStrIntHashTable.Create(@HashString);
+
+  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
+    'HashTable value 1 not insert', hash.Insert('test1', 100));
+  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
+    'HashTable value 5 not insert', hash.Insert('test5', 300));
+  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
+    'HashTable value 121 not insert', hash.Insert('test121', 12100));
+
+  iterator := hash.FirstEntry;
+  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
+    'HashTable hasn''t key ' + iterator.Key,
+    hash.Remove(iterator.Key));
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
+    'HashTable hasn''t key ' + iterator.Key,
+    hash.Remove(iterator.Key));
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
+    'HashTable hasn''t key ' + iterator.Key,
+    hash.Remove(iterator.Key));
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
+    'HashTable iterator not correct', iterator.Key = '');
+
+  FreeAndNil(hash);
+end;
+
+procedure THashTableTestCase.Test_IntegerIntegerHashTable_IterateRange;
+var
+  hash : TIntIntHashTable;
+  pair : TIntIntHashTable.TIterator.TKeyValuePair;
+  counter : Cardinal;
+begin
+  hash := TIntIntHashTable.Create(@HashInteger);
+
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
+    'HashTable value 1 not insert', hash.Insert(1, 100));
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
+    'HashTable value 5 not insert', hash.Insert(5, 100));
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
+    'HashTable value 121 not insert', hash.Insert(121, 12100));
+
+  counter := 0;
+  for pair in hash do
+  begin
+    AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
+      'HashTable hasn''t key ' + IntToStr(pair.First),
+      hash.Remove(pair.First));
+    Inc(counter);
+  end;
+  AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
+    'Hash table iterate through not all elements', counter = 3);
+
+  FreeAndNil(hash);
+end;
+
+procedure THashTableTestCase.Test_StringIntegerHashTable_IterateRange;
+var
+  hash : TStrIntHashTable;
+  pair : TStrIntHashTable.TIterator.TKeyValuePair;
+  counter : Cardinal;
+begin
+  hash := TStrIntHashTable.Create(@HashString);
+
+  AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
+    'HashTable value 1 not insert', hash.Insert('test1', 100));
+  AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
+    'HashTable value 5 not insert', hash.Insert('test5', 300));
+  AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
+    'HashTable value 121 not insert', hash.Insert('test121', 12100));
+
+  counter := 0;
+  for pair in hash do
+  begin
+    AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
+      'HashTable hasn''t key ' + pair.First, hash.Remove(pair.First));
+    Inc(counter);
+  end;
+  AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
+    'Hash table iterate through not all elements', counter = 3);
 
   FreeAndNil(hash);
 end;

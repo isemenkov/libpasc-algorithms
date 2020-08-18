@@ -140,7 +140,8 @@ type
       TIterator = class
       protected
         { Create new iterator for orderedset item entry. }
-        {%H-}constructor Create (OrderedSet : POrderedSetStruct);
+        {%H-}constructor Create (OrderedSet : POrderedSetStruct; 
+          Initialize : Boolean);
       public
         { Return true if iterator has correct value }
         function HasValue : Boolean;
@@ -226,24 +227,29 @@ end;
 
 { TOrderedSet.TIterator }
 
-constructor TOrderedSet.TIterator.Create (OrderedSet : POrderedSetStruct);
+constructor TOrderedSet.TIterator.Create (OrderedSet : POrderedSetStruct;
+  Initialize : Boolean);
 var
   chain : Cardinal;
 begin
   FOrderedSet := OrderedSet;
-  next_entry := nil;
-
-  { Find the first entry }
-  for chain := 0 to FOrderedSet^.table_size - 1 do
+  
+  if Initialize then
   begin
-    { There is a value at the start of this chain }
-    if FOrderedSet^.table[chain] <> nil then
+    next_entry := nil;
+
+    { Find the first entry }
+    for chain := 0 to FOrderedSet^.table_size - 1 do
     begin
-      next_entry := FOrderedSet^.table[chain];
-      Break;    
+      { There is a value at the start of this chain }
+      if FOrderedSet^.table[chain] <> nil then
+      begin
+        next_entry := FOrderedSet^.table[chain];
+        Break;    
+      end;
     end;
+    next_chain := chain;
   end;
-  next_chain := chain;
 end;
 
 function TOrderedSet.TIterator.HasValue : Boolean;
@@ -256,7 +262,7 @@ var
   current_entry : POrderedSetEntry;
   chain : Cardinal;
 begin
-  Result := TIterator.Create (FOrderedSet);
+  Result := TIterator.Create (FOrderedSet, False);
   
   if next_entry = nil then
   begin
@@ -329,7 +335,7 @@ end;
 
 function TOrderedSet.TIterator.GetEnumerator : TIterator;
 begin
-  Result := TIterator.Create(FOrderedSet);
+  Result := TIterator.Create(FOrderedSet, True);
 end;
 
 { TOrderedSet }
@@ -589,12 +595,12 @@ end;
 
 function TOrderedSet.FirstEntry : TIterator;
 begin
-  Result := TIterator.Create (FOrderedSet);
+  Result := TIterator.Create (FOrderedSet, True);
 end;
 
 function TOrderedSet.GetEnumerator : TIterator;
 begin
-  Result := TIterator.Create(FOrderedSet);
+  Result := TIterator.Create(FOrderedSet, True);
 end;
 
 end.
