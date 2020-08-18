@@ -16,6 +16,7 @@ type
     procedure Test_IntegerIntegerAvlTree_CreateNewEmpty;
     procedure Test_IntegerIntegerAvlTree_InsertNewValueInto;
     procedure Test_IntegerIntegerAvlTree_RemoveValueFrom;
+    //procedure Test_IntegerIntegerAvlTree_IterateValues;
     procedure Test_IntegerIntegerAvlTree_InsertOneMillionValuesInto;
 
     procedure Test_StringIntegerAvlTree_CreateNewEmpty;
@@ -177,7 +178,43 @@ begin
 
   FreeAndNil(tree);
 end;
+{
+procedure TAvlTreeTestCase.Test_IntegerIntegerAvlTree_IterateValues;
+var
+  tree : TIntIntTree;
+  iterator : TIntIntTree.TIterator;
+begin
+  tree := TIntIntTree.Create;
 
+  tree.Insert(1, 20);
+  tree.Insert(2, 40);
+  tree.Insert(5, 100);
+
+  iterator := tree.FirstEntry;
+  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
+    'Tree key 1 is not correct', iterator.Key = 1);
+  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
+    'Tree key 1 value is not correct', iterator.Value = 20);
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
+    'Tree key 2 is not correct', iterator.Key = 2);
+  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
+    'Tree key 2 value is not correct', iterator.Value = 40);
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
+    'Tree key 5 is not correct', iterator.Key = 5);
+  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
+    'Tree key 5 value is not correct', iterator.Value = 100);
+
+  iterator := iterator.Next;
+  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
+    'Tree iterator is not correct', iterator.Key = 0);
+
+  FreeAndNil(tree);
+end;
+}
 procedure TAvlTreeTestCase
   .Test_IntegerIntegerAvlTree_InsertOneMillionValuesInto;
 var

@@ -78,7 +78,7 @@ type
     { Retrieve the number of entries in a hash table. }
     function NumEntries : Cardinal;
 
-     { Retrive the first entry in hashtable. }
+    { Retrive the first entry in hashtable. }
     function FirstEntry : TIterator; 
 
     { Return enumerator for in operator. }

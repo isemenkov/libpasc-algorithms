@@ -34,7 +34,7 @@ unit container.avltree;
 interface
 
 uses
-  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
+  SysUtils, utils.pair {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
   {$IFNDEF USE_OPTIONAL}
@@ -58,6 +58,9 @@ type
       {$IFDEF USE_OPTIONAL}
       TOptionalValue = specialize TOptional<V>;
       {$ENDIF}  
+
+      { TAvlTree iterator }
+      TIterator = class;
   public
     { Create a new AVL tree. }
     constructor Create;
@@ -77,6 +80,12 @@ type
       uses the tree as a mapping. }
     function Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
       {$ENDIF};
+
+    { Retrive the first entry in avltree. }
+    function FirstEntry : TIterator; 
+
+    { Return enumerator for in operator. }
+    function GetEnumerator : TIterator;
   protected
     type
       TAvlTreeNodeSide = (
@@ -134,7 +143,7 @@ type
 
     { Find the height of a subtree. }
     function SubTreeHeight (node : PAvlTreeNode) : Integer;
-  protected
+  
     { Update the "height" variable of a node, from the heights of its children. 
       This does not update the height variable of any parent nodes. }
     procedure UpdateTreeHeight (node : PAvlTreeNode);
@@ -176,13 +185,129 @@ type
 
     { Find the nearest node to the given node, to replace it. The node returned 
       is unlinked from the tree. Returns NULL if the node has no children. }
-    function TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;  
+    function TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;
   protected
     FTree : PAvlTreeStruct;
     FCompareFunctor : KeyBinaryCompareFunctor;
+  public
+    type
+      TIterator = class
+      public
+        type
+          TAvlKeyValuePair = specialize TPair<K, V>;
+      protected
+        type
+          PAvlKeyValuePairArray = ^TAvlKeyValuePair;
+          TAvlKeyValuePairArray = array of TAvlKeyValuePair;
+      protected
+        { Create new iterator for avltable item entry. }
+        {%H-}constructor Create (AItems : PAvlKeyValuePairArray; ANumItems :
+          Cardinal; AIndex : Cardinal);
+      
+        { Return current item iterator and move it to next. }
+        function GetCurrent : TAvlKeyValuePair;
+
+        { Get item key. }
+        function GetKey : K;
+
+        { Get item value. }
+        function GetValue : V;
+      public
+        destructor Destroy; override;
+
+        { Retrieve the previous entry in a avltree. }
+        function Prev : TIterator;
+
+        { Retrieve the next entry in a avltree. }
+        function Next : TIterator;
+
+        { Return True if we can move to next element. }
+        function MoveNext : Boolean;
+
+        { Return enumerator for in operator. }
+        function GetEnumerator : TIterator;
+
+        property Key : K read GetKey;
+
+        property Value : V read GetValue;
+
+        property Current : TAvlKeyValuePair read GetCurrent;
+      protected
+        var
+          FItems : PAvlKeyValuePairArray;
+          FNumItems : Cardinal;
+          FCurrIndex : Cardinal;
+      end;
+  protected
+    { Convert the AVL tree into a array. }
+    procedure TreeToArrayAddSubtree (subtree : PAvlTreeNode; arr : 
+      TIterator.PAvlKeyValuePairArray; index : PInteger);     
   end;
 
 implementation
+
+{ TAvlTree.TIterator }
+
+constructor TAvlTree.TIterator.Create (AItems : PAvlKeyValuePairArray;
+  ANumItems : Cardinal; AIndex : Cardinal);
+begin
+  FItems := AItems;
+  FNumItems := ANumItems;
+  FCurrIndex := AIndex;
+end;
+
+destructor TAvlTree.TIterator.Destroy;
+begin
+  
+  inherited Destroy;
+end;
+
+function TAvlTree.TIterator.GetCurrent : TAvlKeyValuePair;
+begin
+  if FCurrIndex < FNumItems then
+  begin
+    Result := FItems[FCurrIndex];
+    Inc(FCurrIndex);
+  end;
+end;
+
+function TAvlTree.TIterator.GetKey : K;
+begin
+  if FCurrIndex < FNumItems then
+  begin
+    Result := FItems[FCurrIndex].First;
+  end;
+end;
+
+function TAvlTree.TIterator.GetValue : V;
+begin
+  if FCurrIndex < FNumItems then
+  begin
+    Result := FItems[FCurrIndex].Second;
+  end;
+end;
+
+function TAvlTree.TIterator.Prev : TIterator;
+begin
+  Result := TIterator.Create(FItems, FNumItems, FCurrIndex - 1);
+end;
+
+function TAvlTree.TIterator.Next : TIterator;
+begin
+  Result := TIterator.Create(FItems, FNumItems, FCurrIndex + 1);
+end;
+
+function TAvlTree.TIterator.MoveNext : Boolean;
+begin
+  Result := FCurrIndex < (FNumItems - 1);
+end;
+
+function TAvlTree.TIterator.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(FItems, FNumItems, 0);
+end;
+
+{ TAvlTree }
 
 function TAvlTree.CompareAvlTreeNode (A, B : PAvlTreeNode) : Boolean;
 begin
@@ -647,6 +772,47 @@ end;
 function TAvlTree.NumEntries : Cardinal;
 begin
   Result := FTree^.num_nodes;
+end;
+
+procedure TAvlTree.TreeToArrayAddSubtree (subtree : PAvlTreeNode; arr :
+  TIterator.PAvlKeyValuePairArray; index : PInteger);
+begin
+  if subtree = nil then
+  begin
+    Exit;
+  end;
+
+  { Add left subtree first }
+  TreeToArrayAddSubtree(subtree^.children[Shortint(AVL_TREE_NODE_LEFT)], arr,
+    index);
+
+  { Add this node }
+  arr[index^] := TIterator.TAvlKeyValuePair.Create(subtree^.Key, subtree^.Value);
+  Inc(index^);
+
+  { Finally add right subtree }
+  TreeToArrayAddSubtree(subtree^.children[Shortint(AVL_TREE_NODE_RIGHT)], arr,
+    index);
+end;
+
+function TAvlTree.FirstEntry : TIterator;
+var
+  arr : TIterator.PAvlKeyValuePairArray;
+  index : Integer;
+begin
+  { Allocate the array }
+
+  index := 0;
+
+  { Add all keys }
+  TreeToArrayAddSubtree(FTree^.root_node, arr, @index);
+  
+  Result := TIterator.Create(arr, FTree^.num_nodes, 0);
+end;
+
+function TAvlTree.GetEnumerator : TIterator;
+begin
+  Result := FirstEntry;
 end;
 
 end.
