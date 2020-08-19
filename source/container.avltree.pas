@@ -195,15 +195,17 @@ type
       public
         type
           TAvlKeyValuePair = specialize TPair<K, V>;
-      protected
-        type
-          PAvlKeyValuePairArray = ^TAvlKeyValuePair;
           TAvlKeyValuePairArray = array of TAvlKeyValuePair;
       protected
         { Create new iterator for avltable item entry. }
-        {%H-}constructor Create (AItems : PAvlKeyValuePairArray; ANumItems :
-          Cardinal; AIndex : Cardinal);
+        {%H-}constructor Create (AItems : PAvlTreeStruct);
+        {%H-}constructor Create (var AItems : TAvlKeyValuePairArray; 
+          ANumItems : Cardinal; AIndex : Cardinal);
       
+        { Convert the AVL tree into a array. }
+        procedure TreeToArrayAddSubtree (subtree : PAvlTreeNode; index : 
+          PInteger);
+
         { Return current item iterator and move it to next. }
         function GetCurrent : TAvlKeyValuePair;
 
@@ -234,21 +236,31 @@ type
         property Current : TAvlKeyValuePair read GetCurrent;
       protected
         var
-          FItems : PAvlKeyValuePairArray;
+          FItems : TAvlKeyValuePairArray;
           FNumItems : Cardinal;
           FCurrIndex : Cardinal;
-      end;
-  protected
-    { Convert the AVL tree into a array. }
-    procedure TreeToArrayAddSubtree (subtree : PAvlTreeNode; arr : 
-      TIterator.PAvlKeyValuePairArray; index : PInteger);     
+      end;     
   end;
 
 implementation
 
 { TAvlTree.TIterator }
 
-constructor TAvlTree.TIterator.Create (AItems : PAvlKeyValuePairArray;
+constructor TAvlTree.TIterator.Create (AItems : PAvlTreeStruct);
+var
+  Index : Integer;
+begin
+  FNumItems := AItems^.num_nodes;
+  FCurrIndex := 0;
+
+  index := 0;
+  SetLength(FItems, AItems^.num_nodes);
+
+  { Add all keys }
+  TreeToArrayAddSubtree(AItems^.root_node, @index);
+end;
+
+constructor TAvlTree.TIterator.Create (var AItems : TAvlKeyValuePairArray;
   ANumItems : Cardinal; AIndex : Cardinal);
 begin
   FItems := AItems;
@@ -258,8 +270,29 @@ end;
 
 destructor TAvlTree.TIterator.Destroy;
 begin
-  
+  SetLength(FItems, 0);
   inherited Destroy;
+end;
+
+procedure TAvlTree.TIterator.TreeToArrayAddSubtree (subtree : PAvlTreeNode; 
+  index : PInteger);
+begin
+  if subtree = nil then
+  begin
+    Exit;
+  end;
+
+  { Add left subtree first }
+  TreeToArrayAddSubtree(subtree^.children[Shortint(AVL_TREE_NODE_LEFT)], index);
+
+  { Add this node }
+  FItems[index^] := TIterator.TAvlKeyValuePair.Create(subtree^.Key, 
+    subtree^.Value);
+  Inc(index^);
+
+  { Finally add right subtree }
+  TreeToArrayAddSubtree(subtree^.children[Shortint(AVL_TREE_NODE_RIGHT)], 
+    index);
 end;
 
 function TAvlTree.TIterator.GetCurrent : TAvlKeyValuePair;
@@ -268,6 +301,9 @@ begin
   begin
     Result := FItems[FCurrIndex];
     Inc(FCurrIndex);
+  end else
+  begin
+    Result := TAvlKeyValuePair.Create;
   end;
 end;
 
@@ -276,6 +312,9 @@ begin
   if FCurrIndex < FNumItems then
   begin
     Result := FItems[FCurrIndex].First;
+  end else
+  begin
+    Result := Default(K);
   end;
 end;
 
@@ -284,12 +323,21 @@ begin
   if FCurrIndex < FNumItems then
   begin
     Result := FItems[FCurrIndex].Second;
+  end else
+  begin
+    Result := Default(V);
   end;
 end;
 
 function TAvlTree.TIterator.Prev : TIterator;
 begin
-  Result := TIterator.Create(FItems, FNumItems, FCurrIndex - 1);
+  if FCurrIndex = 0 then
+  begin
+    Result := TIterator.Create(FItems, FNumItems, 0);
+  end else
+  begin
+    Result := TIterator.Create(FItems, FNumItems, FCurrIndex - 1);
+  end;
 end;
 
 function TAvlTree.TIterator.Next : TIterator;
@@ -299,7 +347,7 @@ end;
 
 function TAvlTree.TIterator.MoveNext : Boolean;
 begin
-  Result := FCurrIndex < (FNumItems - 1);
+  Result := FCurrIndex < FNumItems;
 end;
 
 function TAvlTree.TIterator.GetEnumerator : TIterator;
@@ -774,40 +822,9 @@ begin
   Result := FTree^.num_nodes;
 end;
 
-procedure TAvlTree.TreeToArrayAddSubtree (subtree : PAvlTreeNode; arr :
-  TIterator.PAvlKeyValuePairArray; index : PInteger);
-begin
-  if subtree = nil then
-  begin
-    Exit;
-  end;
-
-  { Add left subtree first }
-  TreeToArrayAddSubtree(subtree^.children[Shortint(AVL_TREE_NODE_LEFT)], arr,
-    index);
-
-  { Add this node }
-  arr[index^] := TIterator.TAvlKeyValuePair.Create(subtree^.Key, subtree^.Value);
-  Inc(index^);
-
-  { Finally add right subtree }
-  TreeToArrayAddSubtree(subtree^.children[Shortint(AVL_TREE_NODE_RIGHT)], arr,
-    index);
-end;
-
 function TAvlTree.FirstEntry : TIterator;
-var
-  arr : TIterator.PAvlKeyValuePairArray;
-  index : Integer;
 begin
-  { Allocate the array }
-
-  index := 0;
-
-  { Add all keys }
-  TreeToArrayAddSubtree(FTree^.root_node, arr, @index);
-  
-  Result := TIterator.Create(arr, FTree^.num_nodes, 0);
+  Result := TIterator.Create(FTree);
 end;
 
 function TAvlTree.GetEnumerator : TIterator;

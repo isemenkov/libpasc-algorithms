@@ -5,13 +5,24 @@ unit testcase_arraylist;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.arraylist, utils.functor;
+  Classes, SysUtils, fpcunit, testregistry, container.arraylist, utils.functor,
+    utils.pair;
 
 type
   TIntegerArrayList = specialize TArrayList<Integer, TCompareFunctorInteger>;
   TStringArrayList = specialize TArrayList<String, TCompareFunctorString>;
 
-  TArrayListTestCase= class(TTestCase)
+  TPairInteger = specialize TPair<Integer, Integer>;
+  TPairIntegerCompareFunctor = class
+    (specialize TBinaryFunctor<TPairInteger, Integer>)
+  public
+    function Call(AValue1, AValue2 : TPairInteger) : Integer; override;
+  end;
+
+  TPairIntegerArrayList = specialize TArrayList<TPairInteger,
+    TPairIntegerCompareFunctor>;
+
+  TArrayListTestCase = class(TTestCase)
   published
     procedure Test_IntegerArrayList_CreateNewEmpty;
     procedure Test_IntegerArrayList_AppendNewValueInto;
@@ -23,6 +34,7 @@ type
     procedure Test_IntegerArrayList_IterateValues;
     procedure Test_IntegerArrayList_IterateRange;
     procedure Test_IntegerArrayList_InsertOneMillionValuesInto;
+    procedure Test_PairIntegerArrayList_AppendObject;
 
     procedure Test_StringArrayList_CreateNewEmpty;
     procedure Test_StringArrayList_AppendNewValueInto;
@@ -37,6 +49,21 @@ type
   end;
 
 implementation
+
+function TPairIntegerCompareFunctor.Call (AValue1, AValue2 : TPairInteger) :
+  Integer;
+begin
+  if AValue1.First < AValue2.First then
+  begin
+    Result := -1;
+  end else if AValue2.First < AValue1.First then
+  begin
+    Result := 1;
+  end else
+  begin
+    Result := 0;
+  end;
+end;
 
 procedure TArrayListTestCase.Test_IntegerArrayList_CreateNewEmpty;
 var
@@ -920,6 +947,47 @@ begin
     arr.Value[index]{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test' +
     IntToStr(index));
   end;
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_PairIntegerArrayList_AppendObject;
+var
+  arr : TPairIntegerArrayList;
+begin
+  arr := TPairIntegerArrayList.Create;
+
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayList pair value <1, 3> not append',
+    arr.Append(TPairInteger.Create(1, 3)));
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayList pair value <4, 5> not append',
+    arr.Append(TPairInteger.Create(4, 5)));
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayList pair value <5, -11> not append',
+    arr.Append(TPairInteger.Create(5, -11)));
+
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayLists length is not correct', arr.Length = 3);
+
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayLists index 0 first value is not correct', arr.Value[0]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}.First = 1);
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayLists index 0 second value is not correct', arr.Value[0]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}.Second = 3);
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayLists index 1 first value is not correct', arr.Value[1]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}.First = 4);
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayLists index 1 second value is not correct', arr.Value[1]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}.Second = 5);
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> '+
+    'ArrayLists index 2 first value is not correct', arr.Value[2]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}.First = 5);
+  AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
+    'ArrayLists index 2 second value is not correct', arr.Value[2]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}.Second = -11);
 
   FreeAndNil(arr);
 end;
