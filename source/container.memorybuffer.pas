@@ -52,7 +52,7 @@ type
     procedure AppendByte (AData : Byte);
 
     { Append a data block to the buffer. }
-    procedure AppdendData (var AData; ASize : Cardinal);
+    procedure AppendData (const AData; ASize : Cardinal);
 
     { Clear the buffer contents. }
     procedure Clear;
@@ -142,7 +142,7 @@ begin
   Inc(FLength);
 end;
 
-procedure TMemoryBuffer.AppdendData (var AData; ASize : Cardinal);
+procedure TMemoryBuffer.AppendData (const AData; ASize : Cardinal);
 begin
   while FLength + ASize > FAlloced do
   begin
@@ -171,7 +171,7 @@ begin
     end;
   end;
 
-  Result := FData[FLength];
+  Result := @FData[FLength];
 end;
 
 procedure TMemoryBuffer.SetBufferDataSize (ASizeUsed : Cardinal);
@@ -189,7 +189,7 @@ begin
     end;
   end;
 
-  Result := FData[0];
+  Result := @FData[0];
 end;
 
 procedure TMemoryBuffer.SetBufferAllocSize (ASize : Cardinal);
@@ -223,7 +223,7 @@ end;
 
 function TMemoryBuffer.GetBufferData : Pointer;
 begin
-  Result := FData[0];
+  Result := @FData[0];
 end;
 
 function TMemoryBuffer.IsEmpty : Boolean;
