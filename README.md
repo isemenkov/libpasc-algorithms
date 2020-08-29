@@ -1,6 +1,6 @@
 libPasC-Algorithms
 ==========
-libPasC-Algorithms is object pascal library of common data structures and algorithms. Library rewritten from [c-algorithms](https://github.com/fragglet/c-algorithms) repository. 
+libPasC-Algorithms is object pascal library of common data structures and algorithms. Library rewritten from [c-algorithms](https://github.com/fragglet/c-algorithms) repository and other sources. 
 
 ##### TArrayList
 
@@ -63,3 +63,16 @@ type
 ```
 
 A set stores a collection of values. Each value can only exist once in the set.
+
+##### TMemoryBuffer
+
+```pascal
+uses
+  container.memorybuffer;
+
+type
+  TMemoryBuffer = class
+```
+
+A TMemoryBuffer is a useful data structure for storing arbitrary sized blocks of memory. It is guarantees deletion of the memory block when the object is destroyed.
+This class based on wxWidgets wxMemoryBuffer api interface [https://docs.wxwidgets.org/trunk/classwx_memory_buffer.html](https://docs.wxwidgets.org/trunk/classwx_memory_buffer.html).
