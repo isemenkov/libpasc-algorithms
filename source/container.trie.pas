@@ -99,7 +99,7 @@ type
     function FindEnd (Key : String) : PTrieNode;
     function FindEndBinary (Key : PByte; KeyLength : Integer) : PTrieNode;
 
-    { Roll back an insert operation after a failed malloc() call. }
+    { Roll back an insert operation after a failed GetMem() call. }
     procedure InsertRollback (Key : PByte);
   end;
 
@@ -165,7 +165,7 @@ begin
     end;
     { Free the node }
     Dispose(node^.data);
-    Dispose(node);
+    //Dispose(node);
   end;
   { Free the trie }  
   Dispose(FTrie);
@@ -183,9 +183,9 @@ begin
   { Search down the trie until the end of string is reached }
   node := FTrie^.root_node;
 
-  key_index := 0;
+  key_index := 1;
   p := Key[key_index];
-  while key_index < Length(Key) do
+  while key_index <= Length(Key) do
   begin
     if node = nil then
     begin
@@ -293,7 +293,7 @@ begin
   { Search down the trie until we reach the end of string, creating nodes as 
     necessary }
   rover := @FTrie^.root_node;
-  key_index := 0;
+  key_index := 1;
   p := Key[key_index];
 
   while True do
@@ -312,8 +312,9 @@ begin
         Exit(False);
       end;
 
-      FillByte(node, Sizeof(PTrieNode), 0);
+      node^.use_count := 0;
       node^.data := Default(V);
+      FillByte(node^.next, Sizeof(PTrieNode) * 256, 0);
       
       { Link in to the trie }
       rover^ := node;
@@ -326,7 +327,7 @@ begin
     c := Byte(p);
 
     { Reached the end of string?  If so, we're finished. }
-    if key_index = Length(Key) then
+    if key_index > Length(Key) then
     begin
       { Set the data at the node we have reached }
       node^.data := Value;
@@ -431,7 +432,7 @@ begin
     node. Free back nodes as necessary. }
   node := FTrie^.root_node;
   last_next_ptr := @FTrie^.root_node;
-  key_index := 0;
+  key_index := 1;
   p := Key[key_index];
   
   while True do
@@ -458,7 +459,7 @@ begin
     end;
 
     { Go to the next character or finish }
-    if key_index = Length(Key) then
+    if key_index > Length(Key) then
     begin
       Break;
     end else
