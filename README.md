@@ -64,6 +64,18 @@ type
 
 A set stores a collection of values. Each value can only exist once in the set.
 
+##### TTrie
+
+```pascal
+uses
+  container.trie;
+
+type
+  generic TTrie<V> = class
+```
+
+A trie is a data structure which provides fast mappings from strings to values.
+
 ##### TMemoryBuffer
 
 ```pascal
