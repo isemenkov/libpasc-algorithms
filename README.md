@@ -30,19 +30,34 @@ libPasC-Algorithms is object pascal library of common data structures and algori
         * [Create](#create-2)
         * [Insert](#insert-2)
         * [Remove](#remove-2)
+        * [Search](#search-2)
         * [Iterate](#iterate-2)
     * [THashTable](#thashtable)
+      * [Examples](#examples-3)
+        * [Create](#create-3)
+        * [Insert](#insert-3)
+        * [Remove](#remove-3)
+        * [Search](#search-3)
+        * [Iterate](#iterate-3)
     * [TOrderedSet](#torderedset)
+      * [Examples](#examples-4)
+        * [Create](#create-4)
+        * [Insert](#insert-4)
+        * [Remove](#remove-4)
+        * [Iterate](#iterate-4)
     * [TTrie](#ttrie)
+      * [Examples](#examples-5)
+        * [Create](#create-5)
+        * [Insert](#insert-5)
+        * [Remove](#remove-5)
+        * [Search](#search-5)
     * [TMemoryBuffer](#tmemorybuffer)
-  * [Examples](#examples)
-    * [TArrayList](#tarraylist-1)
-    * [TList](#tlist-1)
-    * [TAvlTree](#tavltree-1)
-    * [THashTable](#thashtable-1)
-    * [TOrderedSet](#torderedset-1)
-    * [TTrie](#ttrie-1)
-    * [TMemoryBuffer](#tmemorybuffer-1)
+      * [Examples](#examples-6)
+        * [Create](#create-6)
+        * [Insert](#insert-6)
+        * [Buffer size](#buffer-size)
+        * [Realloc buffer size](#realloc-buffer-size)
+        * [Clear buffer](#clear-buffer)
 
 
 
@@ -384,6 +399,19 @@ begin
 end;
 ```
 
+```pascal
+var
+  iterator := TIntStrTree.TIterator;
+
+begin
+  for iterator in tree do
+  begin
+    { Get current value. }
+    writeln(iterator.Key, iterator.Value);
+  end;
+end;
+```
+
 
 
 #### THashTable
@@ -397,6 +425,79 @@ type
 ```
 
 A hash table stores a set of values which can be addressed by a key. Given the key, the corresponding value can be looked up quickly.
+
+##### Examples
+
+###### Create
+
+```pascal
+uses
+  container.hashtable, utils.functor;
+
+type
+  TIntIntHashTable = specialize THashTable<Integer, Integer, TCompareFunctonInteger>;
+
+var
+  hash : TIntIntHashTable;
+
+begin
+  hash := TIntIntHashTable.Create(@HashInteger);
+
+  FreeAndNil(hash);
+end;
+```
+
+###### Insert
+
+```pascal
+  { Add new entry. }
+  hash.Insert(1, 20);
+```
+
+###### Remove
+
+```pascal
+  { Remove item by key. }
+  hash.Remove(1);
+```
+
+###### Search
+
+```pascal
+  { Search item by key. }
+  hash.Search(1);
+```
+
+###### Iterate
+
+```pascal
+var
+  iterator : TIntIntHashTable.TIterator;
+
+begin
+  { Get first item iterator. }
+  iterator := hash.FirstEntry;
+
+  { Get current value. }
+  writeln(iterator.Key, iterator.Value);
+
+  { Get next item. }
+  iterator := iterator.Next;
+end;
+```
+
+```pascal
+var
+  iterator : TIntIntHashTable.TIterator;
+
+begin
+  for iterator in hash do
+  begin
+    { Get current value. }
+    writeln(iterator.Key, iterator.Value);
+  end;
+end;
+```
 
 
 
@@ -413,6 +514,76 @@ type
 A set stores a collection of values. Each value can only exist once in the set.
 
 
+##### Examples
+
+###### Create
+
+```pascal
+uses
+  container.orderedset, utils.functior;
+
+type
+  TIntOrderedSet = specialize TOrderedSet<Integer, TCompareFunctionInteger>;
+
+var
+  orderedset : TIntOrderedSet;
+
+begin
+  orderedset := TIntOrderedSet.Create(@HashInteger);
+
+  FreeAndNil(orderedset);
+end;
+```
+
+###### Insert
+
+```pascal
+  { Add new entry. }
+  orderedset.Insert(1);
+```
+
+###### Remove
+
+```pascal
+  { Remove item from a set. }
+  orderedset.Remove(1);
+```
+
+###### Iterate
+
+```pascal
+var
+  iterator : TIntOrderedSet.TIterator;
+
+begin
+  { Get first item iterator. }
+  iterator := orderedset.FirstEntry;
+
+  while iterator.HasValue do
+  begin
+    { Get current value. }
+    writeln(iterator.Value);
+
+    { Get next item. }
+    iterator := iterator.Next;
+  end;
+end;
+```
+
+```pascal
+var
+  iterator : TIntOrderedSet.TIterator;
+
+begin
+  for iterator in orderedset do
+  begin
+    { Get current value. }
+    writeln(iterator.Value);
+  end;
+end;
+```
+
+
 
 #### TTrie
 
@@ -427,6 +598,50 @@ type
 A trie is a data structure which provides fast mappings from strings to values.
 
 
+##### Examples
+
+###### Create
+
+```pascal
+uses
+  container.trie;
+
+type
+  TIntTrie = specialize TTrie<Integer>;
+
+var
+  trie : TIntTrie;
+
+begin
+  trie := TIntTrie.Create;
+
+  FreeAndNil(trie);
+end;
+```
+
+###### Insert
+
+```pascal
+  { Add new item. }
+  trie.Insert("one", 1);
+
+```
+
+###### Remove
+
+```pascal
+  { Remove item by key. }
+  trie.Remove("one");
+```
+
+###### Search
+
+```pascal
+  { Search element. }
+  trie.Search("one");
+```
+
+
 
 #### TMemoryBuffer
 
@@ -439,3 +654,60 @@ type
 ```
 
 TMemoryBuffer is a useful data structure for storing arbitrary sized blocks of memory. It is guarantees deletion of the memory block when the object is destroyed. This class based on wxWidgets wxMemoryBuffer api interface [https://docs.wxwidgets.org/trunk/classwx_memory_buffer.html](https://docs.wxwidgets.org/trunk/classwx_memory_buffer.html).
+
+##### Examples
+
+###### Create
+
+```pascal
+uses
+  container.menorybuffer;
+
+var
+  buffer : TMemoryBuffer;
+
+begin  
+  buffer := TMemoryBuffer.Create;
+
+  FreeAndNil(buffer);
+end;
+```
+
+###### Insert
+
+```pascal
+  { Append a single byte to the buffer. }
+  buffer.AppendByte(32);
+
+  { Append a data block to the buffer. }
+  buffer.AppendData(PChar("one"), Length("one"));
+
+  
+  Move(PChar("one")^, buffer.GetAppendBuffer(1024)^);
+
+  Move(PChar("one")^, buffer.GetWriteBuffer(1024)^);
+```
+
+###### Buffer size
+
+```pascal
+  { Get the size of the valid data in the buffer. }
+  buffer.GetBufferData;
+
+  { Get the size of the buffer. }
+  buffer.GetBufferAllocSize;
+```
+
+###### Realloc buffer size
+
+```pascal
+  { Ensures the buffer has at least size bytes available. }
+  buffer.SetBufferAllocSize(1024);
+```
+
+###### Clear buffer
+
+```pascal
+  { Clear the buffer contents. }
+  buffer.Clear;
+```
