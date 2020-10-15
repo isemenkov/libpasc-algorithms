@@ -35,6 +35,8 @@ type
     procedure Test_IntegerArrayList_IterateRange;
     procedure Test_IntegerArrayList_InsertOneMillionValuesInto;
     procedure Test_PairIntegerArrayList_AppendObject;
+    procedure Test_IntegerArrayList_SearchInEmpty;
+    procedure Test_IntegerArrayList_LastElementIterator;
 
     procedure Test_StringArrayList_CreateNewEmpty;
     procedure Test_StringArrayList_AppendNewValueInto;
@@ -46,6 +48,8 @@ type
     procedure Test_StringArrayList_IterateValues;
     procedure Test_StringArrayList_IterateRange;
     procedure Test_StringArrayList_InsertOneMillionValuesInto;
+    procedure Test_StringArrayList_SearchInEmpty;
+    procedure Test_StringArrayList_LastElementIterator;
   end;
 
 implementation
@@ -988,6 +992,66 @@ begin
   AssertTrue('#Test_PairIntegerArrayList_AppendObject -> ' +
     'ArrayLists index 2 second value is not correct', arr.Value[2]
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}.Second = -11);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_IntegerArrayList_SearchInEmpty;
+var
+  arr : TIntegerArrayList;
+  index : Integer;
+begin
+  arr := TIntegerArrayList.Create;
+  index := arr.IndexOf(2);
+
+  AssertTrue('#Test_IntegerArrayList_SearchInEmpty -> ' +
+    'ArrayLists impossible element index', index = -1);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_StringArrayList_SearchInEmpty;
+var
+  arr : TStringArrayList;
+  index : Integer;
+begin
+  arr := TStringArrayList.Create;
+  index := arr.IndexOf('none');
+
+  AssertTrue('#Test_StringArrayList_SearchInEmpty -> ' +
+    'ArrayLists impossible element index', index = -1);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_IntegerArrayList_LastElementIterator;
+var
+  arr : TIntegerArrayList;
+  iterator : TIntegerArrayList.TIterator;
+begin
+  arr := TIntegerArrayList.Create;
+
+  arr.Append(2);
+  iterator := arr.LastEntry;
+
+  AssertTrue('#Test_IntegerArrayList_LastElementIterator -> ' +
+    'ArrayLists value not correct', iterator.Value = 2);
+
+  FreeAndNil(arr);
+end;
+
+procedure TArrayListTestCase.Test_StringArrayList_LastElementIterator;
+var
+  arr : TStringArrayList;
+  iterator : TStringArrayList.TIterator;
+begin
+  arr := TStringArrayList.Create;
+
+  arr.Append('String');
+  iterator := arr.LastEntry;
+
+  AssertTrue('#Test_StringArrayList_LastElementIterator -> ' +
+    'ArrayLists value not correct', iterator.Value = 'String');
 
   FreeAndNil(arr);
 end;

@@ -449,6 +449,9 @@ function TArrayList.IndexOf (AData : T) : Integer;
 var
   i : Cardinal;
 begin
+  if FLength <= 0 then
+    Exit(-1);
+
   for i := 0 to FLength - 1 do
   begin
     if FCompareFunctor.Call(FData[i], AData) = 0 then
@@ -467,7 +470,7 @@ end;
 
 function TArrayList.LastEntry : TIterator;
 begin
-  Result := TIterator.Create(@FData, FLength, FLength);
+  Result := TIterator.Create(@FData, FLength, FLength - 1);
 end;
 
 procedure TArrayList.Clear;
