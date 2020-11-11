@@ -49,6 +49,7 @@ type
     type
       {$IFDEF USE_OPTIONAL}
       TOptionalValue = specialize TOptional<T>;
+      TOptionalIndex = specialize TOptional<Cardinal>;
       {$ENDIF}
 
       { TArrayList iterator. }
@@ -85,14 +86,23 @@ type
         procedure SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
           TOptionalValue{$ENDIF});
 
+        { Get item index. }
+        function GetItemIndex : {$IFNDEF USE_OPTIONAL}Cardinal{$ELSE}
+          TOptionalIndex{$ENDIF};
+
         { Return current item iterator and move it to next. }
         function GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
           {$ENDIF};
       public
         { Read/Write arraylist item value. If value not exists raise 
-          EValueNotExistsException. }
+          EIndexOutOfRangeException. }
         property Value : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF} 
           read GetValue write SetValue;
+
+        { Get current item index. If value not exists raise 
+          EIndexOutOfRangeException. }
+        property Index : {$IFNDEF USE_OPTIONAL}Cardinal{$ELSE}TOptionalIndex
+          {$ENDIF} read GetItemIndex;
 
         property Current : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF}
           read GetCurrent;
@@ -252,6 +262,22 @@ begin
   end;
 
   FArray^[FPosition] := AValue{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
+end;
+
+function TArrayList.TIterator.GetItemIndex : {$IFNDEF USE_OPTIONAL}Cardinal
+  {$ELSE}TOptionalIndex{$ENDIF};
+begin
+  if FPosition > FLength then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EIndexOutOfRangeException.Create('Index out of range.');
+    {$ELSE}
+    Exit(TOptionalIndex.Create);
+    {$ENDIF}
+  end;
+
+  Result := {$IFNDEF USE_OPTIONAL}FPosition{$ELSE}
+    TOptionalIndex.Create(FPosition){$ENDIF};
 end;
 
 function TArrayList.TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}
