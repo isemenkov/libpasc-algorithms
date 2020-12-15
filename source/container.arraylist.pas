@@ -26,15 +26,18 @@
 
 unit container.arraylist;
 
-{$mode objfpc}{$H+}
-{$IFOPT D+}
-  {$DEFINE DEBUG}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+  {$IFOPT D+}
+    {$DEFINE DEBUG}
+  {$ENDIF}
 {$ENDIF}
 
 interface
 
 uses
-  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
+  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type
   {$IFNDEF USE_OPTIONAL}
@@ -44,12 +47,14 @@ type
 
   { Automatically resizing array. 
     ArrayLists are generic arrays of T which automatically increase in size. }
-  generic TArrayList<T, BinaryCompareFunctor> = class
+  {$IFDEF FPC}generic{$ENDIF} TArrayList<T; BinaryCompareFunctor
+    {$IFNDEF FPC}: constructor, utils.functor.TBinaryFunctor<T,
+    Integer>{$ENDIF}> = class
   public
     type
       {$IFDEF USE_OPTIONAL}
-      TOptionalValue = specialize TOptional<T>;
-      TOptionalIndex = specialize TOptional<Cardinal>;
+      TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<T>;
+      TOptionalIndex = {$IFDEF FPC}specialize{$ENDIF} TOptional<Cardinal>;
       {$ENDIF}
 
       { TArrayList iterator. }
@@ -190,15 +195,16 @@ implementation
 
 { TArrayList.TIterator }
 
-constructor TArrayList.TIterator.Create (Arr : PDynArray; Len : Cardinal; Pos :
-  Integer);
+constructor TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.Create (Arr : PDynArray; Len : Cardinal; Pos : Integer);
 begin
   FArray := Arr;
   FLength := Len;
   FPosition := Pos;
 end;
 
-function TArrayList.TIterator.HasValue : Boolean;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.HasValue : Boolean;
 begin
   if FPosition >= FLength then
   begin
@@ -208,7 +214,8 @@ begin
   Result := True;
 end;
 
-function TArrayList.TIterator.Prev : TIterator;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.Prev : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition - 1);
 
@@ -218,22 +225,26 @@ begin
   end;
 end;
 
-function TArrayList.TIterator.Next : TIterator;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.Next : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition + 1); 
 end;
 
-function TArrayList.TIterator.MoveNext : Boolean;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.MoveNext : Boolean;
 begin
   Result := FPosition < FLength;
 end;
 
-function TArrayList.TIterator.GetEnumerator : TIterator;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition);
 end;
 
-function TArrayList.TIterator.GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
   TOptionalValue{$ENDIF};
 begin
   if FPosition > FLength then
@@ -249,7 +260,8 @@ begin
     FArray^[FPosition]{$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
-procedure TArrayList.TIterator.SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
   TOptionalValue{$ENDIF});
 begin
   if FPosition > FLength then
@@ -264,7 +276,8 @@ begin
   FArray^[FPosition] := AValue{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
 end;
 
-function TArrayList.TIterator.GetItemIndex : {$IFNDEF USE_OPTIONAL}Cardinal
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetItemIndex : {$IFNDEF USE_OPTIONAL}Cardinal
   {$ELSE}TOptionalIndex{$ENDIF};
 begin
   if FPosition > FLength then
@@ -280,7 +293,8 @@ begin
     TOptionalIndex.Create(FPosition){$ENDIF};
 end;
 
-function TArrayList.TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}
   TOptionalValue{$ENDIF};
 begin
   Result := GetValue;
@@ -289,7 +303,8 @@ end;
 
 { TArrayList }
 
-constructor TArrayList.Create(ALength : Cardinal);
+constructor TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Create(ALength : Cardinal);
 begin
   if ALength = 0 then
   begin
@@ -302,13 +317,15 @@ begin
   FCompareFunctor := BinaryCompareFunctor.Create;
 end;
 
-destructor TArrayList.Destroy;
+destructor TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Destroy;
 begin
   SetLength(FData, 0);
   inherited Destroy;
 end;
 
-function TArrayList.GetValue (AIndex : Cardinal) : {$IFNDEF USE_OPTIONAL}T
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .GetValue (AIndex : Cardinal) : {$IFNDEF USE_OPTIONAL}T
   {$ELSE}TOptionalValue{$ENDIF};
 begin
   if AIndex > FLength then
@@ -324,7 +341,8 @@ begin
     {$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
-procedure TArrayList.SetValue (AIndex : Cardinal; AData : {$IFNDEF USE_OPTIONAL}
+procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .SetValue (AIndex : Cardinal; AData : {$IFNDEF USE_OPTIONAL}
   T{$ELSE}TOptionalValue{$ENDIF});
 begin
   if AIndex > FLength then
@@ -339,7 +357,8 @@ begin
   FData[AIndex] := AData{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
 end;
 
-function TArrayList.Enlarge : Boolean;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Enlarge : Boolean;
 var
   NewSize : Cardinal;
 begin
@@ -353,7 +372,8 @@ begin
   Result := True;  
 end;
 
-procedure TArrayList.SortInternal (var AData : array of T; ALength : Cardinal);
+procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .SortInternal (var AData : array of T; ALength : Cardinal);
 var
   pivot, tmp : T;
   list1_length, list2_length : Cardinal;
@@ -413,7 +433,8 @@ begin
   SortInternal(AData[list1_length + 1], list2_length);
 end;
 
-function TArrayList.Insert (AIndex : Cardinal; AData : T) : Boolean;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Insert (AIndex : Cardinal; AData : T) : Boolean;
 begin
   { Sanity check the index }
   if AIndex > FLength then
@@ -442,17 +463,20 @@ begin
   Result := True;
 end;
 
-function TArrayList.Append (AValue : T) : Boolean;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Append (AValue : T) : Boolean;
 begin
   Result := Insert(FLength, AValue);
 end;
 
-function TArrayList.Prepend (AValue : T) : Boolean;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Prepend (AValue : T) : Boolean;
 begin
   Result := Insert(0, AValue);
 end;
 
-procedure TArrayList.RemoveRange (AIndex : Cardinal; ALength : Cardinal);
+procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .RemoveRange (AIndex : Cardinal; ALength : Cardinal);
 begin
   { Check this is a valid range }
   if (AIndex > FLength) or (AIndex + ALength > FLength) then
@@ -466,12 +490,14 @@ begin
   Dec(FLength, ALength);
 end;
 
-procedure TArrayList.Remove (AIndex : Cardinal);
+procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Remove (AIndex : Cardinal);
 begin
   RemoveRange(AIndex, 1);
 end;
 
-function TArrayList.IndexOf (AData : T) : Integer;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .IndexOf (AData : T) : Integer;
 var
   i : Cardinal;
 begin
@@ -489,28 +515,33 @@ begin
   Result := -1;
 end;
 
-function TArrayList.FirstEntry : TIterator;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .FirstEntry : TIterator;
 begin
   Result := TIterator.Create(@FData, FLength, 0);
 end;
 
-function TArrayList.LastEntry : TIterator;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .LastEntry : TIterator;
 begin
   Result := TIterator.Create(@FData, FLength, FLength - 1);
 end;
 
-procedure TArrayList.Clear;
+procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Clear;
 begin
   FLength := 0;
 end;
 
-procedure TArrayList.Sort;
+procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Sort;
 begin
   { Perform the recursive sort. }
   SortInternal(FData, FLength);
 end;
 
-function TArrayList.GetEnumerator : TIterator;
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(@FData, FLength, 0);
 end;
