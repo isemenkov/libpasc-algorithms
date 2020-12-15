@@ -435,6 +435,10 @@ end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .Insert (AIndex : Cardinal; AData : T) : Boolean;
+{$IFNDEF FPC}
+var
+  Index : Integer;
+{$ENDIF}
 begin
   { Sanity check the index }
   if AIndex > FLength then
@@ -453,6 +457,15 @@ begin
     end;
   end;
 
+  {$IFNDEF FPC}
+  { Strings move fix for delphi. }
+  if TypeInfo(T) = TypeInfo(String) then
+  begin
+    if AIndex <> FLength then
+      for index := FLength downto AIndex + 1 do
+        FData[index] := FData[index - 1];
+  end else
+  {$ENDIF}
   { Move the contents of the array forward from the index onwards }
   Move(FData[AIndex], FData[AIndex + 1], (FLength - AIndex) * SizeOf(T));
 
