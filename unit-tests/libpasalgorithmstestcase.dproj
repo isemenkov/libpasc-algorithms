@@ -95,7 +95,15 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="..\source\container.arraylist.pas"/>
+        <DCCReference Include="..\source\container.list.pas"/>
+        <DCCReference Include="..\source\container.avltree.pas"/>
         <DCCReference Include="testcase_arraylist.pas"/>
+        <DCCReference Include="testcase_list.pas">
+            <Form>$R *.RES</Form>
+        </DCCReference>
+        <DCCReference Include="testcase_avltree.pas">
+            <Form>$R *.RES</Form>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -26,7 +26,9 @@
 
 unit container.avltree;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 {$IFOPT D+}
   {$DEFINE DEBUG}
 {$ENDIF}
@@ -34,7 +36,8 @@ unit container.avltree;
 interface
 
 uses
-  SysUtils, utils.pair {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
+  SysUtils, utils.pair {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  {$IFNDEF FPC}, utils.functor, System.Generics.Defaults{$ENDIF};
 
 type
   {$IFNDEF USE_OPTIONAL}
@@ -52,7 +55,31 @@ type
     Balanced binary trees have several uses. They can be used as a mapping 
     (searching for a value based on its key), or as a set of keys which is 
     always ordered. }
-  generic TAvlTree<K, V, KeyBinaryCompareFunctor> = class
+  {$IFDEF FPC}generic{$ENDIF} TAvlTree<K; V; KeyBinaryCompareFunctor
+    {$IFNDEF FPC}: constructor, utils.functor.TBinaryFunctor<K, 
+    Integer>{$ENDIF}> = class
+  protected
+    type
+      TAvlTreeNodeSide = (
+        AVL_TREE_NODE_LEFT                                               = 0,
+        AVL_TREE_NODE_RIGHT                                              = 1
+      );
+
+      PPAvlTreeNode = ^PAvlTreeNode;
+      PAvlTreeNode = ^TAvlTreeNode;
+      TAvlTreeNode = record
+        children : array [0 .. 1] of PAvlTreeNode;
+        parent : PAvlTreeNode;
+        key : K;
+        value : V;
+        height : Integer;
+      end;
+
+      PAvlTreeStruct = ^TAvlTreeStruct;
+      TAvlTreeStruct = record
+        root_node : PAvlTreeNode;
+        num_nodes : Cardinal;
+      end;
   public 
     type
       {$IFDEF USE_OPTIONAL}
@@ -60,7 +87,55 @@ type
       {$ENDIF}  
 
       { TAvlTree iterator }
-      TIterator = class;
+      TIterator = class
+      public
+        type
+          TAvlKeyValuePair = {$IFDEF FPC}specialize{$ENDIF} TPair<K, V>;
+          TAvlKeyValuePairArray = array of TAvlKeyValuePair;
+      protected
+        { Create new iterator for avltable item entry. }
+        {%H-}constructor Create (AItems : PAvlTreeStruct); overload;
+        {%H-}constructor Create (var AItems : TAvlKeyValuePairArray;
+          ANumItems : Cardinal; AIndex : Cardinal); overload;
+      
+        { Convert the AVL tree into a array. }
+        procedure TreeToArrayAddSubtree (subtree : PAvlTreeNode; index : 
+          PInteger);
+
+        { Return current item iterator and move it to next. }
+        function GetCurrent : TAvlKeyValuePair;
+
+        { Get item key. }
+        function GetKey : K;
+
+        { Get item value. }
+        function GetValue : V;
+      public
+        destructor Destroy; override;
+
+        { Retrieve the previous entry in a avltree. }
+        function Prev : TIterator;
+
+        { Retrieve the next entry in a avltree. }
+        function Next : TIterator;
+
+        { Return True if we can move to next element. }
+        function MoveNext : Boolean;
+
+        { Return enumerator for in operator. }
+        function GetEnumerator : TIterator;
+
+        property Key : K read GetKey;
+
+        property Value : V read GetValue;
+
+        property Current : TAvlKeyValuePair read GetCurrent;
+      protected
+        var
+          FItems : TAvlKeyValuePairArray;
+          FNumItems : Cardinal;
+          FCurrIndex : Cardinal;
+      end;
   public
     { Create a new AVL tree. }
     constructor Create;
@@ -86,28 +161,6 @@ type
 
     { Return enumerator for in operator. }
     function GetEnumerator : TIterator;
-  protected
-    type
-      TAvlTreeNodeSide = (
-        AVL_TREE_NODE_LEFT                                               = 0,
-        AVL_TREE_NODE_RIGHT                                              = 1
-      );
-
-      PPAvlTreeNode = ^PAvlTreeNode;
-      PAvlTreeNode = ^TAvlTreeNode;
-      TAvlTreeNode = record
-        children : array [0 .. 1] of PAvlTreeNode;
-        parent : PAvlTreeNode;
-        key : K;
-        value : V;
-        height : Integer;
-      end;
-
-      PAvlTreeStruct = ^TAvlTreeStruct;
-      TAvlTreeStruct = record
-        root_node : PAvlTreeNode;
-        num_nodes : Cardinal;
-      end;
   protected
     { Compare two nodes. }
     function CompareAvlTreeNode (A, B : PAvlTreeNode) : Boolean;
@@ -188,65 +241,15 @@ type
     function TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;
   protected
     FTree : PAvlTreeStruct;
-    FCompareFunctor : KeyBinaryCompareFunctor;
-  public
-    type
-      TIterator = class
-      public
-        type
-          TAvlKeyValuePair = specialize TPair<K, V>;
-          TAvlKeyValuePairArray = array of TAvlKeyValuePair;
-      protected
-        { Create new iterator for avltable item entry. }
-        {%H-}constructor Create (AItems : PAvlTreeStruct);
-        {%H-}constructor Create (var AItems : TAvlKeyValuePairArray; 
-          ANumItems : Cardinal; AIndex : Cardinal);
-      
-        { Convert the AVL tree into a array. }
-        procedure TreeToArrayAddSubtree (subtree : PAvlTreeNode; index : 
-          PInteger);
-
-        { Return current item iterator and move it to next. }
-        function GetCurrent : TAvlKeyValuePair;
-
-        { Get item key. }
-        function GetKey : K;
-
-        { Get item value. }
-        function GetValue : V;
-      public
-        destructor Destroy; override;
-
-        { Retrieve the previous entry in a avltree. }
-        function Prev : TIterator;
-
-        { Retrieve the next entry in a avltree. }
-        function Next : TIterator;
-
-        { Return True if we can move to next element. }
-        function MoveNext : Boolean;
-
-        { Return enumerator for in operator. }
-        function GetEnumerator : TIterator;
-
-        property Key : K read GetKey;
-
-        property Value : V read GetValue;
-
-        property Current : TAvlKeyValuePair read GetCurrent;
-      protected
-        var
-          FItems : TAvlKeyValuePairArray;
-          FNumItems : Cardinal;
-          FCurrIndex : Cardinal;
-      end;     
+    FCompareFunctor : KeyBinaryCompareFunctor;  
   end;
 
 implementation
 
 { TAvlTree.TIterator }
 
-constructor TAvlTree.TIterator.Create (AItems : PAvlTreeStruct);
+constructor TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.Create (AItems : PAvlTreeStruct);
 var
   Index : Integer;
 begin
@@ -260,22 +263,24 @@ begin
   TreeToArrayAddSubtree(AItems^.root_node, @index);
 end;
 
-constructor TAvlTree.TIterator.Create (var AItems : TAvlKeyValuePairArray;
-  ANumItems : Cardinal; AIndex : Cardinal);
+constructor TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.Create (var AItems : TAvlKeyValuePairArray; ANumItems : Cardinal; 
+  AIndex : Cardinal);
 begin
   FItems := AItems;
   FNumItems := ANumItems;
   FCurrIndex := AIndex;
 end;
 
-destructor TAvlTree.TIterator.Destroy;
+destructor TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.Destroy;
 begin
   SetLength(FItems, 0);
   inherited Destroy;
 end;
 
-procedure TAvlTree.TIterator.TreeToArrayAddSubtree (subtree : PAvlTreeNode; 
-  index : PInteger);
+procedure TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.TreeToArrayAddSubtree (subtree : PAvlTreeNode; index : PInteger);
 begin
   if subtree = nil then
   begin
@@ -295,7 +300,8 @@ begin
     index);
 end;
 
-function TAvlTree.TIterator.GetCurrent : TAvlKeyValuePair;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetCurrent : TAvlKeyValuePair;
 begin
   if FCurrIndex < FNumItems then
   begin
@@ -307,7 +313,8 @@ begin
   end;
 end;
 
-function TAvlTree.TIterator.GetKey : K;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetKey : K;
 begin
   if FCurrIndex < FNumItems then
   begin
@@ -318,7 +325,8 @@ begin
   end;
 end;
 
-function TAvlTree.TIterator.GetValue : V;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetValue : V;
 begin
   if FCurrIndex < FNumItems then
   begin
@@ -329,7 +337,8 @@ begin
   end;
 end;
 
-function TAvlTree.TIterator.Prev : TIterator;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.Prev : TIterator;
 begin
   if FCurrIndex = 0 then
   begin
@@ -340,34 +349,42 @@ begin
   end;
 end;
 
-function TAvlTree.TIterator.Next : TIterator;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.Next : TIterator;
 begin
   Result := TIterator.Create(FItems, FNumItems, FCurrIndex + 1);
 end;
 
-function TAvlTree.TIterator.MoveNext : Boolean;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.MoveNext : Boolean;
 begin
   Result := FCurrIndex < FNumItems;
 end;
 
-function TAvlTree.TIterator.GetEnumerator : TIterator;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(FItems, FNumItems, 0);
 end;
 
 { TAvlTree }
 
-function TAvlTree.CompareAvlTreeNode (A, B : PAvlTreeNode) : Boolean;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .CompareAvlTreeNode (A, B : PAvlTreeNode) : Boolean;
 begin
   Result := (A^.children[0] = B^.children[0]) and
             (A^.children[1] = B^.children[1]) and
             (A^.parent = B^.parent) and
-            (A^.key = B^.key) and
+            (FCompareFunctor.Call(A^.key, B^.key) = 0) and
+            {$IFDEF FPC}
             (A^.value = B^.value) and
+            {$ELSE}
+            (TComparer<V>.Default.Compare(A^.Value, B^.Value) = 1) and
+            {$ENDIF}
             (A^.height = B^.height);
 end;
 
-constructor TAvlTree.Create;
+constructor TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}.Create;
 begin
   New(FTree);
   FTree^.root_node := nil;
@@ -375,7 +392,8 @@ begin
   FCompareFunctor := KeyBinaryCompareFunctor.Create;
 end;
 
-procedure TAvlTree.FreeSubTreeNode (node : PAvlTreeNode);
+procedure TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .FreeSubTreeNode (node : PAvlTreeNode);
 begin
   if node <> nil then
   begin
@@ -387,7 +405,8 @@ begin
   end;
 end;
 
-destructor TAvlTree.Destroy;
+destructor TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Destroy;
 begin
   { Destroy all nodes }
   FreeSubtreeNode(FTree^.root_node);
@@ -398,7 +417,8 @@ begin
   inherited Destroy;
 end;
 
-function TAvlTree.SubTreeHeight (node : PAvlTreeNode) : Integer;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .SubTreeHeight (node : PAvlTreeNode) : Integer;
 begin
   if node <> nil then
   begin
@@ -409,7 +429,8 @@ begin
   end;
 end;
 
-procedure TAvlTree.UpdateTreeHeight (node : PAvlTreeNode);
+procedure TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .UpdateTreeHeight (node : PAvlTreeNode);
 var
   left_subtree : PAvlTreeNode;
   right_subtree : PAvlTreeNode;
@@ -429,7 +450,8 @@ begin
   end;
 end;
 
-function TAvlTree.TreeNodeParentSide (node : PAvlTreeNode) : TAvlTreeNodeSide;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TreeNodeParentSide (node : PAvlTreeNode) : TAvlTreeNodeSide;
 begin
   if node^.parent^.children[Shortint(AVL_TREE_NODE_LEFT)] = node then
   begin
@@ -440,7 +462,8 @@ begin
   end;
 end;
 
-procedure TAvlTree.TreeNodeReplace (node1 : PAvlTreeNode; node2 : PAvlTreeNode);
+procedure TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TreeNodeReplace (node1 : PAvlTreeNode; node2 : PAvlTreeNode);
 var
   side : Integer;
 begin
@@ -455,13 +478,14 @@ begin
   begin
     FTree^.root_node := node2;
   end else begin
-    side := Integer(TreeNodeParentSide(node1));
+    side := Integer(Ord(TreeNodeParentSide(node1)));
     node1^.parent^.children[side] := node2;
     UpdateTreeHeight(node1^.parent);
   end;
 end;
 
-function TAvlTree.TreeRotate (node : PAvlTreeNode; direction : TAVLTreeNodeSide) 
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TreeRotate (node : PAvlTreeNode; direction : TAVLTreeNodeSide) 
   : PAvlTreeNode;
 var
   new_root : PAvlTreeNode;
@@ -493,7 +517,8 @@ begin
   Result := new_root;
 end;
 
-function TAvlTree.TreeNodeBalance (node : PAvlTreeNode) : PAvlTreeNode;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TreeNodeBalance (node : PAvlTreeNode) : PAvlTreeNode;
 var
   left_subtree : PAvlTreeNode;
   right_subtree : PAvlTreeNode;
@@ -546,7 +571,8 @@ begin
   Result := node;
 end;
 
-procedure TAvlTree.TreeBalanceToRoot (node : PAvlTreeNode);
+procedure TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TreeBalanceToRoot (node : PAvlTreeNode);
 var
   rover : PAvlTreeNode;
 begin
@@ -561,7 +587,8 @@ begin
   end;
 end;
 
-procedure TAvlTree.Insert (Key : K; Value : V);
+procedure TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Insert (Key : K; Value : V);
 var
   rover : PPAvlTreeNode;
   new_node : PAvlTreeNode;
@@ -602,7 +629,8 @@ begin
   Inc(FTree^.num_nodes);
 end;
 
-function TAvlTree.TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TreeNodeGetReplacement (node : PAvlTreeNode) : PAvlTreeNode;
 var
   left_subtree : PAvlTreeNode;
   right_subtree : PAvlTreeNode;
@@ -653,7 +681,8 @@ begin
   Result := res;
 end;
 
-procedure TAvlTree.RemoveNode (node : PAvlTreeNode);
+procedure TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .RemoveNode (node : PAvlTreeNode);
 var
   swap_node : PAvlTreeNode;
   balance_startpoint : PAvlTreeNode;
@@ -714,7 +743,8 @@ begin
   TreeBalanceToRoot(balance_startpoint);
 end;
 
-function TAvlTree.Remove(Key : K) : Boolean;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Remove(Key : K) : Boolean;
 var
   node : PAvlTreeNode;
 begin
@@ -733,7 +763,8 @@ begin
   Result := True;
 end;
 
-function TAvlTree.SearchNode (Key : K) : PAvlTreeNode;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .SearchNode (Key : K) : PAvlTreeNode;
 var
   node : PAvlTreeNode;
   diff : Integer;
@@ -763,8 +794,8 @@ begin
   Result := nil; 
 end;
 
-function TAvlTree.Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}
-  TOptionalValue{$ENDIF};
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 var
   node : PAvlTreeNode;
 begin
@@ -785,23 +816,26 @@ begin
   end;
 end;
 
-function TAvlTree.RootNode : PAvlTreeNode;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .RootNode : PAvlTreeNode;
 begin
   Result := FTree^.root_node;
 end;
 
-function TAvlTree.NodeKey (node : PAvlTreeNode) : K;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .NodeKey (node : PAvlTreeNode) : K;
 begin
   Result := node^.key;
 end;
 
-function TAvlTree.NodeValue (node : PAvlTreeNode) : V;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .NodeValue (node : PAvlTreeNode) : V;
 begin
   Result := node^.value;
 end;
 
-function TAvlTree.NodeChild (node : PAvlTreeNode; side : TAvlTreeNodeSide) :
-  PAvlTreeNode;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .NodeChild (node : PAvlTreeNode; side : TAvlTreeNodeSide) : PAvlTreeNode;
 begin
   if (side = AVL_TREE_NODE_LEFT) or (side = AVL_TREE_NODE_RIGHT) then
   begin
@@ -812,22 +846,26 @@ begin
   end;
 end;
 
-function TAvlTree.NodeParent (node : PAvlTreeNode) : PAvlTreeNode;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .NodeParent (node : PAvlTreeNode) : PAvlTreeNode;
 begin
   Result := node^.parent;
 end;
 
-function TAvlTree.NumEntries : Cardinal;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .NumEntries : Cardinal;
 begin
   Result := FTree^.num_nodes;
 end;
 
-function TAvlTree.FirstEntry : TIterator;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .FirstEntry : TIterator;
 begin
   Result := TIterator.Create(FTree);
 end;
 
-function TAvlTree.GetEnumerator : TIterator;
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .GetEnumerator : TIterator;
 begin
   Result := FirstEntry;
 end;

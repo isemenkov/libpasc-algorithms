@@ -1,17 +1,26 @@
 unit testcase_list;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.list, utils.functor;
+  Classes, SysUtils, container.list, utils.functor
+  {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntegerList = specialize TList<Integer, TCompareFunctorInteger>;
-  TStringList = specialize TList<String, TCompareFunctorString>;
+  TIntegerList = {$IFDEF FPC}specialize{$ENDIF} TList<Integer, 
+    TCompareFunctorInteger>;
+  TStringList = {$IFDEF FPC}specialize{$ENDIF} TList<String, 
+    TCompareFunctorString>;
 
   TListTestCase= class(TTestCase)
+  public
+    {$IFNDEF FPC}
+    procedure AssertTrue (AMessage : String; ACondition : Boolean);
+    {$ENDIF}
   published
     procedure Test_IntegerList_CreateNewEmpty;
     procedure Test_IntegerList_AppendNewValueInto;
@@ -41,6 +50,14 @@ type
   end;
 
 implementation
+
+{$IFNDEF FPC}
+procedure TListTestCase.AssertTrue(AMessage : String; ACondition :
+  Boolean);
+begin
+  CheckTrue(ACondition, AMessage);
+end;
+{$ENDIF}
 
 procedure TListTestCase.Test_IntegerList_CreateNewEmpty;
 var
@@ -1305,6 +1322,6 @@ begin
 end;
 
 initialization
-  RegisterTest(TListTestCase);
+  RegisterTest(TListTestCase{$IFNDEF FPC}.Suite{$ENDIF});
 end.
 

@@ -1,17 +1,26 @@
 unit testcase_avltree;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.avltree, utils.functor;
+  Classes, SysUtils, container.avltree, utils.functor
+  {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntIntTree = specialize TAvlTree<Integer, Integer, TCompareFunctorInteger>;
-  TStrIntTree = specialize TAvlTree<String, Integer, TCompareFunctorString>;
+  TIntIntTree = {$IFDEF FPC}specialize{$ENDIF} TAvlTree<Integer, Integer, 
+    TCompareFunctorInteger>;
+  TStrIntTree = {$IFDEF FPC}specialize{$ENDIF} TAvlTree<String, Integer, 
+    TCompareFunctorString>;
 
   TAvlTreeTestCase = class(TTestCase)
+  public
+    {$IFNDEF FPC}
+    procedure AssertTrue (AMessage : String; ACondition : Boolean);
+    {$ENDIF}
   published
     procedure Test_IntegerIntegerAvlTree_CreateNewEmpty;
     procedure Test_IntegerIntegerAvlTree_InsertNewValueInto;
@@ -29,6 +38,14 @@ type
   end;
 
 implementation
+
+{$IFNDEF FPC}
+procedure TAvlTreeTestCase.AssertTrue(AMessage : String; ACondition :
+  Boolean);
+begin
+  CheckTrue(ACondition, AMessage);
+end;
+{$ENDIF}
 
 procedure TAvlTreeTestCase.Test_IntegerIntegerAvlTree_CreateNewEmpty;
 var
@@ -354,6 +371,6 @@ begin
 end;
 
 initialization
-  RegisterTest(TAvlTreeTestCase);
+  RegisterTest(TAvlTreeTestCase{$IFNDEF FPC}.Suite{$ENDIF});
 end.
 
