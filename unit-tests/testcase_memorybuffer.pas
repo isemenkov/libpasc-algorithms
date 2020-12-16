@@ -1,14 +1,21 @@
 unit testcase_memorybuffer;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.memorybuffer;
+  Classes, SysUtils, container.memorybuffer
+  {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
   TMemoryBufferTestCase = class(TTestCase)
+  public
+    {$IFNDEF FPC}
+    procedure AssertTrue (AMessage : String; ACondition : Boolean);
+    {$ENDIF}
   published
     procedure Test_MemoryBuffer_CreateNewEmpty;
     procedure Test_MemoryBuffer_AppendByteValueInto;
@@ -20,6 +27,14 @@ type
   end;
 
 implementation
+
+{$IFNDEF FPC}
+procedure TMemoryBufferTestCase.AssertTrue(AMessage : String; ACondition :
+  Boolean);
+begin
+  CheckTrue(ACondition, AMessage);
+end;
+{$ENDIF}
 
 procedure TMemoryBufferTestCase.Test_MemoryBuffer_CreateNewEmpty;
 var
@@ -49,7 +64,7 @@ begin
   AssertTrue('#Test_MemoryBuffer_AppendByteValueInto -> ' +
     'MemoryBuffer value is not correct', PByte(buffer.GetBufferData)^ = 1);
   AssertTrue('#Test_MemoryBuffer_AppendByteValueInto -> ' +
-    'MemoryBuffer value is not correct', PByte(buffer.GetBufferData +
+    'MemoryBuffer value is not correct', PByte(PAnsiChar(buffer.GetBufferData) +
     Sizeof(Byte))^ = 254);
 
   FreeAndNil(buffer);
@@ -74,13 +89,13 @@ begin
   AssertTrue('#Test_MemoryBuffer_AppendByteAndReallocMemory -> ' +
     'MemoryBuffer value is not correct', PByte(buffer.GetBufferData)^ = 43);
   AssertTrue('#Test_MemoryBuffer_AppendByteAndReallocMemory -> ' +
-    'MemoryBuffer value is not correct', PByte(buffer.GetBufferData +
+    'MemoryBuffer value is not correct', PByte(PAnsiChar(buffer.GetBufferData) +
     Sizeof(Byte) * 1)^ = 12);
   AssertTrue('#Test_MemoryBuffer_AppendByteAndReallocMemory -> ' +
-    'MemoryBuffer value is not correct', PByte(buffer.GetBufferData +
+    'MemoryBuffer value is not correct', PByte(PAnsiChar(buffer.GetBufferData) +
     Sizeof(Byte) * 2)^ = 255);
   AssertTrue('#Test_MemoryBuffer_AppendByteAndReallocMemory -> ' +
-    'MemoryBuffer value is not correct', PByte(buffer.GetBufferData +
+    'MemoryBuffer value is not correct', PByte(PAnsiChar(buffer.GetBufferData) +
     Sizeof(Byte) * 3)^ = 3);
 
   FreeAndNil(buffer);
@@ -110,11 +125,11 @@ begin
     'MemoryBuffer value is not correct', PInt64(buffer.GetBufferData)^ =
     12545888);
   AssertTrue('#Test_MemoryBuffer_AppendDataValueInto -> ' +
-    'MemoryBuffer value is not correct', PInt64(buffer.GetBufferData +
-    Sizeof(Int64) * 1)^ = 85416362);
+    'MemoryBuffer value is not correct', PInt64(PAnsiChar(buffer.GetBufferData)
+    + Sizeof(Int64) * 1)^ = 85416362);
   AssertTrue('#Test_MemoryBuffer_AppendDataValueInto -> ' +
-    'MemoryBuffer value is not correct', PInt64(buffer.GetBufferData +
-    Sizeof(Int64) * 2)^ = 54962185984545);
+    'MemoryBuffer value is not correct', PInt64(PAnsiChar(buffer.GetBufferData)
+    + Sizeof(Int64) * 2)^ = 54962185984545);
 
   FreeAndNil(buffer);
 end;
@@ -138,13 +153,13 @@ begin
   AssertTrue('#Test_MemoryBuffer_Clear -> ' +
     'MemoryBuffer value is not correct', PByte(buffer.GetBufferData)^ = 43);
   AssertTrue('#Test_MemoryBuffer_Clear -> ' +
-    'MemoryBuffer value is not correct', PByte(buffer.GetBufferData +
+    'MemoryBuffer value is not correct', PByte(PAnsiChar(buffer.GetBufferData) +
     Sizeof(Byte) * 1)^ = 12);
   AssertTrue('#Test_MemoryBuffer_Clear -> ' +
-    'MemoryBuffer value is not correct', PByte(buffer.GetBufferData +
+    'MemoryBuffer value is not correct', PByte(PAnsiChar(buffer.GetBufferData) +
     Sizeof(Byte) * 2)^ = 255);
   AssertTrue('#Test_MemoryBuffer_Clear -> ' +
-    'MemoryBuffer value is not correct', PByte(buffer.GetBufferData +
+    'MemoryBuffer value is not correct', PByte(PAnsiChar(buffer.GetBufferData) +
     Sizeof(Byte) * 3)^ = 3);
 
   buffer.Clear;
@@ -168,7 +183,7 @@ begin
   data := 1245665;
   Move(data, (ptr)^, Sizeof(Int64));
   data := 56554147;
-  Move(data, (ptr + Sizeof(Int64) * 1)^, Sizeof(Int64));
+  Move(data, (PAnsiChar(ptr) + Sizeof(Int64) * 1)^, Sizeof(Int64));
   buffer.SetBufferDataSize(Sizeof(Byte) + Sizeof(Int64) * 2);
 
   AssertTrue('#Test_MemoryBuffer_AppendBufferWriteValue -> ' +
@@ -179,11 +194,11 @@ begin
   AssertTrue('#Test_MemoryBuffer_AppendBufferWriteValue -> ' +
     'MemoryBuffer value is not correct', PByte(buffer.GetBufferData)^ = 21);
   AssertTrue('#Test_MemoryBuffer_AppendBufferWriteValue -> ' +
-    'MemoryBuffer value is not correct', PInt64(buffer.GetBufferData +
-    Sizeof(Byte))^ = 1245665);
+    'MemoryBuffer value is not correct', PInt64(PAnsiChar(buffer.GetBufferData)
+    + Sizeof(Byte))^ = 1245665);
   AssertTrue('#Test_MemoryBuffer_AppendBufferWriteValue -> ' +
-    'MemoryBuffer value is not correct', PInt64(buffer.GetBufferData +
-    Sizeof(Byte) + Sizeof(Int64) * 1)^ = 56554147);
+    'MemoryBuffer value is not correct', PInt64(PAnsiChar(buffer.GetBufferData)
+    + Sizeof(Byte) + Sizeof(Int64) * 1)^ = 56554147);
 
   FreeAndNil(buffer);
 end;
@@ -202,7 +217,7 @@ begin
   data := 1245665;
   Move(data, (ptr)^, Sizeof(Int64));
   data := 56554147;
-  Move(data, (ptr + Sizeof(Int64) * 1)^, Sizeof(Int64));
+  Move(data, (PAnsiChar(ptr) + Sizeof(Int64) * 1)^, Sizeof(Int64));
   buffer.SetBufferDataSize(Sizeof(Int64) * 2);
 
   AssertTrue('#Test_MemoryBuffer_BufferRawWriteValue -> ' +
@@ -214,13 +229,13 @@ begin
     'MemoryBuffer value is not correct', PInt64(buffer.GetBufferData)^
     = 1245665);
   AssertTrue('#Test_MemoryBuffer_BufferRawWriteValue -> ' +
-    'MemoryBuffer value is not correct', PInt64(buffer.GetBufferData +
-    Sizeof(Int64) * 1)^ = 56554147);
+    'MemoryBuffer value is not correct', PInt64(PAnsiChar(buffer.GetBufferData)
+    + Sizeof(Int64) * 1)^ = 56554147);
 
   FreeAndNil(buffer);
 end;
 
 initialization
-  RegisterTest(TMemoryBufferTestCase);
+  RegisterTest(TMemoryBufferTestCase{$IFNDEF FPC}.Suite{$ENDIF});
 end.
 

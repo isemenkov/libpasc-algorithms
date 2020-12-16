@@ -1,17 +1,26 @@
 unit testcase_orderedset;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.orderedset, utils.functor;
+  Classes, SysUtils, container.orderedset, utils.functor
+  {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntOrderedSet = specialize TOrderedSet<Integer, TCompareFunctorInteger>;
-  TStringOrderedSet = specialize TOrderedSet<String, TCompareFunctorString>;
+  TIntOrderedSet = {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<Integer, 
+    TCompareFunctorInteger>;
+  TStringOrderedSet = {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<String, 
+    TCompareFunctorString>;
 
   TOrderedSetTestCase = class(TTestCase)
+  public
+    {$IFNDEF FPC}
+    procedure AssertTrue (AMessage : String; ACondition : Boolean);
+    {$ENDIF}
   published
     procedure Test_IntOrderedSet_CreateNewEmpty;
     procedure Test_IntOrderedSet_InsertNewValueInto;
@@ -29,6 +38,14 @@ type
   end;
 
 implementation
+
+{$IFNDEF FPC}
+procedure TOrderedSetTestCase.AssertTrue(AMessage : String; ACondition :
+  Boolean);
+begin
+  CheckTrue(ACondition, AMessage);
+end;
+{$ENDIF}
 
 procedure TOrderedSetTestCase.Test_IntOrderedSet_CreateNewEmpty;
 var
@@ -356,7 +373,7 @@ begin
 end;
 
 initialization
-  RegisterTest(TOrderedSetTestCase);
+  RegisterTest(TOrderedSetTestCase{$IFNDEF FPC}.Suite{$ENDIF});
 
 end.
 

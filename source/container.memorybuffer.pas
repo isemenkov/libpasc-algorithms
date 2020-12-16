@@ -26,7 +26,9 @@
 
 unit container.memorybuffer;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 {$IFOPT D+}
   {$DEFINE DEBUG}
 {$ENDIF}
@@ -167,7 +169,7 @@ begin
   begin
     if not Enlarge then
     begin
-      Exit;
+      Exit(nil);
     end;
   end;
 
@@ -185,7 +187,7 @@ begin
   begin
     if not Enlarge then
     begin
-      Exit;
+      Exit(nil);
     end;
   end;
 

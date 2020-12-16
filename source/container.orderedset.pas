@@ -26,7 +26,9 @@
 
 unit container.orderedset;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 {$IFOPT D+}
   {$DEFINE DEBUG}
 {$ENDIF}
@@ -34,7 +36,8 @@ unit container.orderedset;
 interface
 
 uses
-  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
+  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type
   {$IFNDEF USE_OPTIONAL}
@@ -44,54 +47,9 @@ type
  
   { A set stores a collection of values.  Each value can only exist once in the 
     set. }
-  generic TOrderedSet<V, BinaryCompareFunctor> = class
-  public
-    type
-      { Hash function.  Generates a hash key for values to be stored in a set. }
-      THashOrderedSetFunc = function (Value : V) : Cardinal;
-
-      {$IFDEF USE_OPTIONAL}
-      TOptionalValue = specialize TOptional<V>;
-      {$ENDIF}  
-  
-      { TOrderedSet iterator. }
-      TIterator = class;
-  public
-    { Create a new set. }
-    constructor Create (HashFunc : THashOrderedSetFunc);
-
-    { Destroy a set. }
-    destructor Destroy; override;
-
-    { Add a value to a set. }
-    function Insert (Value : V) : Boolean;
-
-    { Remove a value from a set. }
-    function Remove (Value : V) : Boolean;
-
-    { Retrieve the number of entries in a set }
-    function NumEntries : Cardinal;
-  
-    { Query if a particular value is in a set. }
-    function HasValue (Value : V) : Boolean;
-
-    { Perform a union of two sets.
-      A new set containing all values which are in the first or second sets, or 
-      empty set if it was not possible to allocate memory for the new set. }
-    {function Union (OrderedSet : specialize TOrderedSet<V, 
-      BinaryCompareFunctor>) : specialize TSortedSet<V, BinaryCompareFunctor>;}
-
-    { Perform an intersection of two sets.
-      A new set containing all values which are in both set, or empty set if it 
-      was not possible to allocate memory for the new set. }
-    {function Intersection (OrderedSet : specialize TOrderedSet<V,
-      BinaryCompareFunctor>) : specialize TOrderedSet<V, BinaryCompareFunctor>;}
-
-    { Retrive the first entry in orderedset. }
-    function FirstEntry : TIterator; 
-
-    { Return enumerator for in operator. }
-    function GetEnumerator : TIterator; 
+  {$IFDEF FPC}generic{$ENDIF} TOrderedSet<V; BinaryCompareFunctor
+    {$IFNDEF FPC}: constructor, utils.functor.TBinaryFunctor<V, 
+    Integer>{$ENDIF}> = class
   protected
     type
       PPOrderedSetEntry = ^POrderedSetEntry;
@@ -100,10 +58,11 @@ type
         data : V;
         next : POrderedSetEntry;
       end;
+      TArrayOrderedSetEntry = array of POrderedSetEntry;
 
       POrderedSetStruct = ^TOrderedSetStruct;
       TOrderedSetStruct = record
-        table : PPOrderedSetEntry;
+        table : TArrayOrderedSetEntry;
         entries : Cardinal;
         table_size : Cardinal;
         prime_index : Cardinal;
@@ -122,21 +81,16 @@ type
         393241, 786433, 1572869, 3145739, 6291469, 12582917, 25165843, 50331653, 
         100663319, 201326611, 402653189, 805306457, 1610612741
       ); 
-  protected
-    { Internal function used to allocate the ordered set on creation and when 
-      enlarging the table. }
-    function OrderedSetAllocateTable : Boolean;
-
-    { Free an entry }
-    procedure OrderedSetFreeEntry (entry : POrderedSetEntry);
-
-    function OrderedSetEnlarge : Boolean;
-  protected
-    FHashFunc : THashOrderedSetFunc;
-    FOrderedSet : POrderedSetStruct;
-    FCompareFunctor : BinaryCompareFunctor;
   public
     type
+      { Hash function.  Generates a hash key for values to be stored in a set. }
+      THashOrderedSetFunc = function (Value : V) : Cardinal;
+
+      {$IFDEF USE_OPTIONAL}
+      TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<V>;
+      {$ENDIF}  
+  
+      { TOrderedSet iterator. }
       TIterator = class
       protected
         { Create new iterator for orderedset item entry. }
@@ -174,6 +128,55 @@ type
           next_entry : POrderedSetEntry;
           next_chain : Cardinal;
       end;
+  public
+    { Create a new set. }
+    constructor Create (HashFunc : THashOrderedSetFunc);
+
+    { Destroy a set. }
+    destructor Destroy; override;
+
+    { Add a value to a set. }
+    function Insert (Value : V) : Boolean;
+
+    { Remove a value from a set. }
+    function Remove (Value : V) : Boolean;
+
+    { Retrieve the number of entries in a set }
+    function NumEntries : Cardinal;
+  
+    { Query if a particular value is in a set. }
+    function HasValue (Value : V) : Boolean;
+
+    { Perform a union of two sets.
+      A new set containing all values which are in the first or second sets, or 
+      empty set if it was not possible to allocate memory for the new set. }
+    {function Union (OrderedSet : specialize TOrderedSet<V, 
+      BinaryCompareFunctor>) : specialize TSortedSet<V, BinaryCompareFunctor>;}
+
+    { Perform an intersection of two sets.
+      A new set containing all values which are in both set, or empty set if it 
+      was not possible to allocate memory for the new set. }
+    {function Intersection (OrderedSet : specialize TOrderedSet<V,
+      BinaryCompareFunctor>) : specialize TOrderedSet<V, BinaryCompareFunctor>;}
+
+    { Retrive the first entry in orderedset. }
+    function FirstEntry : TIterator; 
+
+    { Return enumerator for in operator. }
+    function GetEnumerator : TIterator; 
+  protected
+    { Internal function used to allocate the ordered set on creation and when 
+      enlarging the table. }
+    function OrderedSetAllocateTable : Boolean;
+
+    { Free an entry }
+    procedure OrderedSetFreeEntry (entry : POrderedSetEntry);
+
+    function OrderedSetEnlarge : Boolean;
+  protected
+    FHashFunc : THashOrderedSetFunc;
+    FOrderedSet : POrderedSetStruct;
+    FCompareFunctor : BinaryCompareFunctor;
   end;
 
   { Generate a hash key for a pointer. The value pointed at by the pointer is 
@@ -221,14 +224,15 @@ begin
   Result := 5381;
   for i := 0 to Length(location) - 1 do
   begin
-    Result := (Result shl 5) + Result + Byte(Lowercase(location[i]));
+    Result := (Result shl 5) + Result +
+      Byte(PChar(AnsiLowerCase(location[i]))[0]);
   end;
 end;
 
 { TOrderedSet.TIterator }
 
-constructor TOrderedSet.TIterator.Create (OrderedSet : POrderedSetStruct;
-  Initialize : Boolean);
+constructor TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.Create (OrderedSet : POrderedSetStruct; Initialize : Boolean);
 var
   chain : Cardinal;
 begin
@@ -252,12 +256,14 @@ begin
   end;
 end;
 
-function TOrderedSet.TIterator.HasValue : Boolean;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.HasValue : Boolean;
 begin
   Result := next_entry <> nil;
 end;
 
-function TOrderedSet.TIterator.Next : TIterator;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.Next : TIterator;
 var
   current_entry : POrderedSetEntry;
   chain : Cardinal;
@@ -305,20 +311,21 @@ begin
   Result.next_chain := next_chain;
 end;
 
-function TOrderedSet.TIterator.MoveNext : Boolean;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.MoveNext : Boolean;
 begin
   Result := next_entry <> nil;
 end;
 
-function TOrderedSet.TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}V{$ELSE}
-  TOptionalValue{$ENDIF};
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 begin
   Result := GetValue;
   Next;
 end;
 
-function TOrderedSet.TIterator.GetValue : {$IFNDEF USE_OPTIONAL}V{$ELSE}
-  TOptionalValue{$ENDIF};
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetValue : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 begin
   if next_entry = nil then
   begin
@@ -333,14 +340,16 @@ begin
     {$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
-function TOrderedSet.TIterator.GetEnumerator : TIterator;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(FOrderedSet, True);
 end;
 
 { TOrderedSet }
 
-constructor TOrderedSet.Create (HashFunc : THashOrderedSetFunc);
+constructor TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.Create 
+  (HashFunc : THashOrderedSetFunc);
 begin
   FHashFunc := HashFunc;
   FCompareFunctor := BinaryCompareFunctor.Create;
@@ -359,7 +368,7 @@ begin
   end;
 end;
 
-destructor TOrderedSet.Destroy;
+destructor TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.Destroy;
 var
   rover : POrderedSetEntry;
   next : POrderedSetEntry;
@@ -379,8 +388,7 @@ begin
   end;
 
   { Free the table }
-  Dispose(FOrderedSet^.table);
-  FOrderedSet^.table := nil;
+  SetLength(FOrderedSet^.table, 0);
 
   { Free the set structure }
   Dispose(FOrderedSet);
@@ -389,7 +397,8 @@ begin
   inherited Destroy;
 end;
 
-function TOrderedSet.OrderedSetAllocateTable : Boolean;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .OrderedSetAllocateTable : Boolean;
 begin
   { Determine the table size based on the current prime index. An attempt is 
     made here to ensure sensible behavior if the maximum prime is exceeded, but 
@@ -402,26 +411,25 @@ begin
     FOrderedSet^.table_size := FOrderedSet^.entries * 10;
   end;
 
-  { Allocate the table and initialise to NULL }
-  FOrderedSet^.table := GetMem(Sizeof(POrderedSetEntry) * 
-    FOrderedSet^.table_size);
-  FillByte(FOrderedSet^.table^, Sizeof(POrderedSetEntry) * 
-    FOrderedSet^.table_size, 0);
+  { Allocate the table. }
+  SetLength(FOrderedSet^.table, FOrderedSet^.table_size);
 
-  Result := FOrderedSet^.table <> nil;
+  Result := True;
 end;
 
-procedure TOrderedSet.OrderedSetFreeEntry (entry : POrderedSetEntry);
+procedure TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .OrderedSetFreeEntry (entry : POrderedSetEntry);
 begin
   Dispose(entry);
   entry := nil;
 end;
 
-function TOrderedSet.OrderedSetEnlarge : Boolean;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .OrderedSetEnlarge : Boolean;
 var
   rover : POrderedSetEntry;
   next : POrderedSetEntry;
-  old_table : PPOrderedSetEntry;
+  old_table : TArrayOrderedSetEntry;
   old_table_size : Cardinal;
   old_prime_index : Cardinal;
   index : Cardinal;
@@ -466,13 +474,14 @@ begin
   end;
 
   { Free back the old table }
-  Dispose(old_table);
+  SetLength(old_table, 0);
 
   { Resized successfully }
   Result := True;
 end;
 
-function TOrderedSet.Insert (Value : V) : Boolean;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .Insert (Value : V) : Boolean;
 var
   newentry : POrderedSetEntry;
   rover : POrderedSetEntry;
@@ -522,7 +531,8 @@ begin
   Result := True;
 end;
 
-function TOrderedSet.Remove (Value : V) : Boolean;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.Remove 
+  (Value : V) : Boolean;
 var
   rover : PPOrderedSetEntry;
   entry : POrderedSetEntry;
@@ -561,7 +571,8 @@ begin
   Result := False;
 end;
 
-function TOrderedSet.HasValue (Value : V) : Boolean;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.HasValue 
+  (Value : V) : Boolean;
 var 
   rover : POrderedSetEntry;
   index : Cardinal;
@@ -588,17 +599,20 @@ begin
   Result := False;
 end;
 
-function TOrderedSet.NumEntries : Cardinal;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.NumEntries : 
+  Cardinal;
 begin
   Result := FOrderedSet^.entries;
 end;
 
-function TOrderedSet.FirstEntry : TIterator;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.FirstEntry : 
+  TIterator;
 begin
   Result := TIterator.Create (FOrderedSet, True);
 end;
 
-function TOrderedSet.GetEnumerator : TIterator;
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(FOrderedSet, True);
 end;

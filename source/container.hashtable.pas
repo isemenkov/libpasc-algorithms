@@ -26,7 +26,9 @@
 
 unit container.hashtable;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 {$IFOPT D+}
   {$DEFINE DEBUG}
 {$ENDIF}
@@ -34,7 +36,8 @@ unit container.hashtable;
 interface
 
 uses
-  SysUtils, utils.pair {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
+  SysUtils, utils.pair {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type
   {$IFNDEF USE_OPTIONAL}
@@ -44,45 +47,9 @@ type
 
   { A hash table stores a set of values which can be addressed by a key. Given 
     the key, the corresponding value can be looked up quickly. }
-  generic THashTable<K, V, KeyBinaryCompareFunctor> = class 
-  public 
-    type
-      { Hash function used to generate hash values for keys used in a hash
-        table. }
-      THashTableHashFunc = function (Key : K) : Cardinal;
-
-      {$IFDEF USE_OPTIONAL}
-      TOptionalValue = specialize TOptional<V>;
-      {$ENDIF}
-
-      { THashTable iterator. }
-      TIterator = class;
-  public
-    { Create a new hash table. }
-    constructor Create (HashFunc : THashTableHashFunc);
-
-    { Destroy a hash table. }
-    destructor Destroy; override;
-
-    { Insert a value into a hash table, overwriting any existing entry using the
-      same key. }
-    function Insert (Key : K; Value : V) : Boolean;
-
-    { Look up a value in a hash table by key. }
-    function Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
-      {$ENDIF};
-
-    { Remove a value from a hash table. }
-    function Remove (Key : K) : Boolean;
-
-    { Retrieve the number of entries in a hash table. }
-    function NumEntries : Cardinal;
-
-    { Retrive the first entry in hashtable. }
-    function FirstEntry : TIterator; 
-
-    { Return enumerator for in operator. }
-    function GetEnumerator : TIterator;
+  {$IFDEF FPC}generic{$ENDIF} THashTable<K; V; KeyBinaryCompareFunctor
+    {$IFNDEF FPC}: constructor, utils.functor.TBinaryFunctor<K, 
+    Integer>{$ENDIF}> = class 
   protected
     type
       PHashTablePair = ^THashTablePair;
@@ -96,11 +63,12 @@ type
       THashTableEntry = record
         pair : THashTablePair;
         next : PHashTableEntry;
-      end;  
+      end;
+      TArrayHashTableEntry = array of PHashTableEntry;  
 
       PHashTableStruct = ^THashTableStruct;
       THashTableStruct = record
-        table : PPHashTableEntry;
+        table : TArrayHashTableEntry;
         table_size : Cardinal;
 
         entries : Cardinal;
@@ -120,25 +88,21 @@ type
         393241, 786433, 1572869, 3145739, 6291469, 12582917, 25165843, 50331653,
         100663319, 201326611, 402653189, 805306457, 1610612741
       );
-  protected
-    { Internal function used to allocate the table on hash table creation and 
-      when enlarging the table. }
-    function HashTableAllocateTable : Boolean;
-
-    { Free an entry, calling the free functions if there are any registered }
-    procedure HashTableFreeEntry (entry : PHashTableEntry);
-
-    function HashTableEnlarge : Boolean;
-  protected
-    FHashFunc : THashTableHashFunc;
-    FHashTable : PHashTableStruct;
-    FCompareFunctor : KeyBinaryCompareFunctor;
-  public
+  public 
     type
+      { Hash function used to generate hash values for keys used in a hash
+        table. }
+      THashTableHashFunc = function (Key : K) : Cardinal;
+
+      {$IFDEF USE_OPTIONAL}
+      TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<V>;
+      {$ENDIF}
+
+      { THashTable iterator. }
       TIterator = class
       public
         type
-          TKeyValuePair = specialize TPair<K, V>;
+          TKeyValuePair = {$IFDEF FPC}specialize{$ENDIF} TPair<K, V>;
       protected
         { Create new iterator for hashtable item entry. }
         {%H-}constructor Create (HashTable : PHashTableStruct; 
@@ -173,7 +137,46 @@ type
           FHashTablePair : THashTablePair;
           next_entry : PHashTableEntry;
           next_chain : Cardinal; 
-      end;   
+      end; 
+  public
+    { Create a new hash table. }
+    constructor Create (HashFunc : THashTableHashFunc);
+
+    { Destroy a hash table. }
+    destructor Destroy; override;
+
+    { Insert a value into a hash table, overwriting any existing entry using the
+      same key. }
+    function Insert (Key : K; Value : V) : Boolean;
+
+    { Look up a value in a hash table by key. }
+    function Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
+      {$ENDIF};
+
+    { Remove a value from a hash table. }
+    function Remove (Key : K) : Boolean;
+
+    { Retrieve the number of entries in a hash table. }
+    function NumEntries : Cardinal;
+
+    { Retrive the first entry in hashtable. }
+    function FirstEntry : TIterator; 
+
+    { Return enumerator for in operator. }
+    function GetEnumerator : TIterator;
+  protected
+    { Internal function used to allocate the table on hash table creation and 
+      when enlarging the table. }
+    function HashTableAllocateTable : Boolean;
+
+    { Free an entry, calling the free functions if there are any registered }
+    procedure HashTableFreeEntry (entry : PHashTableEntry);
+
+    function HashTableEnlarge : Boolean;
+  protected
+    FHashFunc : THashTableHashFunc;
+    FHashTable : PHashTableStruct;
+    FCompareFunctor : KeyBinaryCompareFunctor;  
   end;  
 
   { Generate a hash key for a pointer. The value pointed at by the pointer is 
@@ -210,7 +213,7 @@ begin
   Result := 5381;
   for i := 0 to Length(location) - 1 do
   begin
-    Result := (Result shl 5) + Result + Byte(location[i]);
+    Result := (Result shl 5) + Result + Byte(Char(location[i]));
   end;
 end;
 
@@ -221,14 +224,14 @@ begin
   Result := 5381;
   for i := 0 to Length(location) - 1 do
   begin
-    Result := (Result shl 5) + Result + Byte(Lowercase(location[i]));
+    Result := (Result shl 5) + Result + Byte(PChar(AnsiLowerCase(location[i])));
   end;
 end;
 
 { THashTable.TIterator }
 
-constructor THashTable.TIterator.Create (HashTable : PHashTableStruct; 
-  Initialize : Boolean);
+constructor THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.Create (HashTable : PHashTableStruct; Initialize : Boolean);
 var
   chain : Cardinal;
 begin
@@ -257,7 +260,8 @@ begin
   end;
 end;
 
-function THashTable.TIterator.Next : TIterator;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.Next : TIterator;
 var
   current_entry : PHashTableEntry;
   chain : Cardinal;
@@ -310,35 +314,42 @@ begin
   Result.next_chain := next_chain;
 end;
 
-function THashTable.TIterator.MoveNext : Boolean;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.MoveNext : Boolean;
 begin
   Result := next_entry <> nil;
 end;
 
-function THashTable.TIterator.GetCurrent : TKeyValuePair;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetCurrent : TKeyValuePair;
 begin
   Result := TKeyValuePair.Create(FHashTablePair.Key, FHashTablePair.Value);
   Next;
 end;
 
-function THashTable.TIterator.GetKey : K;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetKey : K;
 begin
   Result := FHashTablePair.Key;
 end;
 
-function THashTable.TIterator.GetValue : V;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetValue : V;
 begin
   Result := FHashTablePair.Value;
 end;
 
-function THashTable.TIterator.GetEnumerator : TIterator;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(FHashTable, True);
 end;
 
 { THashTable }
 
-constructor THashTable.Create(HashFunc : THashTable.THashTableHashFunc);
+constructor THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Create(HashFunc : THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>
+  {$ENDIF}.THashTableHashFunc);
 begin
   FHashFunc := HashFunc;
   FCompareFunctor := KeyBinaryCompareFunctor.Create;
@@ -357,7 +368,8 @@ begin
   end;
 end;
 
-destructor THashTable.Destroy;
+destructor THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Destroy;
 var
   rover : PHashTableEntry;
   next : PHashTableEntry;
@@ -377,8 +389,7 @@ begin
   end;
   
   { Free the table }
-  Dispose(FHashTable^.table);
-  FHashTable^.table := nil;
+  SetLength(FHashTable^.table, 0);
 
   { Free the hash table structure }
   Dispose(FHashTable);
@@ -387,7 +398,8 @@ begin
   inherited Destroy;
 end;
 
-function THashTable.HashTableAllocateTable : Boolean;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .HashTableAllocateTable : Boolean;
 var
   new_table_size : Cardinal;
 begin
@@ -404,15 +416,15 @@ begin
 
   FHashTable^.table_size := new_table_size;
 
-  { Allocate the table and initialise to NULL for all entries. }
-  FHashTable^.table := GetMem(Sizeof(PHashTableEntry) * FHashTable^.table_size);
-  FillByte(FHashTable^.table^, Sizeof(PHashTableEntry) * FHashTable^.table_size,
-    0);
+  { Allocate the table. }
+  SetLength(FHashTable^.table, FHashTable^.table_size);
 
-  Result := FHashTable^.table <> nil;
+  Result := True;
 end;
 
-procedure THashTable.HashTableFreeEntry (entry : THashTable.PHashTableEntry);
+procedure THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .HashTableFreeEntry (entry : THashTable{$IFNDEF FPC}<K, V,
+  KeyBinaryCompareFunctor>{$ENDIF}.PHashTableEntry);
 var
   pair : PHashTablePair;
 begin
@@ -423,9 +435,10 @@ begin
   pair := nil;
 end;
 
-function THashTable.HashTableEnlarge : Boolean;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .HashTableEnlarge : Boolean;
 var
-  old_table : PPHashTableEntry;
+  old_table : TArrayHashTableEntry;
   old_table_size : Cardinal;
   old_prime_index : Cardinal;
   rover : PHashTableEntry;
@@ -477,11 +490,12 @@ begin
   end;
 
   { Free the old table }
-  Dispose(old_table);
+  SetLength(old_table, 0);
   Result := True;
 end;
 
-function THashTable.Insert (Key : K; Value : V) : Boolean;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Insert (Key : K; Value : V) : Boolean;
 var
   rover : PHashTableEntry;
   pair : PHashTablePair;
@@ -544,7 +558,8 @@ begin
   Result := True;
 end;
 
-function THashTable.Search (Key : K) : V;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Search (Key : K) : V;
 var
   rover : PHashTableEntry;
   pair : PHashTablePair;
@@ -577,7 +592,8 @@ begin
   {$ENDIF}
 end;
 
-function THashTable.Remove (Key : K) : Boolean;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Remove (Key : K) : Boolean;
 var
   rover : PPHashTableEntry;
   entry : PHashTableEntry;
@@ -621,17 +637,20 @@ begin
   end;
 end;
 
-function THashTable.NumEntries : Cardinal;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .NumEntries : Cardinal;
 begin
   Result := FHashTable^.entries;
 end;
 
-function THashTable.FirstEntry : TIterator;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .FirstEntry : TIterator;
 begin
   Result := TIterator.Create(FHashTable, True);
 end;
 
-function THashTable.GetEnumerator : TIterator;
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(FHashTable, True);
 end;

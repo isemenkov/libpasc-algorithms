@@ -1,19 +1,26 @@
 unit testcase_hashtable;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.hashtable, utils.functor;
+  Classes, SysUtils, container.hashtable, utils.functor
+  {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntIntHashTable = specialize THashTable<Integer, Integer,
+  TIntIntHashTable = {$IFDEF FPC}specialize{$ENDIF} THashTable<Integer, Integer,
     TCompareFunctorInteger>;
-  TStrIntHashTable = specialize THashTable<String, Integer,
+  TStrIntHashTable = {$IFDEF FPC}specialize{$ENDIF} THashTable<String, Integer,
     TCompareFunctorString>;
 
   THashTableTestCase = class(TTestCase)
+  public
+    {$IFNDEF FPC}
+    procedure AssertTrue (AMessage : String; ACondition : Boolean);
+    {$ENDIF}
   published
     procedure Test_IntegerIntegerHashTable_CreateNewEmpty;
     procedure Test_IntegerIntegerHashTable_InsertNewValueInto;
@@ -31,6 +38,14 @@ type
   end;
 
 implementation
+
+{$IFNDEF FPC}
+procedure THashTableTestCase.AssertTrue(AMessage : String; ACondition :
+  Boolean);
+begin
+  CheckTrue(ACondition, AMessage);
+end;
+{$ENDIF}
 
 procedure THashTableTestCase.Test_IntegerIntegerHashTable_CreateNewEmpty;
 var
@@ -362,6 +377,6 @@ begin
 end;
 
 initialization
-  RegisterTest(THashTableTestCase);
+  RegisterTest(THashTableTestCase{$IFNDEF FPC}.Suite{$ENDIF});
 end.
 
