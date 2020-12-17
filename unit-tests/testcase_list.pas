@@ -13,8 +13,12 @@ uses
 type
   TIntegerList = {$IFDEF FPC}specialize{$ENDIF} TList<Integer, 
     TCompareFunctorInteger>;
+  TIntegerMultipleList = {$IFDEF FPC}specialize{$ENDIF} TList<TIntegerList,
+    TUnsortableFunctor<TIntegerList>>;
   TStringList = {$IFDEF FPC}specialize{$ENDIF} TList<String, 
     TCompareFunctorString>;
+  TStringMultipleList = {$IFDEF FPC}specialize{$ENDIF} TList<TStringList,
+    TUnsortableFunctor<TStringList>>;
 
   TListTestCase= class(TTestCase)
   public
@@ -34,6 +38,7 @@ type
     procedure Test_IntegerList_IterateValues;
     procedure Test_IntegerList_IterateRange;
     procedure Test_IntegerList_InsertOneMillionValuesInto;
+    procedure Test_IntegerList_InsertValueInMultipleList;
 
     procedure Test_StringList_CreateNewEmpty;
     procedure Test_StringList_AppendNewValueInto;
@@ -47,6 +52,7 @@ type
     procedure Test_StringList_IterateValues;
     procedure Test_StringList_IterateRange;
     procedure Test_StringList_InsertOneMillionValuesInto;
+    procedure Test_StringList_InsertValueInMultipleList;
   end;
 
 implementation
@@ -1288,6 +1294,8 @@ begin
     iterator := iterator.Next;
     Inc(index);
   end;
+
+  FreeAndNil(list);
 end;
 
 procedure TListTestCase.Test_StringList_InsertOneMillionValuesInto;
@@ -1319,6 +1327,91 @@ begin
     iterator := iterator.Next;
     Inc(index);
   end;
+
+  FreeAndNil(list);
+end;
+
+procedure TListTestCase.Test_IntegerList_InsertValueInMultipleList;
+var
+  list : TIntegerMultipleList;
+  inner_list : TIntegerList;
+  value : Integer;
+  index, inner_index : Integer;
+begin
+  list := TIntegerMultipleList.Create;
+
+  for index := 0 to 1000 do
+  begin
+    AssertTrue('#Test_IntegerList_InsertValueInMultipleList -> ' +
+    'TIntegerMultipleList list index' + IntToStr(index) + ' not append',
+    list.Append(TIntegerList.Create));
+
+    for inner_index := 0 to 1000 do
+    begin
+      AssertTrue('#Test_IntegerList_InsertValueInMultipleList -> ' +
+        'Inner TIntegerList value ' + IntToStr(inner_index) + ' not append',
+        list.LastEntry.Value.Append(inner_index));
+    end;
+  end;
+
+  index := 0;
+  for inner_list in list do
+  begin
+    inner_index := 0;
+    for value in inner_list do
+    begin
+      AssertTrue('#Test_IntegerList_InsertValueInMultipleList -> ' +
+        'List ' + IntToStr(index) + ' item index ' + IntToStr(inner_index) +
+        ' value is not correct', value = inner_index);
+
+      Inc(inner_index);
+    end;
+  Inc(index);
+  end;
+
+  FreeAndNil(list);
+end;
+
+
+procedure TListTestCase.Test_StringList_InsertValueInMultipleList;
+var
+  list : TStringMultipleList;
+  inner_list : TStringList;
+  value : String;
+  index, inner_index : Integer;
+begin
+  list := TStringMultipleList.Create;
+
+  for index := 0 to 1000 do
+  begin
+    AssertTrue('#Test_StringList_InsertValueInMultipleList -> ' +
+    'TStringMultipleList list index ' + IntToStr(index) + ' not append',
+    list.Append(TStringList.Create));
+
+    for inner_index := 0 to 1000 do
+    begin
+      AssertTrue('#Test_StringList_InsertValueInMultipleList -> ' +
+        'Inner TStringList value test' + IntToStr(inner_index) + ' not append',
+        list.LastEntry.Value.Append('test' + IntToStr(inner_index)));
+    end;
+  end;
+
+  index := 0;
+  for inner_list in list do
+  begin
+    inner_index := 0;
+    for value in inner_list do
+    begin
+      AssertTrue('#Test_StringList_InsertValueInMultipleList -> ' +
+        'List ' + IntToStr(index) + ' item index ' + IntToStr(inner_index) +
+        ' value is not correct', value = 'test' + IntToStr(inner_index));
+
+      Inc(inner_index);
+    end;
+  Inc(index);
+  end;
+
+  FreeAndNil(list);
 end;
 
 initialization
