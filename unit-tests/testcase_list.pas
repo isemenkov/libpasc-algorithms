@@ -13,12 +13,16 @@ uses
 type
   TIntegerList = {$IFDEF FPC}specialize{$ENDIF} TList<Integer, 
     TCompareFunctorInteger>;
+  TIntegerMultipleCompareFunctor = {$IFDEF FPC}specialize{$ENDIF}
+      TUnsortableFunctor<TIntegerList>;
   TIntegerMultipleList = {$IFDEF FPC}specialize{$ENDIF} TList<TIntegerList,
-    TUnsortableFunctor<TIntegerList>>;
+    TIntegerMultipleCompareFunctor>;
   TStringList = {$IFDEF FPC}specialize{$ENDIF} TList<String, 
     TCompareFunctorString>;
+  TStringMultipleCompareFunctor = {$IFDEF FPC}specialize{$ENDIF}
+      TUnsortableFunctor<TStringList>;
   TStringMultipleList = {$IFDEF FPC}specialize{$ENDIF} TList<TStringList,
-    TUnsortableFunctor<TStringList>>;
+    TStringMultipleCompareFunctor>;
 
   TListTestCase= class(TTestCase)
   public
