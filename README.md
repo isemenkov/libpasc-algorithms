@@ -1,6 +1,6 @@
 libPasC-Algorithms
 ==========
-libPasC-Algorithms is object pascal library of common data structures and algorithms. Library rewritten from [c-algorithms](https://github.com/fragglet/c-algorithms) repository and other sources. 
+libPasC-Algorithms is delphi and object pascal library of common data structures and algorithms. Library rewritten from [c-algorithms](https://github.com/fragglet/c-algorithms) repository and other sources. 
 
 ### Table of contents
 
@@ -63,16 +63,22 @@ libPasC-Algorithms is object pascal library of common data structures and algori
 
 ### Requirements
 
+* [Embarcadero (R) Rad Studio](https://www.embarcadero.com)
 * [Free Pascal Compiler](http://freepascal.org)
 * [Lazarus IDE](http://www.lazarus.freepascal.org/) (optional)
 
-Library is tested with latest stable FreePascal Compiler (currently 3.2.0) and Lazarus IDE (currently 2.0.10) on Ubuntu Linux 5.8.0-33-generic x86_64 and Embarcadero (R) Delphi 10.3 on Windows 7 Service Pack 1 (Version 6.1, Build 7601, 64-bit Edition).
+
+
+Library is tested for 
+
+- Embarcadero (R) Delphi 10.3 on Windows 7 Service Pack 1 (Version 6.1, Build 7601, 64-bit Edition)
+- FreePascal Compiler (3.2.0) and Lazarus IDE (2.0.10) on Ubuntu Linux 5.8.0-33-generic x86_64
 
 
 
 ### Installation
 
-Get the sources and add the *source* directory to the *fpc.cfg* file.
+Get the sources and add the *source* directory to the project search path. For FPC add the *source* directory to the *fpc.cfg* file.
 
 
 
@@ -88,7 +94,7 @@ Add the unit you want to use to the `uses` clause.
 
 A testing framework consists of the following ingredients:
 1. Test runner project located in `unit-tests` directory.
-2. Test cases (FPCUnit based) for all containers classes. 
+2. Test cases (DUnit for Delphi and FPCUnit for FPC based) for all containers classes. 
 
 
 
@@ -115,7 +121,7 @@ uses
   container.arraylist, utils.functor;
 
 type
-  TIntegerArrayList = specialize TArrayList<Integer, TCompareFunctorInteger>;
+  TIntegerArrayList = {$IFDEF FPC}type specialize{$ENDIF} TArrayList<Integer, TCompareFunctorInteger>;
 
 var
   arr : TIntegerArrayList;
@@ -225,7 +231,7 @@ uses
   container.list, utils.functor;
 
 type
-  TStringList = specialize TList<String, TCompareFunctorString>;
+  TStringList = {$IFDEF FPC}type specialize{$ENDIF} TList<String, TCompareFunctorString>;
 
 var
   list : TStringList;
@@ -344,7 +350,7 @@ uses
   container.avltree, utils.functor;
 
 type
-  TIntStrTree = specialize TAvlTree<Integer, String, TCompareFunctionInteger>;
+  TIntStrTree = {$IFDEF FPC}type specialize{$ENDIF} TAvlTree<Integer, String, TCompareFunctionInteger>;
 
 var
   tree : TIntStrTree;
@@ -435,7 +441,7 @@ uses
   container.hashtable, utils.functor;
 
 type
-  TIntIntHashTable = specialize THashTable<Integer, Integer, TCompareFunctonInteger>;
+  TIntIntHashTable = {$IFDEF FPC}type specialize{$ENDIF} THashTable<Integer, Integer, TCompareFunctonInteger>;
 
 var
   hash : TIntIntHashTable;
@@ -523,7 +529,7 @@ uses
   container.orderedset, utils.functior;
 
 type
-  TIntOrderedSet = specialize TOrderedSet<Integer, TCompareFunctionInteger>;
+  TIntOrderedSet = {$IFDEF FPC}type specialize{$ENDIF} TOrderedSet<Integer, TCompareFunctionInteger>;
 
 var
   orderedset : TIntOrderedSet;
@@ -607,7 +613,7 @@ uses
   container.trie;
 
 type
-  TIntTrie = specialize TTrie<Integer>;
+  TIntTrie = {$IFDEF FPC}type specialize{$ENDIF} TTrie<Integer>;
 
 var
   trie : TIntTrie;
