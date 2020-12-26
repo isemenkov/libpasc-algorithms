@@ -58,9 +58,8 @@ type
       {$ENDIF}
 
       { TArrayList iterator. }
-      TBaseIterator = {$IFDEF FPC}specialize {$ENDIF}
-        TBidirectionalIterator<T>;
-      TIterator = class (TBaseIterator)
+      TIterator = class ({$IFDEF FPC}specialize{$ENDIF}
+        TBidirectionalIterator<T>)
       protected
       type
         TDynArray = array of T;
@@ -74,16 +73,19 @@ type
         function HasValue : Boolean; override;
 
         { Retrieve the previous entry in a list. }
-        function Prev : TBaseIterator; override;
+        function Prev : {$IFDEF FPC}specialize{$ENDIF}
+          TBidirectionalIterator<T>; override;
 
         { Retrieve the next entry in a list. }
-        function Next : TBaseIterator; override;
+        function Next : {$IFDEF FPC}specialize{$ENDIF} TForwardIterator<T>;
+          override;
 
         { Return True if we can move to next element. }
         function MoveNext : Boolean; override;
 
         { Return enumerator for in operator. }
-        function GetEnumerator : TBaseIterator; override;
+        function GetEnumerator : {$IFDEF FPC}specialize{$ENDIF}
+          TForwardIterator<T>; override;
       protected
         { Get item value. }
         function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
@@ -217,7 +219,7 @@ begin
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.Prev : TBaseIterator;
+  .TIterator.Prev : {$IFDEF FPC}specialize{$ENDIF} TBidirectionalIterator<T>;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition - 1);
 
@@ -228,7 +230,7 @@ begin
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.Next : TBaseIterator;
+  .TIterator.Next : {$IFDEF FPC}specialize{$ENDIF} TForwardIterator<T>;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition + 1); 
 end;
@@ -240,7 +242,7 @@ begin
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.GetEnumerator : TBaseIterator;
+  .TIterator.GetEnumerator : {$IFDEF FPC}specialize{$ENDIF} TForwardIterator<T>;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition);
 end;
