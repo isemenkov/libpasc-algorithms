@@ -58,8 +58,9 @@ type
       {$ENDIF}
 
       { TArrayList iterator. }
-      TIterator = class ({$IFDEF FPC}specialize {$ENDIF}
-        TBidirectionalIterator<T>)
+      TBaseIterator = {$IFDEF FPC}specialize {$ENDIF}
+        TBidirectionalIterator<T>;
+      TIterator = class (TBaseIterator)
       protected
       type
         TDynArray = array of T;
@@ -73,16 +74,16 @@ type
         function HasValue : Boolean; override;
 
         { Retrieve the previous entry in a list. }
-        function Prev : TIterator; reintroduce;
+        function Prev : TBaseIterator; override;
 
         { Retrieve the next entry in a list. }
-        function Next : TIterator; reintroduce;
+        function Next : TBaseIterator; override;
 
         { Return True if we can move to next element. }
         function MoveNext : Boolean; override;
 
         { Return enumerator for in operator. }
-        function GetEnumerator : TIterator; reintroduce;
+        function GetEnumerator : TBaseIterator; override;
       protected
         { Get item value. }
         function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
@@ -216,18 +217,18 @@ begin
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.Prev : TIterator;
+  .TIterator.Prev : TBaseIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition - 1);
 
-  if Result.FPosition < 0 then
+  if TIterator(Result).FPosition < 0 then
   begin
-    Result.FPosition := 0;
+    TIterator(Result).FPosition := 0;
   end;
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.Next : TIterator;
+  .TIterator.Next : TBaseIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition + 1); 
 end;
@@ -239,7 +240,7 @@ begin
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.GetEnumerator : TIterator;
+  .TIterator.GetEnumerator : TBaseIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition);
 end;

@@ -36,7 +36,7 @@ unit container.orderedset;
 interface
 
 uses
-  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  SysUtils, utils.enumerate {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
   {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type
@@ -91,31 +91,32 @@ type
       {$ENDIF}  
   
       { TOrderedSet iterator. }
-      TIterator = class
+      TIterator = class({$IFDEF FPC}specialize{$ENDIF} 
+        TForwardIterator<V>)
       protected
         { Create new iterator for orderedset item entry. }
         {%H-}constructor Create (OrderedSet : POrderedSetStruct; 
           Initialize : Boolean);
       public
         { Return true if iterator has correct value }
-        function HasValue : Boolean;
+        function HasValue : Boolean; override;
 
         { Retrieve the next entry in a orderedset. }
-        function Next : TIterator;
+        function Next : TIterator; reintroduce;
       protected
         { Get item value. }
         function GetValue : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
-          {$ENDIF};
+          {$ENDIF}; override;
 
         { Return current item iterator and move it to next. }
         function GetCurrent : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
-          {$ENDIF};  
+          {$ENDIF};  override;
       public
         { Return True if we can move to next element. }
-        function MoveNext : Boolean;
+        function MoveNext : Boolean; override;
 
         { Return enumerator for in operator. }
-        function GetEnumerator : TIterator;
+        function GetEnumerator : TIterator; reintroduce;
 
         property Value : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF}
           read GetValue;
