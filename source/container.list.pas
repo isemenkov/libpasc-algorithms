@@ -1,6 +1,6 @@
 (******************************************************************************)
 (*                             libPasC-Algorithms                             *)
-(*       object pascal library of common data structures and algorithms       *)
+(* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
 (* Copyright (c) 2020                                       Ivan Semenkov     *)
@@ -36,7 +36,7 @@ unit container.list;
 interface
 
 uses
-  SysUtils {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  SysUtils, utils.enumerate {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
   {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type
@@ -70,20 +70,21 @@ type
       {$ENDIF}
 
       { TList iterator. }
-      TIterator = class
+      TIterator = class({$IFDEF FPC}specialize{$ENDIF}
+        TBidirectionalIterator<T>)
       protected
         { Create new iterator for list item entry. }
         {%H-}constructor Create (APFirstNode : PPListEntry; APLastNode : 
           PPListEntry; APLength : PLongWord; AItem : PListEntry);
       public
         { Return true if iterator has correct value }
-        function HasValue : Boolean;
+        function HasValue : Boolean; override;
 
         { Retrieve the previous entry in a list. }
-        function Prev : TIterator;
+        function Prev : TIterator; reintroduce;
 
         { Retrieve the next entry in a list. }
-        function Next : TIterator;
+        function Next : TIterator; reintroduce;
 
         { Remove an entry from a list. }
         procedure Remove;
@@ -95,14 +96,14 @@ type
         procedure InsertNext (AData : T);
 
         { Return True if we can move to next element. }
-        function MoveNext : Boolean;
+        function MoveNext : Boolean; override;
 
         { Return enumerator for in operator. }
-        function GetEnumerator : TIterator;
+        function GetEnumerator : TIterator; reintroduce;
       protected
         { Get item value. }
         function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
-          {$ENDIF};
+          {$ENDIF}; override;
 
         { Set new item value. }
         procedure SetValue (AValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
@@ -110,7 +111,7 @@ type
 
         { Return current item iterator and move it to next. }
         function GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
-          {$ENDIF};  
+          {$ENDIF}; override;
       protected
         var
           { We cann't store pointer to list because generics in pascal it is

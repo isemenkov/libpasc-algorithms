@@ -1,6 +1,6 @@
 (******************************************************************************)
 (*                             libPasC-Algorithms                             *)
-(*       object pascal library of common data structures and algorithms       *)
+(* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
 (* Copyright (c) 2020                                       Ivan Semenkov     *)
@@ -36,7 +36,8 @@ unit container.avltree;
 interface
 
 uses
-  SysUtils, utils.pair {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  SysUtils, utils.pair, utils.enumerate 
+  {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
   {$IFNDEF FPC}, utils.functor, System.Generics.Defaults{$ENDIF};
 
 type
