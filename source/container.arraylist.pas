@@ -58,8 +58,9 @@ type
       {$ENDIF}
 
       { TArrayList iterator. }
+      TIterator = class; { Fix for FreePascal compiler. }
       TIterator = class ({$IFDEF FPC}specialize{$ENDIF}
-        TBidirectionalIterator<T>)
+        TBidirectionalIterator<T, TIterator>)
       protected
       type
         TDynArray = array of T;
@@ -73,19 +74,17 @@ type
         function HasValue : Boolean; override;
 
         { Retrieve the previous entry in a list. }
-        function Prev : {$IFDEF FPC}specialize{$ENDIF}
-          TBidirectionalIterator<T>; override;
+        function Prev : TIterator; override;
 
         { Retrieve the next entry in a list. }
-        function Next : {$IFDEF FPC}specialize{$ENDIF} TForwardIterator<T>;
+        function Next : TIterator; override;
           override;
 
         { Return True if we can move to next element. }
         function MoveNext : Boolean; override;
 
         { Return enumerator for in operator. }
-        function GetEnumerator : {$IFDEF FPC}specialize{$ENDIF}
-          TForwardIterator<T>; override;
+        function GetEnumerator : TIterator; override;
       protected
         { Get item value. }
         function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
@@ -219,7 +218,7 @@ begin
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.Prev : {$IFDEF FPC}specialize{$ENDIF} TBidirectionalIterator<T>;
+  .TIterator.Prev : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition - 1);
 
@@ -230,7 +229,7 @@ begin
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.Next : {$IFDEF FPC}specialize{$ENDIF} TForwardIterator<T>;
+  .TIterator.Next : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition + 1); 
 end;
@@ -242,7 +241,7 @@ begin
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .TIterator.GetEnumerator : {$IFDEF FPC}specialize{$ENDIF} TForwardIterator<T>;
+  .TIterator.GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition);
 end;

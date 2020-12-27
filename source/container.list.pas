@@ -70,8 +70,9 @@ type
       {$ENDIF}
 
       { TList iterator. }
+      TIterator = class; { Fix for FreePascal compiler. }
       TIterator = class({$IFDEF FPC}specialize{$ENDIF}
-        TBidirectionalIterator<T>)
+        TBidirectionalIterator<T, TIterator>)
       protected
         { Create new iterator for list item entry. }
         {%H-}constructor Create (APFirstNode : PPListEntry; APLastNode : 
@@ -81,10 +82,10 @@ type
         function HasValue : Boolean; override;
 
         { Retrieve the previous entry in a list. }
-        function Prev : TIterator; reintroduce;
+        function Prev : TIterator; override;
 
         { Retrieve the next entry in a list. }
-        function Next : TIterator; reintroduce;
+        function Next : TIterator; override;
 
         { Remove an entry from a list. }
         procedure Remove;
@@ -99,7 +100,7 @@ type
         function MoveNext : Boolean; override;
 
         { Return enumerator for in operator. }
-        function GetEnumerator : TIterator; reintroduce;
+        function GetEnumerator : TIterator; override;
       protected
         { Get item value. }
         function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue

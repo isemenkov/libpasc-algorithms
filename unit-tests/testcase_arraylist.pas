@@ -18,8 +18,7 @@ type
     TCompareFunctorString>;
 
   TIntegerArrayListEnumerator = {$IFDEF FPC}specialize{$ENDIF}
-    TEnumerator<Integer, {$IFDEF FPC}specialize{$ENDIF} TBidirectionalIterator<
-    Integer>>;
+    TEnumerator<Integer, TIntegerArrayList.TIterator>;
 
   TPairInteger = {$IFDEF FPC}specialize{$ENDIF} TPair<Integer, Integer>;
   TPairIntegerCompareFunctor = class
