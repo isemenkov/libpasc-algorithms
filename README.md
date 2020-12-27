@@ -209,6 +209,20 @@ begin
 end;
 ```
 
+```pascal
+var
+  iterator : TIntegerArrayList.TEnumerator.TIterator;
+
+begin
+  for iterator in TIntegerArrayList.TEnumerator.Create(arr.FirstEntry) do
+  begin
+    writeln(iterator.Index);
+    writeln(iterator.Value);
+  end;
+end;
+```
+
+
 
 #### TList
 
@@ -320,6 +334,19 @@ var
 begin
   for iterator in list do
   begin
+    writeln(iterator.Value);
+  end;
+end;
+```
+
+```pascal
+var
+  iterator : TIntegerList.TEnumerator.TIterator;
+
+begin
+  for iterator in TIntegerList.TEnumerator.Create(list.FirstEntry) do
+  begin
+    writeln(iterator.Index);
     writeln(iterator.Value);
   end;
 end;
@@ -584,6 +611,19 @@ begin
   for iterator in orderedset do
   begin
     { Get current value. }
+    writeln(iterator.Value);
+  end;
+end;
+```
+
+```pascal
+var
+  iterator : TIntOrderedSet.TEnumerator.TIterator;
+
+begin
+  for iterator in TIntegerOrdererSet.TEnumerator.Create(orderedset.FirstEntry) do
+  begin
+    writeln(iterator.Index);
     writeln(iterator.Value);
   end;
 end;
