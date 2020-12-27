@@ -84,7 +84,7 @@ type
   public 
     type
       {$IFDEF USE_OPTIONAL}
-      TOptionalValue = specialize TOptional<V>;
+      TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<V>;
       {$ENDIF}  
 
       { TAvlTree iterator }

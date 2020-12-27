@@ -17,11 +17,11 @@ type
       TUnsortableFunctor<TIntegerList>;
   TIntegerMultipleList = {$IFDEF FPC}specialize{$ENDIF} TList<TIntegerList,
     TIntegerMultipleCompareFunctor>;
-  TStringList = {$IFDEF FPC}specialize{$ENDIF} TList<String, 
+  TListStrings = {$IFDEF FPC}specialize{$ENDIF} TList<String,
     TCompareFunctorString>;
   TStringMultipleCompareFunctor = {$IFDEF FPC}specialize{$ENDIF}
-      TUnsortableFunctor<TStringList>;
-  TStringMultipleList = {$IFDEF FPC}specialize{$ENDIF} TList<TStringList,
+      TUnsortableFunctor<TListStrings>;
+  TStringMultipleList = {$IFDEF FPC}specialize{$ENDIF} TList<TListStrings,
     TStringMultipleCompareFunctor>;
 
   TListTestCase= class(TTestCase)
@@ -83,9 +83,9 @@ end;
 
 procedure TListTestCase.Test_StringList_CreateNewEmpty;
 var
-  list : TStringList;
+  list : TListStrings;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_CreateNewEmpty -> ' +
    'IntgerList must be empty', list.Length = 0);
@@ -136,10 +136,10 @@ end;
 
 procedure TListTestCase.Test_StringList_AppendNewValueInto;
 var
-  list : TStringList;
-  iterator : TStringList.TIterator;
+  list : TListStrings;
+  iterator : TListStrings.TIterator;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_AppendNewValueInto -> ' +
     'IntegerList value test1 not append', list.Append('test1'));
@@ -227,10 +227,10 @@ end;
 
 procedure TListTestCase.Test_StringList_PrependValueInto;
 var
-  list : TStringList;
-  iterator : TStringList.TIterator;
+  list : TListStrings;
+  iterator : TListStrings.TIterator;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_PrependValueInto -> ' +
     'IntegerList value test42 not prepend', list.Prepend('test42'));
@@ -332,10 +332,10 @@ end;
 
 procedure TListTestCase.Test_StringList_AppendNewValueAndClear;
 var
-  list : TStringList;
-  iterator : TStringList.TIterator;
+  list : TListStrings;
+  iterator : TListStrings.TIterator;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_AppendNewValueAndClear -> ' +
     'IntegerList value test43 not append', list.Append('test43'));
@@ -450,10 +450,10 @@ end;
 
 procedure TListTestCase.Test_StringList_InsertNewValueInto;
 var
-  list : TStringList;
-  iterator : TStringList.TIterator;
+  list : TListStrings;
+  iterator : TListStrings.TIterator;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_InsertNewValueInto -> ' +
     'IntegerList value test43 not append', list.Append('test43'));
@@ -596,10 +596,10 @@ end;
 
 procedure TListTestCase.Test_StringList_RemoveValueFrom;
 var
-  list : TStringList;
-  iterator : TStringList.TIterator;
+  list : TListStrings;
+  iterator : TListStrings.TIterator;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_RemoveValueFrom -> ' +
     'IntegerList value test32 not append', list.Append('test32'));
@@ -751,10 +751,10 @@ end;
 
 procedure TListTestCase.Test_StringList_FindNthIndexValueFrom;
 var
-  list : TStringList;
-  iterator : TStringList.TIterator;
+  list : TListStrings;
+  iterator : TListStrings.TIterator;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_FindNthIndexValueFrom -> ' +
     'IntegerList value test1 not append', list.Append('test1'));
@@ -872,10 +872,10 @@ end;
 
 procedure TListTestCase.Test_StringList_RemoveMultipleValuesFrom;
 var
-  list : TStringList;
+  list : TListStrings;
   count : Cardinal;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_RemoveMultipleValuesFrom -> ' +
     'IntegerList value test43 not append', list.Append('test43'));
@@ -981,10 +981,10 @@ end;
 
 procedure TListTestCase.Test_StringList_Sort;
 var
-  list : TStringList;
-  iterator : TStringList.TIterator;
+  list : TListStrings;
+  iterator : TListStrings.TIterator;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_Sort -> ' +
     'IntegerList value apple not append', list.Append('apple'));
@@ -1100,11 +1100,11 @@ end;
 
 procedure TListTestCase.Test_StringList_IterateValues;
 var
-  list : TStringList;
-  iterator : TStringList.TIterator;
+  list : TListStrings;
+  iterator : TListStrings.TIterator;
   counter : Cardinal;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_IterateValues -> ' +
     'IntegerList value test4 not append', list.Append('test4'));
@@ -1160,7 +1160,8 @@ end;
 procedure TListTestCase.Test_IntegerList_IterateRange;
 var
   list : TIntegerList;
-  value : Integer;
+  value : {$IFNDEF USE_OPTIONAL}Integer{$ELSE}TIntegerList.TOptionalValue
+    {$ENDIF};
   counter : Cardinal;
 begin
   list := TIntegerList.Create;
@@ -1216,11 +1217,12 @@ end;
 
 procedure TListTestCase.Test_StringList_IterateRange;
 var
-  list : TStringList;
-  value : String;
+  list : TListStrings;
+  value : {$IFNDEF USE_OPTIONAL}String{$ELSE}TListStrings.TOptionalValue
+    {$ENDIF};
   counter : Cardinal;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   AssertTrue('#Test_StringList_IterateRange -> ' +
     'IntegerList value test4 not append', list.Append('test4'));
@@ -1304,11 +1306,11 @@ end;
 
 procedure TListTestCase.Test_StringList_InsertOneMillionValuesInto;
 var
-  list : TStringList;
+  list : TListStrings;
   index : Integer;
-  iterator : TStringList.TIterator;
+  iterator : TListStrings.TIterator;
 begin
-  list := TStringList.Create;
+  list := TListStrings.Create;
 
   for index := 0 to 1000000 do
   begin
@@ -1338,8 +1340,10 @@ end;
 procedure TListTestCase.Test_IntegerList_InsertValueInMultipleList;
 var
   list : TIntegerMultipleList;
-  inner_list : TIntegerList;
-  value : Integer;
+  inner_list : {$IFNDEF USE_OPTIONAL}TIntegerList{$ELSE}
+    TIntegerMultipleList.TOptionalValue{$ENDIF};
+  value : {$IFNDEF USE_OPTIONAL}Integer{$ELSE}TIntegerList.TOptionalValue
+    {$ENDIF};
   index, inner_index : Integer;
 begin
   list := TIntegerMultipleList.Create;
@@ -1354,7 +1358,8 @@ begin
     begin
       AssertTrue('#Test_IntegerList_InsertValueInMultipleList -> ' +
         'Inner TIntegerList value ' + IntToStr(inner_index) + ' not append',
-        list.LastEntry.Value.Append(inner_index));
+        list.LastEntry.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}
+        .Append(inner_index));
     end;
   end;
 
@@ -1362,11 +1367,12 @@ begin
   for inner_list in list do
   begin
     inner_index := 0;
-    for value in inner_list do
+    for value in inner_list{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} do
     begin
       AssertTrue('#Test_IntegerList_InsertValueInMultipleList -> ' +
         'List ' + IntToStr(index) + ' item index ' + IntToStr(inner_index) +
-        ' value is not correct', value = inner_index);
+        ' value is not correct', value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} =
+        inner_index);
 
       Inc(inner_index);
     end;
@@ -1380,8 +1386,10 @@ end;
 procedure TListTestCase.Test_StringList_InsertValueInMultipleList;
 var
   list : TStringMultipleList;
-  inner_list : TStringList;
-  value : String;
+  inner_list : {$IFNDEF USE_OPTIONAL}TListStrings{$ELSE}
+    TStringMultipleList.TOptionalValue{$ENDIF};
+  value : {$IFNDEF USE_OPTIONAL}String{$ELSE}TListStrings.TOptionalValue
+    {$ENDIF};
   index, inner_index : Integer;
 begin
   list := TStringMultipleList.Create;
@@ -1390,13 +1398,14 @@ begin
   begin
     AssertTrue('#Test_StringList_InsertValueInMultipleList -> ' +
     'TStringMultipleList list index ' + IntToStr(index) + ' not append',
-    list.Append(TStringList.Create));
+    list.Append(TListStrings.Create));
 
     for inner_index := 0 to 1000 do
     begin
       AssertTrue('#Test_StringList_InsertValueInMultipleList -> ' +
         'Inner TStringList value test' + IntToStr(inner_index) + ' not append',
-        list.LastEntry.Value.Append('test' + IntToStr(inner_index)));
+        list.LastEntry.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}
+        .Append('test' + IntToStr(inner_index)));
     end;
   end;
 
@@ -1404,11 +1413,12 @@ begin
   for inner_list in list do
   begin
     inner_index := 0;
-    for value in inner_list do
+    for value in inner_list{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} do
     begin
       AssertTrue('#Test_StringList_InsertValueInMultipleList -> ' +
         'List ' + IntToStr(index) + ' item index ' + IntToStr(inner_index) +
-        ' value is not correct', value = 'test' + IntToStr(inner_index));
+        ' value is not correct', value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} =
+        'test' + IntToStr(inner_index));
 
       Inc(inner_index);
     end;

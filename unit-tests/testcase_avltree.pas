@@ -288,7 +288,8 @@ begin
   begin
     AssertTrue('#Test_IntegerIntegerAvlTree_IterateRange -> ' +
       'Tree key' + IntToStr(value.First) + ' value not correct',
-      tree.Search(value.First) = value.Second);
+      tree.Search(value.First){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} =
+      value.Second);
     Inc(counter);
   end;
   AssertTrue('#Test_IntegerIntegerAvlTree_IterateRange -> ' +
@@ -314,7 +315,8 @@ begin
   begin
     AssertTrue('#Test_StringIntegerAvlTree_IterateRange -> ' +
       'Tree key' + value.First + ' value not correct',
-      tree.Search(value.First) = value.Second);
+      tree.Search(value.First){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} =
+      value.Second);
     Inc(counter);
   end;
   AssertTrue('#Test_StringIntegerAvlTree_IterateRange -> ' +

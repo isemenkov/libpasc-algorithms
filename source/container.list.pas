@@ -148,6 +148,8 @@ type
         property Current : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF}
           read GetCurrent;
       end;
+
+      TEnumerator = {$IFDEF FPC}specialize{$ENDIF} TEnumerator<T, TIterator>;
   public
     { Create new list. }
     constructor Create;

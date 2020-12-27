@@ -201,22 +201,25 @@ begin
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.Value),
-    orderedset.HasValue(iterator.Value));
+    'OrderedSet hasn''t value ' + IntToStr(iterator.Value{$IFDEF USE_OPTIONAL}
+    .Unwrap{$ENDIF}),
+    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
 
   iterator := iterator.Next;
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.Value),
-    orderedset.HasValue(iterator.Value));
+    'OrderedSet hasn''t value ' + IntToStr(iterator.Value{$IFDEF USE_OPTIONAL}
+    .Unwrap{$ENDIF}),
+    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
 
   iterator := iterator.Next;
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.Value),
-    orderedset.HasValue(iterator.Value));
+    'OrderedSet hasn''t value ' + IntToStr(iterator.Value{$IFDEF USE_OPTIONAL}
+    .Unwrap{$ENDIF}),
+    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
 
   iterator := iterator.Next;
   AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
@@ -243,22 +246,25 @@ begin
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.Value,
-    orderedset.HasValue(iterator.Value));
+    'OrderedSet hasn''t value ' + iterator.Value{$IFDEF USE_OPTIONAL}
+    .Unwrap{$ENDIF},
+    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
 
   iterator := iterator.Next;
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.Value,
-    orderedset.HasValue(iterator.Value));
+    'OrderedSet hasn''t value ' + iterator.Value{$IFDEF USE_OPTIONAL}
+    .Unwrap{$ENDIF},
+    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
 
   iterator := iterator.Next;
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
     'OrderedSet iterator hasn''t value', iterator.HasValue);
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.Value,
-    orderedset.HasValue(iterator.Value));
+    'OrderedSet hasn''t value ' + iterator.Value{$IFDEF USE_OPTIONAL}
+    .Unwrap{$ENDIF},
+    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
 
   iterator := iterator.Next;
   AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
@@ -270,7 +276,8 @@ end;
 procedure TOrderedSetTestCase.Test_IntOrderedSet_IterateRange;
 var
   orderedset : TIntOrderedSet;
-  value : Integer;
+  value : {$IFNDEF USE_OPTIONAL}Integer{$ELSE}TIntOrderedSet.TOptionalValue
+    {$ENDIF};
   counter : Cardinal;
 begin
   orderedset := TIntOrderedSet.Create(@hashInteger);
@@ -286,8 +293,9 @@ begin
   for value in orderedset do
   begin
     AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
-      'OrderedSet hasn''t value ' + IntToStr(Value),
-      orderedset.HasValue(Value));
+      'OrderedSet hasn''t value ' + IntToStr(Value{$IFDEF USE_OPTIONAL}
+      .Unwrap{$ENDIF}),
+      orderedset.HasValue(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
     Inc(counter);
   end;
   AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
@@ -299,7 +307,8 @@ end;
 procedure TOrderedSetTestCase.Test_StringOrderedSet_IterateRange;
 var
   orderedset : TStringOrderedSet;
-  value : String;
+  value : {$IFNDEF USE_OPTIONAL}String{$ELSE}TStringOrderedSet.TOptionalValue
+    {$ENDIF};
   counter : Cardinal;
 begin
   orderedset := TStringOrderedSet.Create(@hashString);
@@ -315,7 +324,8 @@ begin
   for value in orderedset do
   begin
     AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
-      'OrderedSet hasn''t value ' + Value, orderedset.HasValue(Value));
+      'OrderedSet hasn''t value ' + Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF},
+      orderedset.HasValue(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
     Inc(counter);
   end;
   AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +

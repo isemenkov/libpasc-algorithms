@@ -78,7 +78,6 @@ type
 
         { Retrieve the next entry in a list. }
         function Next : TIterator; override;
-          override;
 
         { Return True if we can move to next element. }
         function MoveNext : Boolean; override;
@@ -119,6 +118,8 @@ type
         FLength : LongInt;
         FPosition : LongInt;
       end;
+
+      TEnumerator = {$IFDEF FPC}specialize{$ENDIF} TEnumerator<T, TIterator>;
   public
     constructor Create (ALength : Cardinal = 0);
     destructor Destroy; override;
@@ -272,7 +273,7 @@ begin
     {$IFNDEF USE_OPTIONAL}
     raise EIndexOutOfRangeException.Create('Index out of range.');
     {$ELSE}
-    Exit(TOptionalValue.Create);
+    Exit;
     {$ENDIF}
   end;
 

@@ -130,6 +130,8 @@ type
           next_entry : POrderedSetEntry;
           next_chain : Cardinal;
       end;
+
+      TEnumerator = {$IFDEF FPC}specialize{$ENDIF} TEnumerator<V, TIterator>;
   public
     { Create a new set. }
     constructor Create (HashFunc : THashOrderedSetFunc);

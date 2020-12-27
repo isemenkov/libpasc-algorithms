@@ -559,7 +559,7 @@ begin
 end;
 
 function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .Search (Key : K) : V;
+  .Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 var
   rover : PHashTableEntry;
   pair : PHashTablePair;
