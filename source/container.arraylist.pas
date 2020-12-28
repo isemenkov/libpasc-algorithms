@@ -36,8 +36,8 @@ unit container.arraylist;
 interface
 
 uses
-  SysUtils, utils.enumerate {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
-  {$IFNDEF FPC}, utils.functor{$ENDIF};
+  SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}, utils.enumerate,
+  utils.functor;
 
 type
   {$IFNDEF USE_OPTIONAL}
