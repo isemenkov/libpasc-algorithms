@@ -126,7 +126,8 @@ uses
   container.arraylist, utils.functor;
 
 type
-  TIntegerArrayList = {$IFDEF FPC}type specialize{$ENDIF} TArrayList<Integer, TCompareFunctorInteger>;
+  TIntegerArrayList = {$IFDEF FPC}type specialize{$ENDIF} TArrayList<Integer, 
+    TCompareFunctorInteger>;
 
 var
   arr : TIntegerArrayList;
@@ -390,7 +391,8 @@ uses
   container.avltree, utils.functor;
 
 type
-  TIntStrTree = {$IFDEF FPC}type specialize{$ENDIF} TAvlTree<Integer, String, TCompareFunctionInteger>;
+  TIntStrTree = {$IFDEF FPC}type specialize{$ENDIF} TAvlTree<Integer, String, 
+    TCompareFunctionInteger>;
 
 var
   tree : TIntStrTree;
@@ -485,7 +487,8 @@ uses
   container.hashtable, utils.functor;
 
 type
-  TIntIntHashTable = {$IFDEF FPC}type specialize{$ENDIF} THashTable<Integer, Integer, TCompareFunctonInteger>;
+  TIntIntHashTable = {$IFDEF FPC}type specialize{$ENDIF} THashTable<Integer, Integer, 
+    TCompareFunctonInteger>;
 
 var
   hash : TIntIntHashTable;
@@ -577,7 +580,8 @@ uses
   container.orderedset, utils.functior;
 
 type
-  TIntOrderedSet = {$IFDEF FPC}type specialize{$ENDIF} TOrderedSet<Integer, TCompareFunctionInteger>;
+  TIntOrderedSet = {$IFDEF FPC}type specialize{$ENDIF} TOrderedSet<Integer, 
+    TCompareFunctionInteger>;
 
 var
   orderedset : TIntOrderedSet;
