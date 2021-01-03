@@ -1,6 +1,7 @@
 libPasC-Algorithms
 ==========
-libPasC-Algorithms is delphi and object pascal library of common data structures and algorithms. Library rewritten from [c-algorithms](https://github.com/fragglet/c-algorithms) repository and other sources. 
+
+libPasC-Algorithms is delphi and object pascal library of common data structures and algorithms. The library is based on the [c-algorithms](https://github.com/fragglet/c-algorithms) repository and it is a set of containers adapted for the Pascal language and the template system available on it.
 
 ### Table of contents
 
@@ -65,7 +66,7 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
 
 * [Embarcadero (R) Rad Studio](https://www.embarcadero.com)
 * [Free Pascal Compiler](http://freepascal.org)
-* [Lazarus IDE](http://www.lazarus.freepascal.org/) (optional)
+* [Lazarus IDE](http://www.lazarus.freepascal.org/)
 
 
 
@@ -102,15 +103,19 @@ A testing framework consists of the following ingredients:
 
 #### TArrayList
 
+TArrayList are generic arrays of T which automatically increase in size.
+
 ```pascal
 uses
-  container.arraylist;
+  container.arraylist, utils.functor;
   
 type
   generic TArrayList<T, BinaryCompareFunctor> = class
 ```
 
-Automatically resizing array. ArrayList are generic arrays of T which automatically increase in size.
+BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two array items. Needed for sort and search functions.
+
+
 
 ##### Examples
 
@@ -226,15 +231,19 @@ end;
 
 #### TList
 
+A doubly-linked list stores a collection of values. Each entry in the list contains a link to the next entry and the previous entry. It is therefore possible to iterate over entries in the list in either direction.
+
 ```pascal
 uses
-  container.list;
+  container.list, utils.functor;
 
 type
   generic TList<T, BinaryCompareFunctor> = class
 ```
 
-A doubly-linked list stores a collection of values. Each entry in the list contains a link to the next entry and the previous entry. It is therefore possible to iterate over entries in the list in either direction.
+BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two list items. Needed for sort and search functions.
+
+
 
 ##### Examples
 
@@ -356,6 +365,10 @@ end;
 
 #### TAvlTree
 
+The AVL tree structure is a balanced binary tree which stores a collection of nodes. Each node has a key and a value associated with it. The nodes are sorted within the tree based on the order of their keys. Modifications to the tree are constructed such that the tree remains balanced at all times (there are always roughly equal numbers of nodes on either side of the tree).
+
+Balanced binary trees have several uses. They can be used as a mapping (searching for a value based on its key), or as a set of keys which is always ordered.
+
 ```pascal
 uses
   container.avltree;
@@ -364,9 +377,9 @@ type
   generic TAvlTree<K, V, KeyBinaryCompareFunctor> = class
 ```
 
-The AVL tree structure is a balanced binary tree which stores a collection of nodes. Each node has a key and a value associated with it. The nodes are sorted within the tree based on the order of their keys. Modifications to the tree are constructed such that the tree remains balanced at all times (there are always roughly equal numbers of nodes on either side of the tree).
+KeyBinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two keys. 
 
-Balanced binary trees have several uses. They can be used as a mapping (searching for a value based on its key), or as a set of keys which is always ordered.
+
 
 ##### Examples
 
@@ -449,15 +462,19 @@ end;
 
 #### THashTable
 
+A hash table stores a set of values which can be addressed by a key. Given the key, the corresponding value can be looked up quickly.
+
 ```pascal
 uses
-  container.hashtable;
+  container.hashtable, utils.functor;
  
 type
   generic THashTable<K, V, KeyBinaryCompareFunctor> = class
 ```
 
-A hash table stores a set of values which can be addressed by a key. Given the key, the corresponding value can be looked up quickly.
+KeyBinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two keys. 
+
+
 
 ##### Examples
 
@@ -536,15 +553,19 @@ end;
 
 #### TOrderedSet
 
+A set stores a collection of values. Each value can only exist once in the set.
+
 ```pascal
 uses
-  container.orderedset;
+  container.orderedset, utils.functor;
 
 type
   generic TOrderedSet<V, BinaryCompareFunctor> = class
 ```
 
-A set stores a collection of values. Each value can only exist once in the set.
+BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two items.
+
+
 
 
 ##### Examples
@@ -633,6 +654,8 @@ end;
 
 #### TTrie
 
+A trie is a data structure which provides fast mappings from strings to values.
+
 ```pascal
 uses
   container.trie;
@@ -641,7 +664,7 @@ type
   generic TTrie<V> = class
 ```
 
-A trie is a data structure which provides fast mappings from strings to values.
+
 
 
 ##### Examples
@@ -691,6 +714,8 @@ end;
 
 #### TMemoryBuffer
 
+TMemoryBuffer is a useful data structure for storing arbitrary sized blocks of memory. It is guarantees deletion of the memory block when the object is destroyed. This class based on wxWidgets wxMemoryBuffer api interface [https://docs.wxwidgets.org/trunk/classwx_memory_buffer.html](https://docs.wxwidgets.org/trunk/classwx_memory_buffer.html).
+
 ```pascal
 uses
   container.memorybuffer;
@@ -699,7 +724,7 @@ type
   TMemoryBuffer = class
 ```
 
-TMemoryBuffer is a useful data structure for storing arbitrary sized blocks of memory. It is guarantees deletion of the memory block when the object is destroyed. This class based on wxWidgets wxMemoryBuffer api interface [https://docs.wxwidgets.org/trunk/classwx_memory_buffer.html](https://docs.wxwidgets.org/trunk/classwx_memory_buffer.html).
+
 
 ##### Examples
 
