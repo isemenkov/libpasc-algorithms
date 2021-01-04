@@ -51,6 +51,24 @@ type
   TStringAdditionalAccumalate = {$IFDEF FPC}specialize{$ENDIF} 
     TAccumulate<String, TStringArrayList.TIterator, TAdditionStringFunctor>;
 
+  TIntegerPow2Functor = class
+    ({$IFDEF FPC}specialize{$ENDIF} TUnaryFunctor<Integer, Integer>)
+  public
+    function Call(AValue : Integer) : Integer; override;
+  end;
+
+  TIntegerArrayListMap = {$IFDEF FPC}specialize{$ENDIF}
+    TMap<Integer, TIntegerArrayList.TIterator, TIntegerPow2Functor>;
+
+  TSubStringFunctor = class
+    ({$IFDEF FPC}specialize{$ENDIF} TUnaryFunctor<String, String>)
+  public
+    function Call (AValue : String) : String; override;
+  end;
+
+  TStringArrayListMap = {$IFDEF FPC}specialize{$ENDIF}
+    TMap<String, TStringArrayList.TIterator, TSubStringFunctor>;
+
   TArrayListTestCase = class(TTestCase)
   public
     {$IFNDEF FPC}
@@ -74,6 +92,7 @@ type
     procedure Test_IntegerArrayList_Enumerator;
     procedure Test_IntegerArrayList_FilterEnumerator;
     procedure Test_IntegerArrayList_AdditionalAccumulate;
+    procedure Test_IntegerArrayList_MapPow;
 
     procedure Test_StringArrayList_CreateNewEmpty;
     procedure Test_StringArrayList_AppendNewValueInto;
@@ -91,6 +110,8 @@ type
     procedure Test_StringArrayList_Enumerator;
     procedure Test_StringArrayList_FilterEnumerator;
     procedure Test_StringArrayList_AdditionalAccumulate;
+    procedure Test_StringArrayList_MapSubString;
+
   end;
 
 implementation
@@ -108,6 +129,16 @@ begin
   begin
     Result := 0;
   end;
+end;
+
+function TIntegerPow2Functor.Call (AValue : Integer) : Integer;
+begin
+  Result := AValue * AValue;
+end;
+
+function TSubStringFunctor.Call (AValue : String) : String;
+begin
+  Result := Copy(AValue, 5, Length(AValue) - 4);
 end;
 
 function TFilterIntegerOddFunctor.Call (AValue : Integer) : Boolean;
@@ -1422,6 +1453,112 @@ begin
   accum := TStringAdditionalAccumalate.Create(arr.FirstEntry, '');
   AssertTrue('#Test_StringArrayList_AdditionalAccumulate -> ' +
     'ArrayLists accumulate value is not correct', accum.Value = '12345');  
+end;
+
+procedure TArrayListTestCase.Test_IntegerArrayList_MapPow;
+var
+  arr : TIntegerArrayList;
+  map : TIntegerArrayListMap;
+  map_iter : TIntegerArrayListMap.TIterator;
+  index : Integer;
+begin
+  arr := TIntegerArrayList.Create;
+
+  arr.Append(2);
+  arr.Append(3);
+  arr.Append(4);
+  arr.Append(5);
+  arr.Append(6);
+
+  AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
+    'ArrayLists length is not correct', arr.Length = 5);
+  
+  index := 0;
+  for map_iter in TIntegerArrayListMap.Create(arr.FirstEntry, 
+    TIntegerPow2Functor.Create) do
+  begin
+    case index of
+      0 : begin
+        AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
+          'ArrayLists value 0 is not correct', map_iter.Value = 4);
+      end;
+      1 : begin
+        AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
+          'ArrayLists value 1 is not correct', map_iter.Value = 9);
+      end;
+      2 : begin
+        AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
+          'ArrayLists value 2 is not correct', map_iter.Value = 16);
+      end;
+      3 : begin
+        AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
+          'ArrayLists value 3 is not correct', map_iter.Value = 25);
+      end;
+      4 : begin
+        AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
+          'ArrayLists value 4 is not correct', map_iter.Value = 36);
+      end;
+      5 : begin
+        Fail('#Test_IntegerArrayList_MapPow -> ' +
+          'Impossible iterator index');
+      end;
+    end;
+
+    Inc(index);
+  end;  
+end;
+
+procedure TArrayListTestCase.Test_StringArrayList_MapSubString;
+var
+  arr : TStringArrayList;
+  map : TStringArrayListMap;
+  map_iter : TStringArrayListMap.TIterator;
+  index : Integer;
+begin
+  arr := TStringArrayList.Create;
+
+  arr.Append('test2');
+  arr.Append('test3');
+  arr.Append('test4');
+  arr.Append('test5');
+  arr.Append('testtest');
+
+  AssertTrue('#Test_StringArrayList_MapSubString -> ' +
+    'ArrayLists length is not correct', arr.Length = 5);
+  
+  index := 0;
+  for map_iter in TStringArrayListMap.Create(arr.FirstEntry, 
+    TSubStringFunctor.Create) do
+  begin
+    case index of
+      0 : begin
+        AssertTrue('#Test_StringArrayList_MapSubString -> ' +
+          'ArrayLists value 0 is not correct', map_iter.Value = '2');
+      end;
+      1 : begin
+        AssertTrue('#Test_StringArrayList_MapSubString -> ' +
+          'ArrayLists value 1 is not correct', map_iter.Value = '3');
+      end;
+      2 : begin
+        AssertTrue('#Test_StringArrayList_MapSubString -> ' +
+          'ArrayLists value 2 is not correct', map_iter.Value = '4');
+      end;
+      3 : begin
+        AssertTrue('#Test_StringArrayList_MapSubString -> ' +
+          'ArrayLists value 3 is not correct', map_iter.Value = '5');
+      end;
+      4 : begin
+        AssertTrue('#Test_StringArrayList_MapSubString -> ' +
+          'ArrayLists value 4 is not correct', map_iter.Value = 'test');
+      end;
+      5 : begin
+        Fail('#Test_StringArrayList_MapSubString -> ' +
+          'Impossible iterator index');
+      end;
+    end;
+
+    Inc(index);
+  end;  
 end;
 
 initialization
