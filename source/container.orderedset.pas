@@ -3,7 +3,7 @@
 (* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
-(* Copyright (c) 2020                                       Ivan Semenkov     *)
+(* Copyright (c) 2020 - 2021                                Ivan Semenkov     *)
 (* https://github.com/isemenkov/libpasc-algorithms          ivan@semenkov.pro *)
 (*                                                          Ukraine           *)
 (******************************************************************************)
@@ -62,7 +62,7 @@ type
 
       POrderedSetStruct = ^TOrderedSetStruct;
       TOrderedSetStruct = record
-        table : TArrayOrderedSetEntry;
+        table : PPOrderedSetEntry;
         entries : Cardinal;
         table_size : Cardinal;
         prime_index : Cardinal;
@@ -250,9 +250,9 @@ begin
     for chain := 0 to FOrderedSet^.table_size - 1 do
     begin
       { There is a value at the start of this chain }
-      if FOrderedSet^.table[chain] <> nil then
+      if TArrayOrderedSetEntry(FOrderedSet^.table)[chain] <> nil then
       begin
-        next_entry := FOrderedSet^.table[chain];
+        next_entry := TArrayOrderedSetEntry(FOrderedSet^.table)[chain];
         Break;    
       end;
     end;
@@ -299,10 +299,10 @@ begin
     while chain < FOrderedSet^.table_size do
     begin
       { Is there a chain at this table entry? }
-      if FOrderedSet^.table[chain] <> nil then
+      if TArrayOrderedSetEntry(FOrderedSet^.table)[chain] <> nil then
       begin
         { Valid chain found! }
-        next_entry := FOrderedSet^.table[chain];
+        next_entry := TArrayOrderedSetEntry(FOrderedSet^.table)[chain];
         Break;
       end;
       { Keep searching until we find an empty chain }
@@ -381,7 +381,7 @@ begin
   { Free all entries in all chains }
   for i := 0 to FOrderedSet^.table_size - 1 do
   begin
-    rover := FOrderedSet^.table[i];
+    rover := TArrayOrderedSetEntry(FOrderedSet^.table)[i];
 
     while rover <> nil do
     begin
@@ -392,7 +392,9 @@ begin
   end;
 
   { Free the table }
-  SetLength(FOrderedSet^.table, 0);
+  Dispose(FOrderedSet^.table);
+  FOrderedSet^.table := nil;
+  //SetLength(FOrderedSet^.table, 0);
 
   { Free the set structure }
   Dispose(FOrderedSet);
@@ -416,9 +418,15 @@ begin
   end;
 
   { Allocate the table. }
-  SetLength(FOrderedSet^.table, FOrderedSet^.table_size);
+  GetMem(FOrderedSet^.table, Sizeof(POrderedSetEntry) * 
+    FOrderedSet^.table_size);
+  FillChar(FOrderedSet^.table^, Sizeof(POrderedSetEntry) * 
+    FOrderedSet^.table_size, $0);
 
-  Result := True;
+  Result := FOrderedSet^.table <> nil;
+  //SetLength(FOrderedSet^.table, FOrderedSet^.table_size);
+
+  //Result := True;
 end;
 
 procedure TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
@@ -433,7 +441,7 @@ function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
 var
   rover : POrderedSetEntry;
   next : POrderedSetEntry;
-  old_table : TArrayOrderedSetEntry;
+  old_table : PPOrderedSetEntry;
   old_table_size : Cardinal;
   old_prime_index : Cardinal;
   index : Cardinal;
@@ -461,7 +469,7 @@ begin
   for i := 0 to old_table_size - 1 do
   begin
     { Walk along this chain }
-    rover := old_table[i];
+    rover := TArrayOrderedSetEntry(old_table)[i];
 
     while rover <> nil do
     begin
@@ -469,8 +477,8 @@ begin
 
       { Hook this entry into the new table }
       index := FHashFunc(rover^.data) mod FOrderedSet^.table_size;
-      rover^.next := FOrderedSet^.table[index];
-      FOrderedSet^.table[index] := rover;
+      rover^.next := TArrayOrderedSetEntry(FOrderedSet^.table)[index];
+      TArrayOrderedSetEntry(FOrderedSet^.table)[index] := rover;
 
       { Advance to the next entry in the chain }
       rover := next;
@@ -478,7 +486,8 @@ begin
   end;
 
   { Free back the old table }
-  SetLength(old_table, 0);
+  Dispose(old_table);
+  //SetLength(old_table, 0);
 
   { Resized successfully }
   Result := True;
@@ -507,7 +516,7 @@ begin
 
   { Walk along this chain and attempt to determine if this data has already been
     added to the table }
-  rover := FOrderedSet^.table[index];
+  rover := TArrayOrderedSetEntry(FOrderedSet^.table)[index];
 
   while rover <> nil do
   begin
@@ -525,8 +534,8 @@ begin
   newentry^.data := Value;
 
   { Link into chain }
-  newentry^.next := FOrderedSet^.table[index];
-  FOrderedSet^.table[index] := newentry;
+  newentry^.next := TArrayOrderedSetEntry(FOrderedSet^.table)[index];
+  TArrayOrderedSetEntry(FOrderedSet^.table)[index] := newentry;
 
   { Keep track of the number of entries in the set }
   Inc(FOrderedSet^.entries);
@@ -546,7 +555,7 @@ begin
   index := FHashFunc(Value) mod FOrderedSet^.table_size;
 
   { Search this chain, until the corresponding entry is found }
-  rover := @FOrderedSet^.table[index];
+  rover := @(TArrayOrderedSetEntry(FOrderedSet^.table)[index]);
 
   while rover^ <> nil do
   begin
@@ -585,7 +594,7 @@ begin
   index := FHashFunc(Value) mod FOrderedSet^.table_size;
 
   { Search this chain, until the corresponding entry is found }
-  rover := FOrderedSet^.table[index];
+  rover := TArrayOrderedSetEntry(FOrderedSet^.table)[index];
 
   while rover <> nil do
   begin
