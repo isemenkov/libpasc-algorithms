@@ -3,7 +3,7 @@
 (* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
-(* Copyright (c) 2020                                       Ivan Semenkov     *)
+(* Copyright (c) 2020 - 2021                                Ivan Semenkov     *)
 (* https://github.com/isemenkov/libpasc-algorithms          ivan@semenkov.pro *)
 (*                                                          Ukraine           *)
 (******************************************************************************)
@@ -68,7 +68,7 @@ type
 
       PHashTableStruct = ^THashTableStruct;
       THashTableStruct = record
-        table : TArrayHashTableEntry;
+        table : PPHashTableEntry;
         table_size : Cardinal;
 
         entries : Cardinal;
@@ -245,9 +245,9 @@ begin
     { Find the first entry }
     for chain := 0 to FHashTable^.table_size - 1 do
     begin
-      if FHashTable^.table[chain] <> nil then
+      if TArrayHashTableEntry(FHashTable^.table)[chain] <> nil then
       begin
-        next_entry := FHashTable^.table[chain];
+        next_entry := TArrayHashTableEntry(FHashTable^.table)[chain];
         next_chain := chain;
         Break;
       end;
@@ -293,9 +293,9 @@ begin
     while chain < FHashTable^.table_size do
     begin
       { Is there anything in this chain? }
-      if FHashTable^.table[chain] <> nil then
+      if TArrayHashTableEntry(FHashTable^.table)[chain] <> nil then
       begin
-        next_entry := FHashTable^.table[chain];
+        next_entry := TArrayHashTableEntry(FHashTable^.table)[chain];
         Break;
       end;
       { Try the next chain }
@@ -378,7 +378,7 @@ begin
   { Free all entries in all chains }
   for i := 0 to FHashTable^.table_size - 1 do
   begin
-    rover := FHashTable^.table[i];
+    rover := TArrayHashTableEntry(FHashTable^.table)[i];
   
     while rover <> nil do
     begin
@@ -389,7 +389,8 @@ begin
   end;
   
   { Free the table }
-  SetLength(FHashTable^.table, 0);
+  Dispose(FHashTable^.table);
+  FHashTable^.table := nil;
 
   { Free the hash table structure }
   Dispose(FHashTable);
@@ -417,9 +418,11 @@ begin
   FHashTable^.table_size := new_table_size;
 
   { Allocate the table. }
-  SetLength(FHashTable^.table, FHashTable^.table_size);
+  GetMem(FHashTable^.table, Sizeof(PHashTableEntry) * FHashTable^.table_size);
+  FillChar(FHashTable^.table^, Sizeof(PHashTableEntry) * FHashTable^.table_size,
+    $0);
 
-  Result := True;
+  Result := FHashTable^.table <> nil;
 end;
 
 procedure THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
@@ -438,7 +441,7 @@ end;
 function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
   .HashTableEnlarge : Boolean;
 var
-  old_table : TArrayHashTableEntry;
+  old_table : PPHashTableEntry;
   old_table_size : Cardinal;
   old_prime_index : Cardinal;
   rover : PHashTableEntry;
@@ -468,7 +471,7 @@ begin
   { Link all entries from all chains into the new table }
   for i := 0 to old_table_size - 1 do
   begin
-    rover := old_table[i];
+    rover := TArrayHashTableEntry(old_table)[i];
 
     while rover <> nil do
     begin
@@ -481,8 +484,8 @@ begin
       index := FHashFunc(pair^.key) mod FHashTable^.table_size;
 
       { Link this entry into the chain }
-      rover^.next := FHashTable^.table[index];
-      FHashTable^.table[index] := rover;
+      rover^.next := TArrayHashTableEntry(FHashTable^.table)[index];
+      TArrayHashTableEntry(FHashTable^.table)[index] := rover;
 
       { Advance to next in the chain }
       rover := next;
@@ -490,7 +493,7 @@ begin
   end;
 
   { Free the old table }
-  SetLength(old_table, 0);
+  Dispose(old_table);
   Result := True;
 end;
 
@@ -520,7 +523,7 @@ begin
 
   { Traverse the chain at this location and look for an existing entry with the 
     same key }
-  rover := FHashTable^.table[index];
+  rover := TArrayHashTableEntry(FHashTable^.table)[index];
 
   while rover <> nil do
   begin
@@ -548,8 +551,8 @@ begin
   newentry^.pair.value := value;
 
   { Link into the list }
-  newentry^.next := FHashTable^.table[index];
-  FHashTable^.table[index] := newentry;
+  newentry^.next := TArrayHashTableEntry(FHashTable^.table)[index];
+  TArrayHashTableEntry(FHashTable^.table)[index] := newentry;
 
   { Maintain the count of the number of entries }
   Inc(FHashTable^.entries);
@@ -569,7 +572,7 @@ begin
   index := FHashFunc(key) mod FHashTable^.table_size;
 
   { Walk the chain at this index until the corresponding entry is found }
-  rover := FHashTable^.table[index];
+  rover := TArrayHashTableEntry(FHashTable^.table)[index];
 
   while rover <> nil do
   begin
@@ -608,7 +611,7 @@ begin
     previous entry in the chain. This allows us to unlink the entry when we find
     it. }
   Result := False;
-  rover := @FHashTable^.table[index];
+  rover := @(TArrayHashTableEntry(FHashTable^.table)[index]);
 
   while rover^ <> nil do
   begin
