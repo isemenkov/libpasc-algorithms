@@ -3,7 +3,7 @@
 (* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
-(* Copyright (c) 2020                                       Ivan Semenkov     *)
+(* Copyright (c) 2020 - 2021                                Ivan Semenkov     *)
 (* https://github.com/isemenkov/libpasc-algorithms          ivan@semenkov.pro *)
 (*                                                          Ukraine           *)
 (******************************************************************************)
@@ -36,8 +36,8 @@ unit container.arraylist;
 interface
 
 uses
-  SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}, utils.enumerate,
-  utils.functor;
+  SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}, utils.enumerate
+  {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type
   {$IFNDEF USE_OPTIONAL}
@@ -50,21 +50,27 @@ type
   {$IFDEF FPC}generic{$ENDIF} TArrayList<T; BinaryCompareFunctor
     {$IFNDEF FPC}: constructor, utils.functor.TBinaryFunctor<T,
     Integer>{$ENDIF}> = class
-  public
+  protected
     type
       {$IFDEF USE_OPTIONAL}
       TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<T>;
       TOptionalIndex = {$IFDEF FPC}specialize{$ENDIF} TOptional<LongInt>;
       {$ENDIF}
 
+      { Internal container storage data type. }
+      PData = ^TData;
+      TData = record
+        Value : T;
+      end;
+
+      TDynArray = array of PData;
+      PDynArray = ^TDynArray;
+  public
+    type
       { TArrayList iterator. }
       TIterator = class; { Fix for FreePascal compiler. }
       TIterator = class ({$IFDEF FPC}specialize{$ENDIF}
         TBidirectionalIterator<T, TIterator>)
-      protected
-      type
-        TDynArray = array of T;
-        PDynArray = ^TDynArray;
       protected
         { Create new iterator for arraylist item entry. }
         {%H-}constructor Create (Arr : PDynArray; Len : Cardinal; Pos : 
@@ -170,7 +176,7 @@ type
     function Enlarge : Boolean;
 
     { Sort the values }
-    procedure SortInternal (var AData : array of T; ALength : Cardinal);
+    procedure SortInternal (var AData : array of PData; ALength : Cardinal);
 
     { Get value by index. }
     function GetValue (AIndex : LongInt) : {$IFNDEF USE_OPTIONAL}T{$ELSE}
@@ -181,7 +187,7 @@ type
       {$ELSE}TOptionalValue{$ENDIF});
   protected
     var
-      FData : array of T;
+      FData : array of PData;
       FLength : LongInt;
       FAlloced : LongInt;
       FCompareFunctor : BinaryCompareFunctor;
@@ -261,7 +267,7 @@ begin
   end;
 
   Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}
-    FArray^[FPosition]{$IFDEF USE_OPTIONAL}){$ENDIF};
+    FArray^[FPosition]^.Value{$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
 procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -277,7 +283,7 @@ begin
     {$ENDIF}
   end;
 
-  FArray^[FPosition] := AValue{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
+  FArray^[FPosition]^.Value := AValue{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -341,8 +347,8 @@ begin
     {$ENDIF}
   end;
 
-  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}FData[AIndex]
-    {$IFDEF USE_OPTIONAL}){$ENDIF};
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}FData[AIndex]^
+    .Value{$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
 procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -358,7 +364,8 @@ begin
     {$ENDIF}
   end;  
 
-  FData[AIndex] := AData{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
+  New(FData[AIndex]);
+  FData[AIndex]^.Value := AData{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF};
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -377,9 +384,9 @@ begin
 end;
 
 procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .SortInternal (var AData : array of T; ALength : Cardinal);
+  .SortInternal (var AData : array of PData; ALength : Cardinal);
 var
-  pivot, tmp : T;
+  pivot, tmp : PData;
   list1_length, list2_length : Cardinal;
   i : Cardinal;
 begin
@@ -404,7 +411,7 @@ begin
 
   for i := 0 to ALength - 1 do
   begin
-    if FCompareFunctor.Call(AData[i], pivot) < 0 then
+    if FCompareFunctor.Call(AData[i]^.Value, pivot^.Value) < 0 then
     begin
       { This should be in list 1. Therefore it is in the wrong position. Swap 
         the data immediately following the last item in list 1 with this data. }
@@ -439,8 +446,6 @@ end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .Insert (AIndex : LongInt; AData : T) : Boolean;
-var
-  Index : Integer;
 begin
   { Sanity check the index }
   if AIndex > FLength then
@@ -459,18 +464,13 @@ begin
     end;
   end;
 
-  { Strings move fix. }
-  if TypeInfo(T) = TypeInfo(String) then
-  begin
-    if AIndex <> FLength then
-      for index := FLength downto AIndex + 1 do
-        FData[index] := FData[index - 1];
-  end else
-    { Move the contents of the array forward from the index onwards }
-    Move(FData[AIndex], FData[AIndex + 1], (FLength - AIndex) * SizeOf(T));
+  { Move the contents of the array forward from the index onwards }
+  System.Move(FData[AIndex], FData[AIndex + 1], (FLength - AIndex) * 
+    Sizeof(PData));
 
   { Insert the new entry at the index }
-  FData[AIndex] := AData;
+  New(FData[AIndex]);
+  FData[AIndex]^.Value := AData;
   Inc(FLength);
 
   Result := True;
@@ -499,7 +499,7 @@ begin
 
   { Move back the entries following the range to be removed }
   Move(FData[AIndex + ALength], FData[AIndex],
-    (FLength - (AIndex + ALength)) * SizeOf(T));
+    (FLength - (AIndex + ALength)) * SizeOf(PData));
   Dec(FLength, ALength);
 end;
 
@@ -519,7 +519,7 @@ begin
 
   for i := 0 to FLength - 1 do
   begin
-    if FCompareFunctor.Call(FData[i], AData) = 0 then
+    if FCompareFunctor.Call(FData[i]^.Value, AData) = 0 then
     begin
       Result := i;
       Exit;

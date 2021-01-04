@@ -1458,7 +1458,6 @@ end;
 procedure TArrayListTestCase.Test_IntegerArrayList_MapPow;
 var
   arr : TIntegerArrayList;
-  map : TIntegerArrayListMap;
   map_iter : TIntegerArrayListMap.TIterator;
   index : Integer;
 begin
@@ -1511,7 +1510,6 @@ end;
 procedure TArrayListTestCase.Test_StringArrayList_MapSubString;
 var
   arr : TStringArrayList;
-  map : TStringArrayListMap;
   map_iter : TStringArrayListMap.TIterator;
   index : Integer;
 begin

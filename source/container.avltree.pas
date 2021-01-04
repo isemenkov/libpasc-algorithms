@@ -36,7 +36,7 @@ unit container.avltree;
 interface
 
 uses
-  SysUtils, utils.pair, utils.enumerate 
+  SysUtils, utils.pair
   {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
   {$IFNDEF FPC}, utils.functor, System.Generics.Defaults{$ENDIF};
 
