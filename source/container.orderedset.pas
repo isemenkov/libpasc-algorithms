@@ -154,14 +154,16 @@ type
     { Perform a union of two sets.
       A new set containing all values which are in the first or second sets, or 
       empty set if it was not possible to allocate memory for the new set. }
-    {function Union (OrderedSet : specialize TOrderedSet<V, 
-      BinaryCompareFunctor>) : specialize TSortedSet<V, BinaryCompareFunctor>;}
+    function Union (OrderedSet : {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<V, 
+      BinaryCompareFunctor>) : {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<V, 
+      BinaryCompareFunctor>;
 
     { Perform an intersection of two sets.
       A new set containing all values which are in both set, or empty set if it 
       was not possible to allocate memory for the new set. }
-    {function Intersection (OrderedSet : specialize TOrderedSet<V,
-      BinaryCompareFunctor>) : specialize TOrderedSet<V, BinaryCompareFunctor>;}
+    function Intersection (OrderedSet : {$IFDEF FPC}specialize{$ENDIF} 
+      TOrderedSet<V, BinaryCompareFunctor>) : {$IFDEF FPC}specialize{$ENDIF} 
+      TOrderedSet<V, BinaryCompareFunctor>;
 
     { Retrive the first entry in orderedset. }
     function FirstEntry : TIterator; 
@@ -628,6 +630,67 @@ function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
   .GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(FOrderedSet, True);
+end;
+
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .Union (OrderedSet : {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<V,
+  BinaryCompareFunctor>) : {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<V,
+  BinaryCompareFunctor>;
+var
+  Value : V;
+begin
+  Result := TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+    .Create(FHashFunc);
+
+  { Add all values from the first set. }
+  for Value in Self do
+  begin
+    { Copy the value into the new set. }
+    if not Result.Insert(Value) then
+    begin
+      { Failed to insert. }
+      FreeAndNil(Result);
+      Exit(nil);
+    end;  
+  end;
+
+  { Add all values from the second set. }
+  for Value in OrderedSet do
+  begin
+    { Has this value been put into the new set already?
+		  If so, do not insert this again. }
+    if not Result.HasValue(Value) then
+      if not Result.Insert(Value) then
+      begin
+        { Failed to insert. }
+        FreeAndNil(Result);
+        Exit(nil);
+      end;
+  end;
+end;
+
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+  .Intersection (OrderedSet : {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<V, 
+  BinaryCompareFunctor>) : {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<V, 
+  BinaryCompareFunctor>;
+var
+  Value : V;
+begin
+  Result := TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
+    .Create(FHashFunc);
+  
+  { Iterate over all values in self set. }
+  for Value in Self do
+  begin
+    { Is this value in OrderedSet as well? If so, it should be in the new set. }
+    if OrderedSet.HasValue(Value) then
+      { Copy the value first before inserting, if necessary. }
+      if not OrderedSet.Insert(Value) then
+      begin
+        FreeAndNil(Result);
+        Exit(nil);
+      end;
+  end;
 end;
 
 end.
