@@ -3,7 +3,7 @@
 (* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
-(* Copyright (c) 2020                                       Ivan Semenkov     *)
+(* Copyright (c) 2020 - 2021                                Ivan Semenkov     *)
 (* https://github.com/isemenkov/libpasc-algorithms          ivan@semenkov.pro *)
 (*                                                          Ukraine           *)
 (******************************************************************************)
@@ -26,7 +26,9 @@
 
 unit container.trie;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 {$IFOPT D+}
   {$DEFINE DEBUG}
 {$ENDIF}
@@ -34,15 +36,22 @@ unit container.trie;
 interface
 
 uses
-  SysUtils;
+  SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
+  {$IFNDEF USE_OPTIONAL}
   { Item key value not exists. }
   EKeyNotExistsException = class(Exception);
+  {$ENDIF}
 
   { A trie is a data structure which provides fast mappings from strings to 
     values. }
-  generic TTrie<V> = class
+  {$IFDEF FPC}generic{$ENDIF} TTrie<V> = class
+  {$IFDEF USE_OPTIONAL}
+  public
+    type  
+      TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<T>;
+  {$ENDIF}
   public
     { Create a new trie. }
     constructor Create;
@@ -53,20 +62,22 @@ type
     { Insert a new key-value pair into a trie. The key is a NUL-terminated
       string. Return true if the value was inserted successfully, or zero if it 
       was not possible to allocate memory for the new entry. }
-    function Insert (Key : String; Value : V) : Boolean;
+    function Insert (Key : AnsiString; Value : V) : Boolean;
 
     { Insert a new key-value pair into a trie. The key is a sequence of bytes. }
     function InsertBinary (Key : PByte; KeyLength : Integer; Value : V) : 
       Boolean;
 
     { Look up a value from its key in a trie. }
-    function Search (Key : String) : V;
+    function Search (Key : AnsiString) : {$IFNDEF USE_OPTIONAL}V{$ELSE}
+      TOptionalValue{$ENDIF};
 
     { Look up a value from its key in a trie. The key is a sequence of bytes. }
-    function SearchBinary (Key : PByte; KeyLength : Integer) : V;
+    function SearchBinary (Key : PByte; KeyLength : Integer) : 
+      {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 
     { Remove an entry from a trie. }
-    function Remove (Key : String) : Boolean;
+    function Remove (Key : AnsiString) : Boolean;
 
     { Remove an entry from a trie. The key is a sequence of bytes. }
     function RemoveBinary (Key : PByte; KeyLength : Integer) : Boolean;
@@ -79,14 +90,9 @@ type
       PTrieNode = ^TTrieNode;  
       TTrieNode = record
         data : V;
+        ptr : Pointer;
         use_count : Cardinal;
         next : array [0 .. 255] of PTrieNode;
-      end;
-
-      PTrieDestroyNode = ^TTrieDestroyNode;
-      TTrieDestroyNode = record
-        data : PTrieNode;
-        next : PTrieDestroyNode;  
       end;
 
       PTrieStruct = ^TTrieStruct;
@@ -96,89 +102,79 @@ type
   protected
     FTrie : PTrieStruct;  
   protected
-    function FindEnd (Key : String) : PTrieNode;
+    function FindEnd (Key : AnsiString) : PTrieNode;
     function FindEndBinary (Key : PByte; KeyLength : Integer) : PTrieNode;
 
     { Roll back an insert operation after a failed GetMem() call. }
     procedure InsertRollback (Key : PByte);
+  private
+    procedure ListPush (list : PPTrieNode; node : PTrieNode);
+    function ListPop (list : PPTrieNode) : PTrieNode;
   end;
 
 implementation
 
 { TTrie }
 
-constructor TTrie.Create;
+procedure TTrie{$IFNDEF FPC}<V>{$ENDIF}.ListPush (list : PPTrieNode; 
+  node : PTrieNode);
+begin
+  node^.ptr := list^;
+  list^ := node;
+end;
+
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.ListPop (list : PPTrieNode) : 
+  PTrieNode;
+begin
+  Result := list^;
+  list^ := Result^.ptr;
+end;
+
+constructor TTrie{$IFNDEF FPC}<V>{$ENDIF}.Create;
 begin
   New(FTrie);
   FTrie^.root_node := nil;
 end;
 
-destructor TTrie.Destroy;
-
-  procedure list_push (list : PTrieDestroyNode; node : PTrieNode);
-    {$IFNDEF DEBUG}inline;{$ENDIF}
-  var
-    new_node : PTrieDestroyNode;
-  begin
-    New(new_node);
-    new_node^.data := node;
-    new_node^.next := list^.next;
-    list^.next := new_node;
-  end;
-
-  function list_pop (list : PTrieDestroyNode) : PTrieDestroyNode;
-    {$IFNDEF DEBUG}inline;{$ENDIF}
-  var
-    node : PTrieDestroyNode;
-  begin
-    node := list^.next;
-    list^.next := node^.next;
-    Result := node;
-  end;
-
+destructor TTrie{$IFNDEF FPC}<V>{$ENDIF}.Destroy;
 var
-  free_list : TTrieDestroyNode;
-  node : PTrieDestroyNode;
+  free_list, node : PTrieNode;
   i : Integer;
 begin
-  free_list.next := nil;
+  free_list := nil;
 
-  { Start with the root node }
+  { Start with the root node. }
   if FTrie^.root_node <> nil then
-  begin
-    list_push(@free_list, FTrie^.root_node);
-  end;
+    ListPush(@free_list, FTrie^.root_node);
 
   { Go through the free list, freeing nodes. We add new nodes as we encounter 
     them; in this way, all the nodes are freed non-recursively. }
-  while free_list.next <> nil do
+  while free_list <> nil do
   begin
-    node := list_pop(@free_list);
+    node := ListPop(@free_list);
 
     { Add all children of this node to the free list. }
-    for i := 0 to 256 do
+    for i := 0 to 255 do
     begin
-      if node^.data^.next[i] <> nil then
-      begin
-        list_push(@free_list, node^.data^.next[i]);
-      end;
+      if node^.next[i] <> nil then
+        ListPush(@free_list, node^.next[i]);
     end;
-    { Free the node }
-    Dispose(node^.data);
-    //Dispose(node);
+
+    { Free the node. }
+    Dispose(node);
   end;
-  { Free the trie }  
+
+  { Free the trie. }
   Dispose(FTrie);
-  FTrie := nil;  
 
   inherited Destroy;
 end;
 
-function TTrie.FindEnd (Key : String) : PTrieNode;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.FindEnd (Key : AnsiString) : PTrieNode;
 var
   node : PTrieNode;
-  key_index : Cardinal;
-  p : Char;
+  key_index : Integer;
+  p : AnsiChar;
 begin
   { Search down the trie until the end of string is reached }
   node := FTrie^.root_node;
@@ -204,7 +200,8 @@ begin
   Result := node;
 end;
 
-function TTrie.FindEndBinary (Key : PByte; KeyLength : Integer) : PTrieNode;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.FindEndBinary (Key : PByte; KeyLength : 
+  Integer) : PTrieNode;
 var
   node : PTrieNode;
   j, c : Integer;
@@ -221,6 +218,7 @@ begin
     end;
 
     c := Byte(Key[j]);
+
     { Jump to the next node }
     node := node^.next[c];
   end;
@@ -229,7 +227,7 @@ begin
   Result := node;
 end;
 
-procedure TTrie.InsertRollback (Key : PByte);
+procedure TTrie{$IFNDEF FPC}<V>{$ENDIF}.InsertRollback (Key : PByte);
 var
   node : PTrieNode;
   prev_ptr : PPTrieNode;
@@ -241,7 +239,7 @@ begin
     string because Insert never got that far. As a result, it is not necessary 
     to check for the end of string delimiter (NUL). }
   node := FTrie^.root_node;
-  prev_ptr := @FTrie^.root_node;
+  prev_ptr := @(FTrie^.root_node);
   p := Key;
 
   while node <> nil do
@@ -272,12 +270,13 @@ begin
   end;
 end;
 
-function TTrie.Insert (Key : String; Value : V) : Boolean;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.Insert (Key : AnsiString; Value : V) : 
+  Boolean;
 var
   rover : PPTrieNode;
   node : PTrieNode;
-  key_index : Cardinal;
-  p : Char;
+  key_index : Integer;
+  p : AnsiChar;
   c : Integer;
 begin
   { Search to see if this is already in the tree }
@@ -292,7 +291,7 @@ begin
 
   { Search down the trie until we reach the end of string, creating nodes as 
     necessary }
-  rover := @FTrie^.root_node;
+  rover := @(FTrie^.root_node);
   key_index := 1;
   p := Key[key_index];
 
@@ -303,19 +302,20 @@ begin
     if node = nil then
     begin
       { Node does not exist, so create it }
-      node := GetMem(Sizeof(PTrieNode));
+      GetMem(node, Sizeof(TTrieNode));
       
       if node = nil then
       begin
         { Allocation failed.  Go back and undo what we have done so far. }
-        InsertRollback(PByte(PChar(Key)));
+        InsertRollback(PByte(PAnsiChar(Key)));
         Exit(False);
       end;
 
-      node^.use_count := 0;
       node^.data := Default(V);
-      FillByte(node^.next, Sizeof(PTrieNode) * 256, 0);
-      
+      node^.ptr := nil;
+      node^.use_count := 0;
+      FillChar(node^.next, Sizeof(PTrieNode) * 256, $0);
+
       { Link in to the trie }
       rover^ := node;
     end;
@@ -339,11 +339,12 @@ begin
     Inc(key_index);
     p := Key[key_index];
   end;
+
   Result := True;
 end;
 
-function TTrie.InsertBinary (Key : PByte; KeyLength : Integer; Value : V) :
-  Boolean;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.InsertBinary (Key : PByte; KeyLength : 
+  Integer; Value : V) : Boolean;
 var
   rover : PPTrieNode;
   node : PTrieNode;
@@ -361,7 +362,7 @@ begin
 
   { Search down the trie until we reach the end of string, creating nodes as 
     necessary }
-  rover := @FTrie^.root_node;
+  rover := @(FTrie^.root_node);
   p := 0;
 
   while True do
@@ -371,7 +372,7 @@ begin
     if node = nil then
     begin
       { Node does not exist, so create it }
-      node := GetMem(Sizeof(PTrieNode));
+      GetMem(node, Sizeof(TTrieNode));
 
       if node = nil then
       begin
@@ -380,8 +381,10 @@ begin
         Exit(False);
       end;
 
-      FillChar(node, Sizeof(PTrieNode), 0);
       node^.data := Default(V);
+      node^.ptr := nil;
+      node^.use_count := 0;
+      FillChar(node^.next, Sizeof(PTrieNode) * 256, $0);
 
       { Link in to the trie }
       rover^ := node;
@@ -405,33 +408,31 @@ begin
     rover := @(node^.next[c]);
     Inc(p);
   end;
+
   Result := True;
 end;
 
-function TTrie.Remove (Key : String) : Boolean;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.Remove (Key : AnsiString) : Boolean;
 var
   node : PTrieNode;
   next : PTrieNode;
   last_next_ptr : PPTrieNode;
-  key_index : Cardinal;
-  p : Char;
+  key_index : Integer;
+  p : AnsiChar;
   c : Integer;
 begin
   { Find the end node and remove the value }
   node := FindEnd(Key);
 
   if node <> nil then
-  begin
-    node^.data := Default(V);
-  end else
-  begin
+    node^.data := Default(V)
+  else
     Exit(False);
-  end;
 
   { Now traverse the tree again as before, decrementing the use count of each 
     node. Free back nodes as necessary. }
   node := FTrie^.root_node;
-  last_next_ptr := @FTrie^.root_node;
+  last_next_ptr := @(FTrie^.root_node);
   key_index := 1;
   p := Key[key_index];
   
@@ -460,13 +461,10 @@ begin
 
     { Go to the next character or finish }
     if key_index > Length(Key) then
-    begin
-      Break;
-    end else
-    begin
+      Break
+    else
       Inc(key_index);
       p := Key[key_index];
-    end;
 
     { If necessary, save the location of the "next" pointer so that it may be 
       set to NULL on the next iteration if the next node visited is freed. }
@@ -483,7 +481,8 @@ begin
   Result := True;
 end;
 
-function TTrie.RemoveBinary (Key : PByte; KeyLength : Integer) : Boolean;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.RemoveBinary (Key : PByte; KeyLength : 
+  Integer) : Boolean;
 var
   node : PTrieNode;
   next : PTrieNode;
@@ -494,17 +493,14 @@ begin
   node := FindEndBinary(Key, KeyLength);
 
   if node <> nil then
-  begin
-    node^.data := Default(V);
-  end else
-  begin
+    node^.data := Default(V)
+  else
     Exit(False);
-  end;
 
   { Now traverse the tree again as before, decrementing the use count of each 
     node. Free back nodes as necessary. }
   node := FTrie^.root_node;
-  last_next_ptr := @FTrie^.root_node;
+  last_next_ptr := @(FTrie^.root_node);
   p := 0;
 
   while True do
@@ -532,12 +528,9 @@ begin
 
     { Go to the next character or finish }
     if p = KeyLength then
-    begin
-      Break;
-    end else
-    begin
+      Break
+    else
       Inc(p);
-    end;
 
     { If necessary, save the location of the "next" pointer so that it may be 
       set to NULL on the next iteration if the next node visited is freed. }
@@ -554,47 +547,50 @@ begin
   Result := True;
 end;
 
-function TTrie.Search (Key : String) : V;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.Search (Key : AnsiString) : 
+  {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 var
   node : PTrieNode;
 begin
   node := FindEnd(Key);
   
   if node <> nil then
-  begin
-    Exit(node^.data);
-  end else
-  begin
+    Exit({$IFNDEF USE_OPTIONAL}node^.data{$ELSE}
+      TOptionalValue.Create(node^.data){$ENDIF})
+  else
+    {$IFNDEF USE_OPTIONAL}
     raise EKeyNotExistsException.Create('Key not exists.');
-  end;
+    {$ELSE}
+    Exi(TOptionalValue.Create);
+    {$ENDIF}
 end;
 
-function TTrie.SearchBinary (Key : PByte; KeyLength : Integer) : V;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.SearchBinary (Key : PByte; KeyLength : 
+  Integer) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 var
   node : PTrieNode;
 begin
   node := FindEndBinary(Key, KeyLength);
 
   if node <> nil then
-  begin
-    Exit(node^.data);
-  end else
-  begin
+    Exit({$IFNDEF USE_OPTIONAL}node^.data{$ELSE}
+      TOptionalValue.Create(node^.data){$ENDIF})
+  else
+    {$IFNDEF USE_OPTIONAL}
     raise EKeyNotExistsException.Create('Key not exists.');
-  end;
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
 end;
 
-function TTrie.NumEntries : Cardinal;
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.NumEntries : Cardinal;
 begin
   { To find the number of entries, simply look at the use count of the root 
     node. }
   if FTrie^.root_node <> nil then
-  begin
-    Result := FTrie^.root_node^.use_count;
-  end else
-  begin
+    Result := FTrie^.root_node^.use_count
+  else
     Result := 0;
-  end;
 end;
 
 end.

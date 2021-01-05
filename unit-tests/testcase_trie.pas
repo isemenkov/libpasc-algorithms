@@ -1,34 +1,45 @@
 unit testcase_trie;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, container.trie;
+  Classes, SysUtils, container.trie
+  {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntTrie = specialize TTrie<Integer>;
-  TStrTrie = specialize TTrie<String>;
+  TIntTrie = {$IFDEF FPC}specialize{$ENDIF} TTrie<Integer>;
+  TStrTrie = {$IFDEF FPC}specialize{$ENDIF} TTrie<String>;
 
   TTrieTestCase = class(TTestCase)
+  public
+    {$IFNDEF FPC}
+    procedure AssertTrue (AMessage : String; ACondition : Boolean);
+    {$ENDIF}
   published
     procedure Test_IntegerTrie_CreateNewEmpty;
     procedure Test_IntegerTrie_InsertNewValueInto;
     //procedure Test_IntegerIntegerAvlTree_RemoveValueFrom;
-    //procedure Test_IntegerIntegerAvlTree_IterateValues;
-    //procedure Test_IntegerIntegerAvlTree_IterateRange;
     //procedure Test_IntegerIntegerAvlTree_InsertOneMillionValuesInto;
 
     //procedure Test_StringIntegerAvlTree_CreateNewEmpty;
     //procedure Test_StringIntegerAvlTree_InsertNewValueInto;
     //procedure Test_StringIntegerAvlTree_RemoveValueFrom;
-    //procedure Test_StringIntegerAvlTree_IterateValues;
-    //procedure Test_StringIntegerAvlTree_IterateRange;
     //procedure Test_StringIntegerAvlTree_InsertOneMillionValuesInto;
   end;
 
 implementation
+
+{$IFNDEF FPC}
+procedure TTrieTestCase.AssertTrue(AMessage : String; ACondition :
+  Boolean);
+begin
+  CheckTrue(ACondition, AMessage);
+end;
+{$ENDIF}
 
 procedure TTrieTestCase.Test_IntegerTrie_CreateNewEmpty;
 var
@@ -53,17 +64,20 @@ begin
     'New value isn''t inserted', trie.Insert('another', 587));
 
   AssertTrue('#Test_IntegerTrie_InsertNewValueInto ->' +
-    'Key ''test'' value is not correct', trie.Search('test') = 21);
+    'Key ''test'' value is not correct', trie.Search('test')
+    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 21);
   AssertTrue('#Test_IntegerTrie_InsertNewValueInto ->' +
-    'Key ''value'' value is not correct', trie.Search('value') = 14);
+    'Key ''value'' value is not correct', trie.Search('value')
+    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 14);
   AssertTrue('#Test_IntegerTrie_InsertNewValueInto ->' +
-    'Key ''another'' value is not correct', trie.Search('another') = 587);
+    'Key ''another'' value is not correct', trie.Search('another')
+    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 587);
 
-  //FreeAndNil(trie);
+  FreeAndNil(trie);
 end;
 
 
 initialization
-  RegisterTest(TTrieTestCase);
+  RegisterTest(TTrieTestCase{$IFNDEF FPC}.Suite{$ENDIF});
 end.
 
