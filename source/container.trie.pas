@@ -181,7 +181,7 @@ begin
 
   key_index := 1;
   p := Key[key_index];
-  while key_index <= Length(Key) do
+  while Byte(p) <> $0 do
   begin
     if node = nil then
     begin
@@ -327,7 +327,7 @@ begin
     c := Byte(p);
 
     { Reached the end of string?  If so, we're finished. }
-    if key_index > Length(Key) then
+    if c = $0 then
     begin
       { Set the data at the node we have reached }
       node^.data := Value;
@@ -460,7 +460,7 @@ begin
     end;
 
     { Go to the next character or finish }
-    if key_index > Length(Key) then
+    if c = $0 then
       Break
     else
       Inc(key_index);
