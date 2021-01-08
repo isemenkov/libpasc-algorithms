@@ -98,6 +98,10 @@ type
         function GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
           {$ENDIF}; override;
 
+        { Get item index. }
+        function GetItemIndex : {$IFNDEF USE_OPTIONAL}LongInt{$ELSE}
+          TOptionalIndex{$ENDIF};
+
         { Return current item iterator and move it to next. }
         function GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue
           {$ENDIF}; override;
@@ -106,6 +110,11 @@ type
           EIndexOutOfRangeException. }
         property Value : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF} 
           read GetValue;
+
+        { Get current item index. If value not exists raise 
+          EIndexOutOfRangeException. }
+        property Index : {$IFNDEF USE_OPTIONAL}LongInt{$ELSE}TOptionalIndex
+          {$ENDIF} read GetItemIndex;
 
         property Current : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF}
           read GetCurrent;
@@ -129,10 +138,6 @@ type
     { Remove a range of entities from a TSortedArray while maintaining the 
       sorted property. }
     procedure RemoveRange (AIndex : LongInt; ALength : LongInt);
-
-    { Insert a value into a TSortedArray while maintaining the sorted 
-      property. }
-    function Insert (AIndex : LongInt; AData : T) : Boolean;
 
     { Find the index of a value in a TSortedArray. }
     function IndexOf (AData : T) : Integer;
@@ -170,5 +175,184 @@ type
 
 implementation
 
+{ TSortedArray.TIterator }
+
+constructor TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.Create (Arr : PDynArray; Len : Cardinal; Pos : Integer);
+begin
+  FArray := Arr;
+  FLength := Len;
+  FPosition := Pos;
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.HasValue : Boolean;
+begin
+  if FPosition >= FLength then
+  begin
+    Exit(False);
+  end;
+
+  Result := True;
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.Prev : TIterator;
+begin
+  Result := TIterator.Create(FArray, FLength, FPosition - 1);
+
+  if TIterator(Result).FPosition < 0 then
+  begin
+    TIterator(Result).FPosition := 0;
+  end;
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.Next : TIterator;
+begin
+  Result := TIterator.Create(FArray, FLength, FPosition + 1); 
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.MoveNext : Boolean;
+begin
+  Result := FPosition < FLength;
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(FArray, FLength, FPosition);
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetValue : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF};
+begin
+  if FPosition > FLength then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EIndexOutOfRangeException.Create('Index out of range.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}
+    FArray^[FPosition]^.Value{$IFDEF USE_OPTIONAL}){$ENDIF};
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetItemIndex : {$IFNDEF USE_OPTIONAL}LongInt
+  {$ELSE}TOptionalIndex{$ENDIF};
+begin
+  if FPosition > FLength then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EIndexOutOfRangeException.Create('Index out of range.');
+    {$ELSE}
+    Exit(TOptionalIndex.Create);
+    {$ENDIF}
+  end;
+
+  Result := {$IFNDEF USE_OPTIONAL}FPosition{$ELSE}
+    TOptionalIndex.Create(FPosition){$ENDIF};
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .TIterator.GetCurrent : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF};
+begin
+  Result := GetValue;
+  Inc(FPosition);
+end;
+
+{ TSortedArray }
+
+constructor TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Create(ALength : Cardinal);
+begin
+  if ALength = 0 then
+  begin
+    ALength := 16;
+  end;
+
+  SetLength(FData, ALength);
+  FAlloced := ALength;
+  FLength := 0;
+  FCompareFunctor := BinaryCompareFunctor.Create;
+end;
+
+destructor TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Destroy;
+begin
+  SetLength(FData, 0);
+  inherited Destroy;
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .GetValue (AIndex : LongInt) : {$IFNDEF USE_OPTIONAL}T
+  {$ELSE}TOptionalValue{$ENDIF};
+begin
+  if AIndex > FLength then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EIndexOutOfRangeException.Create('Index out of range.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}FData[AIndex]^
+    .Value{$IFDEF USE_OPTIONAL}){$ENDIF};
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Append (AData : T) : Boolean;
+begin
+
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .IndexOf (AData : T) : Integer;
+begin
+  
+end;
+
+procedure TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Remove (AIndex : Cardinal);
+begin
+  RemoveRange(AIndex, 1);
+end;
+
+procedure TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .RemoveRange (AIndex : LongInt; ALength : LongInt);
+begin
+
+end;
+
+procedure TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Clear;
+begin
+  FLength := 0;
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .FirstEntry : TIterator;
+begin
+  Result := TIterator.Create(@FData, FLength, 0);
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .LastEntry : TIterator;
+begin
+  Result := TIterator.Create(@FData, FLength, FLength - 1);
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .GetEnumerator : TIterator;
+begin
+  Result := TIterator.Create(@FData, FLength, 0);
+end;
 
 end.
