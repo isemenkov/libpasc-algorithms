@@ -101,15 +101,15 @@
         <DCCReference Include="..\source\container.hashtable.pas"/>
         <DCCReference Include="..\source\container.memorybuffer.pas"/>
         <DCCReference Include="..\source\container.trie.pas"/>
+        <DCCReference Include="..\source\container.sortedarray.pas"/>
         <DCCReference Include="testcase_arraylist.pas"/>
         <DCCReference Include="testcase_list.pas"/>
         <DCCReference Include="testcase_avltree.pas"/>
         <DCCReference Include="testcase_orderedset.pas"/>
         <DCCReference Include="testcase_hashtable.pas"/>
-        <DCCReference Include="testcase_memorybuffer.pas">
-            <Form>$R *.RES</Form>
-        </DCCReference>
-        <DCCReference Include="testcase_trie.pas">
+        <DCCReference Include="testcase_memorybuffer.pas"/>
+        <DCCReference Include="testcase_trie.pas"/>
+        <DCCReference Include="testcase_sortedarray.pas">
             <Form>$R *.RES</Form>
         </DCCReference>
         <BuildConfiguration Include="Release">

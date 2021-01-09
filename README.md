@@ -18,44 +18,51 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
         * [Search](#search)
         * [Sort](#sort)
         * [Iterate](#iterate)
-    * [TList](#tlist)
+    * [TSortedArray](#tsortedarray)
       * [Examples](#examples-1)
         * [Create](#create-1)
         * [Insert](#insert-1)
         * [Remove](#remove-1)
         * [Search](#search-1)
-        * [Sort](#sort-1)
         * [Iterate](#iterate-1)
-    * [TAvlTree](#tavltree)
+    * [TList](#tlist)
       * [Examples](#examples-2)
         * [Create](#create-2)
         * [Insert](#insert-2)
         * [Remove](#remove-2)
         * [Search](#search-2)
+        * [Sort](#sort-1)
         * [Iterate](#iterate-2)
-    * [THashTable](#thashtable)
+    * [TAvlTree](#tavltree)
       * [Examples](#examples-3)
         * [Create](#create-3)
         * [Insert](#insert-3)
         * [Remove](#remove-3)
         * [Search](#search-3)
         * [Iterate](#iterate-3)
-    * [TOrderedSet](#torderedset)
+    * [THashTable](#thashtable)
       * [Examples](#examples-4)
         * [Create](#create-4)
         * [Insert](#insert-4)
         * [Remove](#remove-4)
+        * [Search](#search-4)
         * [Iterate](#iterate-4)
-    * [TTrie](#ttrie)
+    * [TOrderedSet](#torderedset)
       * [Examples](#examples-5)
         * [Create](#create-5)
         * [Insert](#insert-5)
         * [Remove](#remove-5)
-        * [Search](#search-5)
-    * [TMemoryBuffer](#tmemorybuffer)
+        * [Iterate](#iterate-5)
+    * [TTrie](#ttrie)
       * [Examples](#examples-6)
         * [Create](#create-6)
         * [Insert](#insert-6)
+        * [Remove](#remove-6)
+        * [Search](#search-6)
+    * [TMemoryBuffer](#tmemorybuffer)
+      * [Examples](#examples-7)
+        * [Create](#create-7)
+        * [Insert](#insert-7)
         * [Buffer size](#buffer-size)
         * [Realloc buffer size](#realloc-buffer-size)
         * [Clear buffer](#clear-buffer)
@@ -223,6 +230,109 @@ begin
   for iterator in TIntegerArrayList.TEnumerator.Create(arr.FirstEntry) do
   begin
     writeln(iterator.Index);
+    writeln(iterator.Value);
+  end;
+end;
+```
+
+
+
+#### TSortedArray
+
+The TSortedArray is an automatically resizing array which stores its elements in sorted order. User defined functor determine the sorting order. All operations on a TSortedArray maintain the sorted property. Most operations are done in O(n) time, but searching can be done in O(log n) worst case.
+
+```pascal
+uses
+  container.sortedarray, utils.functor;
+  
+type
+  generic TSortedArray<T, BinaryCompareFunctor> = class
+```
+
+BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two array items. Needed for search function.
+
+
+
+##### Examples
+
+###### Create
+
+```pascal
+uses
+  container.sortedarray, utils.functor;
+
+type
+  TIntegerSortedArray = {$IFDEF FPC}type specialize{$ENDIF} 
+    TSortedArray<Integer, TCompareFunctorInteger>;
+
+var
+  arr : TIntegerSortedArray;
+
+begin
+  arr := TIntegerSortedArray.Create;
+
+  FreeAndNil(arr);
+
+  { Create and reserve container for twelve elements. }
+  arr := TIntegerSortedArray.Create(12);
+end;
+```
+
+###### Insert
+
+```pascal
+  { Add new item at the end. }
+  arr.Append(1);
+```
+
+###### Remove
+
+```pascal
+  { Remove item by index. }
+  arr.Remove(1);
+
+  { Remove items range. }
+  arr.RemoveRange(0, 3);
+
+  { Remove all items. }
+  arr.Clear;
+```
+
+###### Search
+
+```pascal
+  { Seach element. }
+  arr.IndexOf(3);
+```
+
+###### Iterate
+
+```pascal
+var
+  iterator : TIntegerSortedArray.TIterator;
+
+begin
+  { Get first item iterator. }
+  iterator := arr.FirstEntry;
+
+  while iterator.HasValue do
+  begin
+    { Get current value. }
+    writeln(iterator.Value);
+
+    { Get next item. }
+    iterator := iterator.Next;
+  end;
+end;
+```
+
+```pascal
+var
+  iterator : TIntegerSortedArray.TIterator;
+
+begin
+  for iterator in arr do
+  begin
     writeln(iterator.Value);
   end;
 end;

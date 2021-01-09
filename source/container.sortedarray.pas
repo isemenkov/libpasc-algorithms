@@ -36,7 +36,7 @@ unit container.sortedarray;
 interface
 
 uses
-  SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}, utils.enumerate
   {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type
@@ -129,7 +129,7 @@ type
 
     { Insert a value into a sorted array while maintaining the sorted 
       property. }
-    function Append (AValue : T) : Boolean;
+    function Append (AData : T) : Boolean;
 
     { Remove a value from a TSortedArray at a specified index while maintaining 
       the sorted property. }
@@ -154,6 +154,16 @@ type
     { Return enumerator for in operator. }
     function GetEnumerator : TIterator;
   protected
+    { Function for finding first index of range which equals data. An equal 
+      value must be present. }
+    function FirstIndex (AData : T; ALeft : LongInt; ARight : LongInt) :
+      LongInt;
+
+    { Function for finding last index of range which equals data. An equal 
+      value must be present. }
+    function LastIndex (AData : T; ALeft : LongInt; ARight : LongInt) :
+      LongInt;
+
     { Get value by index. }
     function GetValue (AIndex : LongInt) : {$IFNDEF USE_OPTIONAL}T{$ELSE}
       TOptionalValue{$ENDIF};
@@ -309,14 +319,118 @@ end;
 
 function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .Append (AData : T) : Boolean;
+var
+  left, right, index, order, NewSize : LongInt;
 begin
+  { Do a binary search like loop to find right position. }
+  left := 0;
+  right := FLength;
+  index := 0;
+  
+  { When length is 1 set right to 0 so that the loop is not entered. }
+  if right <= 1 then
+    right := 0;
 
+  while left <> right do
+  begin
+    index := (left + right) div 2;
+
+    order := FCompareFunctor.Call(AData, FData[index]^.Value);
+    if order < 0 then
+    begin
+      { Value should be left of index. }
+      right := index;
+    end else if order > 0 then
+    begin
+      { Value should be right of index. }
+      left := index + 1;
+    end else
+    begin
+      { Value should be at index. }
+      Break;
+    end;
+  end;    
+
+  { Look whether the item should be put before or after the index. }
+  if (FLength > 0) and (FCompareFunctor.Call(AData, FData[index]^.Value) > 0)
+    then
+  begin
+    Inc(index);
+  end;
+
+  { Insert element at index. }
+  if FLength + 1 > FAlloced then
+  begin
+    { Enlarge the array. }
+    NewSize := FAlloced * 2;
+
+    { Double the allocated size }
+    NewSize := FAlloced * 2;
+
+    { Reallocate the array to the new size }
+    SetLength(FData, NewSize);
+    FAlloced := NewSize;
+  end;
+
+  { Move the contents of the array forward from the index onwards }
+  System.Move(FData[index], FData[index + 1], (FLength - index) *
+    Sizeof(PData));
+
+  { Insert the new entry at the index }
+  New(FData[index]);
+  FData[index]^.Value := AData;
+  Inc(FLength);
+
+  Result := True;  
 end;
 
 function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .IndexOf (AData : T) : Integer;
+var
+  left, right, index, order : LongInt;
 begin
-  
+  if FLength <= 0 then
+    Exit(-1);
+
+  left := 0;
+  right := FLength;
+  index := 0;
+
+  { Safe subtract 1 of right without going negative. }
+  if right <= 1 then
+    right := 0;
+
+  while left <> right do
+  begin
+    index := (left + right) div 2;
+
+    order := FCompareFunctor.Call(AData, FData[index]^.Value);
+    if order < 0 then
+    begin
+      { Value should be left of index. }
+      right := index;
+    end else if order > 0 then
+    begin
+      { Value should be right of index. }
+      left := index + 1;
+    end else
+    begin
+      { No binary search can be done anymore, search linear now. }
+      left := FirstIndex(AData, left, index);
+      right := LastIndex(AData, index, right);
+
+      for index := left to right do
+      begin
+        if FCompareFunctor.Call(AData, FData[index]^.Value) = 0 then
+          Exit(index);
+      end;
+
+      { Nothing is found. }
+      Exit(-1);
+    end;
+  end;
+
+  Result := -1;
 end;
 
 procedure TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -328,7 +442,16 @@ end;
 procedure TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .RemoveRange (AIndex : LongInt; ALength : LongInt);
 begin
+  { Check this is a valid range }
+  if (AIndex > FLength) or (AIndex + ALength > FLength) then
+  begin
+    Exit;
+  end;
 
+  { Move back the entries following the range to be removed }
+  Move(FData[AIndex + ALength], FData[AIndex],
+    (FLength - (AIndex + ALength)) * SizeOf(PData));
+  Dec(FLength, ALength);
 end;
 
 procedure TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -353,6 +476,56 @@ function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(@FData, FLength, 0);
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .FirstIndex (AData : T; ALeft : LongInt; ARight : LongInt) : LongInt;
+var
+  index, order : LongInt;
+begin
+  index := ALeft;
+
+  while ALeft < ARight do
+  begin
+    index := (ALeft + ARight) div 2;
+
+    order := FCompareFunctor.Call(AData, FData[index]^.Value);
+
+    if order > 0 then
+    begin
+      ALeft := index + 1;
+    end else
+    begin
+      ARight := index;
+    end;
+  end;
+
+  Result := index;
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .LastIndex (AData : T; ALeft : LongInt; ARight : LongInt) : LongInt;
+var
+  index, order : LongInt;
+begin
+  index := ARight;
+
+  while ALeft < ARight do
+  begin
+    index := (ALeft + ARight) div 2;
+
+    order := FCompareFunctor.Call(AData, FData[index]^.Value);
+
+    if order <= 0 then
+    begin
+      ALeft := index + 1;
+    end else
+    begin
+      ARight := index;
+    end;
+  end;
+
+  Result := index;
 end;
 
 end.
