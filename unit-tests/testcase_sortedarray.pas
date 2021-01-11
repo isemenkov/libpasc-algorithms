@@ -14,6 +14,8 @@ uses
 type
   TIntegerSortedArray = {$IFDEF FPC}specialize{$ENDIF} TSortedArray<Integer,
     TCompareFunctorInteger>;
+  TStringSortedArray = {$IFDEF FPC}specialize{$ENDIF} TSortedArray<String,
+    TCompareFunctorString>;
 
   TSortedArrayTestCase = class(TTestCase)
   public
@@ -23,7 +25,11 @@ type
   published
     procedure Test_IntegerSortedArray_CreateNewEmpty;
     procedure Test_IntegerSortedArray_AppendNewValueInto;
+    procedure Test_IntegerSortedArray_AppendNewValueAndReallocMemory;
 
+    procedure Test_StringSortedArray_CreateNewEmpty;
+    procedure Test_StringSortedArray_AppendNewValueInto;
+    procedure Test_StringSortedArray_AppendNewValueAndReallocMemory;
   end;
 
 implementation
@@ -43,6 +49,25 @@ begin
   arr := TIntegerSortedArray.Create(0);
 
   AssertTrue('#Test_IntegerSortedArray_CreateNewEmpty -> ' +
+   'ArrayList must be empty', arr.Length = 0);
+
+  FreeAndNil(arr);
+end;
+
+procedure TSortedArrayTestCase.Test_StringSortedArray_CreateNewEmpty;
+var
+  arr : TStringSortedArray;
+begin
+  arr := TStringSortedArray.Create(0);
+
+  AssertTrue('#Test_StringSortedArray_CreateNewEmpty -> ' +
+   'ArrayList must be empty', arr.Length = 0);
+  
+  FreeAndNil(arr);
+
+  arr := TStringSortedArray.Create(10);
+
+  AssertTrue('#Test_StringSortedArray_CreateNewEmpty -> ' +
    'ArrayList must be empty', arr.Length = 0);
 
   FreeAndNil(arr);
@@ -74,6 +99,135 @@ begin
     'ArrayLists index 2 value is not correct', arr.Value[2]
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 8);
 
+  FreeAndNil(arr);
+end;
+
+procedure TSortedArrayTestCase.Test_StringSortedArray_AppendNewValueInto;
+var
+  arr : TStringSortedArray;
+begin
+  arr := TStringSortedArray.Create(3);
+
+  AssertTrue('#Test_StringSortedArray_AppendNewValueInto -> ' +
+    'ArrayList value test1 not append', arr.Append('apple'));
+  AssertTrue('#Test_StringSortedArray_AppendNewValueInto -> ' +
+    'ArrayList value test4 not append', arr.Append('orange'));
+  AssertTrue('#Test_StringSortedArray_AppendNewValueInto -> ' +
+    'ArrayList value test5 not append', arr.Append('banana'));
+
+  AssertTrue('#Test_StringSortedArray_AppendNewValueInto -> ' +
+    'ArrayLists length is not correct', arr.Length = 3);
+
+  AssertTrue('#Test_StringSortedArray_AppendNewValueInto -> ' +
+    'ArrayLists index 0 value is not correct', arr.Value[0]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'apple');
+  AssertTrue('#Test_StringSortedArray_AppendNewValueInto -> ' +
+    'ArrayLists index 1 value is not correct', arr.Value[1]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'banana');
+  AssertTrue('#Test_StringSortedArray_AppendNewValueInto -> '+
+    'ArrayLists index 2 value is not correct', arr.Value[2]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'orange');
+  
+  FreeAndNil(arr);
+end;
+
+procedure TSortedArrayTestCase
+  .Test_IntegerSortedArray_AppendNewValueAndReallocMemory;
+var
+  arr : TIntegerSortedArray;
+begin
+  arr := TIntegerSortedArray.Create(3);
+
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value 12 not append', arr.Append(12));
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value 432 not append', arr.Append(432));
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value -34 not append', arr.Append(-34));
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value 40 not append', arr.Append(40));
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value 492 not append', arr.Append(492));
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value 301 not append', arr.Append(301));
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value -31 not append', arr.Append(-31));
+
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists length is not correct', arr.Length = 7);
+
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 0 value is not correct', arr.Value[0]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -34);
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 1 value is not correct', arr.Value[1]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = -31);
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 2 value is not correct', arr.Value[2]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12);
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 3 value is not correct', arr.Value[3]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 40);
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 4 value is not correct', arr.Value[4]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 301);
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 5 value is not correct', arr.Value[5]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 432);
+  AssertTrue('#Test_IntegerSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 6 value is not correct', arr.Value[6]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 492);
+  
+  FreeAndNil(arr);
+end;
+
+procedure TSortedArrayTestCase
+  .Test_StringSortedArray_AppendNewValueAndReallocMemory;
+var
+  arr : TStringSortedArray;
+begin
+  arr := TStringSortedArray.Create(3);
+
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value test12 not append', arr.Append('apple'));
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value test432 not append', arr.Append('banana'));
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value test-34 not append', arr.Append('orange'));
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value test40 not append', arr.Append('potato'));
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value test492 not append', arr.Append('mango'));
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value test301 not append', arr.Append('cherry'));
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayList value test-31 not append', arr.Append('tomato'));
+
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists length is not correct', arr.Length = 7);
+
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 0 value is not correct', arr.Value[0]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'apple');
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 1 value is not correct', arr.Value[1]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'banana');
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 2 value is not correct', arr.Value[2]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'cherry');
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 3 value is not correct', arr.Value[3]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'mango');
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 4 value is not correct', arr.Value[4]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'orange');
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 5 value is not correct', arr.Value[5]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'potato');
+  AssertTrue('#Test_StringSortedArray_AppendNewValueAndReallocMemory -> ' +
+    'ArrayLists index 6 value is not correct', arr.Value[6]
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'tomato');
+  
   FreeAndNil(arr);
 end;
 
