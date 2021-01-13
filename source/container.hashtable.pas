@@ -36,7 +36,8 @@ unit container.hashtable;
 interface
 
 uses
-  SysUtils, utils.pair {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
+  SysUtils, utils.pair, utils.enumerate 
+  {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
   {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type
@@ -98,36 +99,42 @@ type
       TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<V>;
       {$ENDIF}
 
+      TKeyValuePair = {$IFDEF FPC}specialize{$ENDIF} TPair<K, V>;
+
       { THashTable iterator. }
-      TIterator = class
-      public
-        type
-          TKeyValuePair = {$IFDEF FPC}specialize{$ENDIF} TPair<K, V>;
+      TIterator = class;
+      TIterator = class ({$IFDEF FPC}specialize{$ENDIF}
+        TForwardIterator<TKeyValuePair, TIterator>)
       protected
         { Create new iterator for hashtable item entry. }
         {%H-}constructor Create (HashTable : PHashTableStruct; 
           Initialize : Boolean); 
-      
+
         { Get item key. }
         function GetKey : K;
         
         { Get item value. }
-        function GetValue : V;
+        function GetValue : V; reintroduce;
 
         { Return current item iterator and move it to next. }
-        function GetCurrent : TKeyValuePair;
+        function GetCurrent : TKeyValuePair; override;
       public
+        { Return true if iterator has correct value }
+        function HasValue : Boolean; override;
+
         { Retrieve the next entry in a hashtable. }
-        function Next : TIterator;
+        function Next : TIterator; override;
 
         { Return True if we can move to next element. }
-        function MoveNext : Boolean;
+        function MoveNext : Boolean; override;
 
         { Return enumerator for in operator. }
-        function GetEnumerator : TIterator;
+        function GetEnumerator : TIterator; override;
 
+        { Reuturn key value. }
         property Key : K read GetKey;
         
+        { Return value. }
         property Value : V read GetValue;
 
         property Current : TKeyValuePair read GetCurrent;
@@ -224,7 +231,8 @@ begin
   Result := 5381;
   for i := 0 to Length(location) - 1 do
   begin
-    Result := (Result shl 5) + Result + Byte(PChar(AnsiLowerCase(location[i])));
+    Result := (Result shl 5) + Result +
+      {%H-}Byte(PChar(AnsiLowerCase(location[i])));
   end;
 end;
 
@@ -258,6 +266,12 @@ begin
       FHashTablePair := next_entry^.pair;
     end;
   end;
+end;
+
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.HasValue : Boolean;
+begin
+  Result := True;
 end;
 
 function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}

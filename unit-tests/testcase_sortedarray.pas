@@ -7,8 +7,8 @@ unit testcase_sortedarray;
 interface
 
 uses
-  Classes, SysUtils, container.sortedarray, utils.functor, utils.pair,
-  utils.enumerate, utils.functional
+  Classes, SysUtils, container.sortedarray, utils.functor,
+  utils.enumerate
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type

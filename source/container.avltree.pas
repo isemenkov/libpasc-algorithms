@@ -36,7 +36,7 @@ unit container.avltree;
 interface
 
 uses
-  SysUtils, utils.pair
+  SysUtils, utils.pair, utils.enumerate
   {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
   {$IFNDEF FPC}, utils.functor, System.Generics.Defaults{$ENDIF};
 
@@ -87,12 +87,13 @@ type
       TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<V>;
       {$ENDIF}  
 
+      TAvlKeyValuePair = {$IFDEF FPC}specialize{$ENDIF} TPair<K, V>;
+      TAvlKeyValuePairArray = array of TAvlKeyValuePair;
+
       { TAvlTree iterator }
-      TIterator = class
-      public
-        type
-          TAvlKeyValuePair = {$IFDEF FPC}specialize{$ENDIF} TPair<K, V>;
-          TAvlKeyValuePairArray = array of TAvlKeyValuePair;
+      TIterator = class;
+      TIterator = class ({$IFDEF FPC}specialize{$ENDIF}
+        TBidirectionalIterator<TAvlKeyValuePair, TIterator>)
       protected
         { Create new iterator for avltable item entry. }
         {%H-}constructor Create (AItems : PAvlTreeStruct); overload;
@@ -104,30 +105,35 @@ type
           PInteger);
 
         { Return current item iterator and move it to next. }
-        function GetCurrent : TAvlKeyValuePair;
+        function GetCurrent : TAvlKeyValuePair; override;
 
         { Get item key. }
         function GetKey : K;
 
         { Get item value. }
-        function GetValue : V;
+        function GetValue : V; reintroduce;
       public
         destructor Destroy; override;
 
+        { Return true if iterator has correct value. }
+        function HasValue : Boolean; override;
+
         { Retrieve the previous entry in a avltree. }
-        function Prev : TIterator;
+        function Prev : TIterator; override;
 
         { Retrieve the next entry in a avltree. }
-        function Next : TIterator;
+        function Next : TIterator; override;
 
         { Return True if we can move to next element. }
-        function MoveNext : Boolean;
+        function MoveNext : Boolean; override;
 
         { Return enumerator for in operator. }
-        function GetEnumerator : TIterator;
+        function GetEnumerator : TIterator; override;
 
+        { Return key value. }
         property Key : K read GetKey;
 
+        { Return value. }
         property Value : V read GetValue;
 
         property Current : TAvlKeyValuePair read GetCurrent;
@@ -280,6 +286,17 @@ begin
   inherited Destroy;
 end;
 
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .TIterator.HasValue : Boolean;
+begin
+  if FCurrIndex >= FNumItems then
+  begin
+    Exit(False);
+  end;
+
+  Result := True;
+end;
+
 procedure TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
   .TIterator.TreeToArrayAddSubtree (subtree : PAvlTreeNode; index : PInteger);
 begin
@@ -292,7 +309,7 @@ begin
   TreeToArrayAddSubtree(subtree^.children[Shortint(AVL_TREE_NODE_LEFT)], index);
 
   { Add this node }
-  FItems[index^] := TIterator.TAvlKeyValuePair.Create(subtree^.Key, 
+  FItems[index^] := TAvlKeyValuePair.Create(subtree^.Key,
     subtree^.Value);
   Inc(index^);
 

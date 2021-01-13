@@ -275,7 +275,7 @@ procedure TAvlTreeTestCase.Test_IntegerIntegerAvlTree_IterateRange;
 var
   tree : TIntIntTree;
   counter : Cardinal;
-  value : TIntIntTree.TIterator.TAvlKeyValuePair;
+  value : TIntIntTree.TAvlKeyValuePair;
 begin
   tree := TIntIntTree.Create;
 
@@ -302,7 +302,7 @@ procedure TAvlTreeTestCase.Test_StringIntegerAvlTree_IterateRange;
 var
   tree : TStrIntTree;
   counter : Cardinal;
-  value : TStrIntTree.TIterator.TAvlKeyValuePair;
+  value : TStrIntTree.TAvlKeyValuePair;
 begin
   tree := TStrIntTree.Create;
 

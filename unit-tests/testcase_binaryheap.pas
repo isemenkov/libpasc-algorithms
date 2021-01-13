@@ -7,8 +7,7 @@ unit testcase_binaryheap;
 interface
 
 uses
-  Classes, SysUtils, container.binaryheap, utils.functor, utils.pair,
-  utils.enumerate, utils.functional
+  Classes, SysUtils, container.binaryheap, utils.functor
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type

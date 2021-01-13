@@ -36,7 +36,7 @@ unit container.binaryheap;
 interface
 
 uses
-  SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}, utils.enumerate
+  SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF}
   {$IFNDEF FPC}, utils.functor{$ENDIF};
 
 type

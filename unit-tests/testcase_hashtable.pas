@@ -270,7 +270,7 @@ end;
 procedure THashTableTestCase.Test_IntegerIntegerHashTable_IterateRange;
 var
   hash : TIntIntHashTable;
-  pair : TIntIntHashTable.TIterator.TKeyValuePair;
+  pair : TIntIntHashTable.TKeyValuePair;
   counter : Cardinal;
 begin
   hash := TIntIntHashTable.Create(@HashInteger);
@@ -299,7 +299,7 @@ end;
 procedure THashTableTestCase.Test_StringIntegerHashTable_IterateRange;
 var
   hash : TStrIntHashTable;
-  pair : TStrIntHashTable.TIterator.TKeyValuePair;
+  pair : TStrIntHashTable.TKeyValuePair;
   counter : Cardinal;
 begin
   hash := TStrIntHashTable.Create(@HashString);
