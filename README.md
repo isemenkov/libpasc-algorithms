@@ -53,16 +53,21 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
         * [Insert](#insert-5)
         * [Remove](#remove-5)
         * [Iterate](#iterate-5)
-    * [TTrie](#ttrie)
+    * [TMinBinaryHeap, TMaxBinaryHeap](#tminbinaryheap-tmaxbinaryheap)
       * [Examples](#examples-6)
         * [Create](#create-6)
         * [Insert](#insert-6)
-        * [Remove](#remove-6)
-        * [Search](#search-6)
-    * [TMemoryBuffer](#tmemorybuffer)
+        * [Pop](#pop)
+    * [TTrie](#ttrie)
       * [Examples](#examples-7)
         * [Create](#create-7)
         * [Insert](#insert-7)
+        * [Remove](#remove-6)
+        * [Search](#search-6)
+    * [TMemoryBuffer](#tmemorybuffer)
+      * [Examples](#examples-8)
+        * [Create](#create-8)
+        * [Insert](#insert-8)
         * [Buffer size](#buffer-size)
         * [Realloc buffer size](#realloc-buffer-size)
         * [Clear buffer](#clear-buffer)
@@ -762,6 +767,62 @@ begin
     writeln(iterator.Value);
   end;
 end;
+```
+
+
+
+#### TMinBinaryHeap, TMaxBinaryHeap
+
+Heap type. If a heap is a min heap, the values with the lowest priority are stored at the top of the heap and will be the first returned. If a heap is a  max heap, the values with the greatest priority are stored at the top of the heap.
+
+```pascal
+uses
+  container.binaryheap, utils.functor;
+
+type
+  generic TMinBinaryHeap<V, BinaryCompareFunctor> = class
+  generic TMaxBinaryHeap<V, BinaryCompareFunctor> = class
+```
+
+BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two items.
+
+
+
+
+##### Examples
+
+###### Create
+
+```pascal
+uses
+  container.binaryheap, utils.functior;
+
+type
+  TIntMinBinaryHeap = {$IFDEF FPC}type specialize{$ENDIF} TMinBinaryHeap<Integer, 
+    TCompareFunctionInteger>;
+
+var
+  heap : TIntMinBinaryHeap;
+
+begin
+  heap := TIntMinBinaryHeap.Create;
+
+  FreeAndNil(heap);
+end;
+```
+
+###### Insert
+
+```pascal
+  { Add new entry. }
+  heap.Append(1);
+```
+
+###### Pop
+
+```pascal
+  { Get item from a heap and remove it. }
+  writeln(IntToStr(heap.Pop));
 ```
 
 
