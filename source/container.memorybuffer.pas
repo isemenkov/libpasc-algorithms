@@ -48,14 +48,14 @@ type
   PMemoryBuffer = ^TMemoryBuffer;
   TMemoryBuffer = class
   public
-    constructor Create (ASize : Cardinal = 1024);
+    constructor Create (ASize : Int64 = 1024);
     destructor Destroy; override;
 
     { Append a single byte to the buffer. }
     procedure AppendByte (AData : Byte);
 
     { Append a data block to the buffer. }
-    procedure AppendData (const AData; ASize : Cardinal);
+    procedure AppendData (const AData; ASize : Int64);
 
     { Clear the buffer contents. }
     procedure Clear;
@@ -64,24 +64,24 @@ type
       the empty space in the buffer.
       This pointer can be used to directly write data into the buffer, this new 
       data will be appended to the existing data. }
-    function GetAppendBuffer (ASizeNeeded : Cardinal) : Pointer;
+    function GetAppendBuffer (ASizeNeeded : Int64) : Pointer;
 
     { Sets the length of the data stored in the buffer.
       Mainly useful for truncating existing data. }
-    procedure SetBufferDataSize (ASizeUsed : Cardinal);
+    procedure SetBufferDataSize (ASizeUsed : Int64);
 
     { Ensure the buffer is big enough and return a pointer to the buffer which 
       can be used to directly write into the buffer up to sizeNeeded bytes. }
-    function GetWriteBuffer (ASizeNeeded : Cardinal) : Pointer;
+    function GetWriteBuffer (ASizeNeeded : Int64) : Pointer;
 
     { Ensures the buffer has at least size bytes available. }
-    procedure SetBufferAllocSize (ASize : Cardinal);
+    procedure SetBufferAllocSize (ASize : Int64);
 
     { Returns the size of the buffer. }
-    function GetBufferAllocSize : Cardinal;
+    function GetBufferAllocSize : Int64;
 
     { Returns the length of the valid data in the buffer. }
-    function GetBufferDataSize : Cardinal;
+    function GetBufferDataSize : Int64;
 
     { Return a pointer to the data in the buffer. }
     function GetBufferData : Pointer;
@@ -93,13 +93,13 @@ type
     function Enlarge : Boolean;
   protected
     FData : array of Byte;
-    FLength : Cardinal;
-    FAlloced : Cardinal;
+    FLength : Int64;
+    FAlloced : Int64;
   end;
 
 implementation
 
-constructor TMemoryBuffer.Create (ASize : Cardinal);
+constructor TMemoryBuffer.Create (ASize : Int64);
 begin
   if ASize = 0 then
   begin
@@ -119,7 +119,7 @@ end;
 
 function TMemoryBuffer.Enlarge : Boolean;
 var
-  NewSize : Cardinal;
+  NewSize : Int64;
 begin
   { Double the allocated size }
   NewSize := FAlloced * 2;
@@ -145,7 +145,7 @@ begin
   Inc(FLength);
 end;
 
-procedure TMemoryBuffer.AppendData (const AData; ASize : Cardinal);
+procedure TMemoryBuffer.AppendData (const AData; ASize : Int64);
 begin
   while FLength + ASize > FAlloced do
   begin
@@ -164,7 +164,7 @@ begin
   FLength := 0;
 end;
 
-function TMemoryBuffer.GetAppendBuffer (ASizeNeeded : Cardinal) : Pointer;
+function TMemoryBuffer.GetAppendBuffer (ASizeNeeded : Int64) : Pointer;
 begin
   while FLength + ASizeNeeded > FAlloced do
   begin
@@ -177,12 +177,12 @@ begin
   Result := @FData[FLength];
 end;
 
-procedure TMemoryBuffer.SetBufferDataSize (ASizeUsed : Cardinal);
+procedure TMemoryBuffer.SetBufferDataSize (ASizeUsed : Int64);
 begin
   FLength := ASizeUsed;
 end;
 
-function TMemoryBuffer.GetWriteBuffer (ASizeNeeded : Cardinal) : Pointer;
+function TMemoryBuffer.GetWriteBuffer (ASizeNeeded : Int64) : Pointer;
 begin
   while ASizeNeeded > FAlloced do
   begin
@@ -195,7 +195,7 @@ begin
   Result := @FData[0];
 end;
 
-procedure TMemoryBuffer.SetBufferAllocSize (ASize : Cardinal);
+procedure TMemoryBuffer.SetBufferAllocSize (ASize : Int64);
 begin
   if ASize < FAlloced then
   begin
@@ -214,12 +214,12 @@ begin
   end;
 end;
 
-function TMemoryBuffer.GetBufferAllocSize : Cardinal;
+function TMemoryBuffer.GetBufferAllocSize : Int64;
 begin
   Result := FAlloced;
 end;
 
-function TMemoryBuffer.GetBufferDataSize : Cardinal;
+function TMemoryBuffer.GetBufferDataSize : Int64;
 begin
   Result := FLength;
 end;
