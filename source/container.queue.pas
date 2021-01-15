@@ -39,11 +39,28 @@ uses
   SysUtils{$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
+  {$IFNDEF USE_OPTIONAL}
+  { List item value not exists. }
+  EValueNotExistsException = class(Exception);
+  {$ENDIF}
+
   { A double ended queue stores a list of values in order. New values can be 
     added and removed from either end of the queue. }
   {$IFDEF FPC}generic{$ENDIF} TQueue<T> = class
   protected
-
+    type
+      { A double-ended queue. }
+      PQueueEntry = ^TQueueEntry;
+      TQueueEntry = record
+        Value : T;
+        Prev : PQueueEntry;
+        Next : PQueueEntry;
+      end;
+  public
+    type
+      {$IFDEF USE_OPTIONAL}
+      TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<T>;
+      {$ENDIF}
   public
     constructor Create;
     destructor Destroy;
@@ -52,27 +69,126 @@ type
     function PushHead (AData : T) : Boolean;
 
     { Remove a value from the head of a queue. }
-    function PopHead : T;
+    function PopHead : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF};
 
     { Read value from the head of a queue, without removing it from the queue. }
-    function PeekHead : T;
+    function PeekHead : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF};
 
     { Add a value to the tail of a queue. }
     function PushTail (AData : T) : Boolean;
 
     { Remove a value from the tail of a queue. }
-    function PopTail : T;
+    function PopTail : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF};
 
     { Read a value from the tail of a queue, without removing it from the 
       queue. }
-    function PeekTail : T;
+    function PeekTail : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF};
 
     { Query if any values are currently in a queue. }
     function IsEmpty : Boolean;
+  protected
+    FHead : PQueueEntry;
+    FTail : PQueueEntry;
+    FLength : Cardinal;
   end;
 
 implementation
 
 { TQueue }
+
+constructor TQueue{$IFNDEF FPC}<T>{$ENDIF}.Create;
+begin
+  FHead := nil;
+  FTail := nil;
+  FLength := 0;
+end;
+
+destructor TQueue{$IFNDEF FPC}<T>{$ENDIF}.Destroy;
+begin
+  { Empty the queue. }
+  while not IsEmpty do
+    PopHead;
+end;
+
+function TQueue{$IFNDEF FPC}<T>{$ENDIF}.PushHead (AData : T) : Boolean;
+var
+  NewEntry : PQueueEntry;
+begin
+  { Create the new entry and fill in the fields in the structure. }
+  New(NewEntry);
+  NewEntry^.Value := AData;
+  NewEntry^.Prev := nil;
+  NewEntry^.Next := FHead;
+
+  { Insert into the queue. }
+  if FHead = nil then
+  begin
+    { If the queue was previously empty, both the head and tail must be pointed 
+      at the new entry. }
+    FHead := NewEntry;
+    FTail := NewEntry;
+  end else
+  begin
+    { First entry in the list must have prev pointed back to this new entry. }
+    FHead^.Prev := NewEntry;
+
+    { Only the head must be pointed at the new entry. }
+    FHead := NewEntry;
+  end;
+
+  Result := True;
+end;
+
+function TQueue{$IFNDEF FPC}<T>{$ENDIF}.PopHead : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF};
+var
+  Entry : PQueueEntry;
+begin
+  { Check the queue is not empty. }
+  if IsEmpty then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EValueNotExistsException.Create('Queue is empty.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  { Unlink the first entry from the head of the queue. }
+  Entry := FHead;
+  FHead := Entry^.Next;
+  Result := {$IFNDEF USE_OPTIOANL}Entry^.Value{$ELSE}
+    TOptionalValue.Create(Entry^.Value){$ENDIF};
+  
+  if FHead = nil then
+  begin
+    { If doing this has unlinked the last entry in the queue, set tail to NULL 
+      as well. }
+    FTail := nil;
+  end else
+  begin
+    { The new first in the queue has no previous entry. }
+    FHead^.Prev := nil;
+  end;
+
+  { Free back the queue entry structure. }
+  Dispose(Entry);
+end;
+
+function TQueue{$IFNDEF FPC}<T>{$ENDIF}.PeekHead : {$IFNDEF USE_OPTIONAL}T
+  {$ELSE}TOptionalValue{$ENDIF};
+begin
+  if IsEmpty then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EValueNotExistsException.Create('Queue is empty.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  Result := {$IFNDEF USE_OPTIONAL}FHead^.Value{$ELSE}
+    TOptionalValue.Create(FHead^.Value){$ENDIF};
+end;
 
 end.
