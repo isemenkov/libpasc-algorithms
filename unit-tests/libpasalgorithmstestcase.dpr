@@ -15,6 +15,7 @@ uses
   container.trie in '..\source\container.trie.pas',
   container.sortedarray in '..\source\container.sortedarray.pas',
   container.binaryheap in '..\source\container.binaryheap.pas',
+  container.queue in '..\source\container.queue.pas',
 
   testcase_arraylist in '..\unit-tests\testcase_arraylist.pas',
   testcase_list in '..\unit-tests\testcase_list.pas',
@@ -24,7 +25,8 @@ uses
   testcase_memorybuffer in '..\unit-tests\testcase_memorybuffer.pas',
   testcase_trie in '..\unit-tests\testcase_trie.pas',
   testcase_sortedarray in '..\unit-tests\testcase_sortedarray.pas',
-  testcase_binaryheap in '..\unit-tests\testcase_binaryheap.pas';
+  testcase_binaryheap in '..\unit-tests\testcase_binaryheap.pas',
+  testcase_queue in '..\unit-tests\testcase_queue.pas';
 
 {$R *.RES}
 

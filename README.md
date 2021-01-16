@@ -64,10 +64,15 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
         * [Insert](#insert-7)
         * [Remove](#remove-6)
         * [Search](#search-6)
-    * [TMemoryBuffer](#tmemorybuffer)
+    * [TQueue](#tqueue)
       * [Examples](#examples-8)
         * [Create](#create-8)
         * [Insert](#insert-8)
+        * [Remove](#remove-7)
+    * [TMemoryBuffer](#tmemorybuffer)
+      * [Examples](#examples-9)
+        * [Create](#create-9)
+        * [Insert](#insert-9)
         * [Buffer size](#buffer-size)
         * [Realloc buffer size](#realloc-buffer-size)
         * [Clear buffer](#clear-buffer)
@@ -883,6 +888,63 @@ end;
 ```pascal
   { Search element. }
   trie.Search("one");
+```
+
+
+
+#### TQueue
+
+A double ended queue stores a list of values in order. New values can be added and removed from either end of the queue.
+
+```pascal
+uses
+  container.queue;
+
+type
+  generic TQueue<T> = class
+```
+
+
+
+##### Examples
+
+###### Create
+
+```pascal
+uses
+  container.queue;
+
+type
+  TIntegerQueue = {$IFDEF FPC}type specialize{$ENDIF} TQueue<Integer>;
+
+var
+  queue : TIntegerQueue;
+
+begin
+  queue := TIntegerQueue.Create;
+
+  FreeAndNil(queue);
+end;
+```
+
+###### Insert
+
+```pascal
+  { Add a value to the head of a queue. }
+  queue.PushHead(12);
+
+  { Add a value to the tail of a queue. }
+  queue.PushTail(22);
+```
+
+###### Remove
+
+```pascal
+  { Remove a value from the head of a queue. }
+  queue.PopHead;
+
+  { Remove a value from the tail of a queue. }
+  queue.PopTail;
 ```
 
 

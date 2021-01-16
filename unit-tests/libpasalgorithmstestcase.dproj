@@ -103,6 +103,7 @@
         <DCCReference Include="..\source\container.trie.pas"/>
         <DCCReference Include="..\source\container.sortedarray.pas"/>
         <DCCReference Include="..\source\container.binaryheap.pas"/>
+        <DCCReference Include="..\source\container.queue.pas"/>
         <DCCReference Include="testcase_arraylist.pas"/>
         <DCCReference Include="testcase_list.pas"/>
         <DCCReference Include="testcase_avltree.pas"/>
@@ -112,6 +113,9 @@
         <DCCReference Include="testcase_trie.pas"/>
         <DCCReference Include="testcase_sortedarray.pas"/>
         <DCCReference Include="testcase_binaryheap.pas">
+            <Form>$R *.RES</Form>
+        </DCCReference>
+        <DCCReference Include="testcase_queue.pas">
             <Form>$R *.RES</Form>
         </DCCReference>
         <BuildConfiguration Include="Release">

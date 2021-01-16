@@ -63,7 +63,7 @@ type
       {$ENDIF}
   public
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override;
 
     { Add a value to the head of a queue. }
     function PushHead (AData : T) : Boolean;
@@ -108,6 +108,8 @@ begin
   { Empty the queue. }
   while not IsEmpty do
     PopHead;
+
+  inherited Destroy;
 end;
 
 function TQueue{$IFNDEF FPC}<T>{$ENDIF}.PushHead (AData : T) : Boolean;
@@ -136,6 +138,7 @@ begin
     FHead := NewEntry;
   end;
 
+  Inc(FLength);
   Result := True;
 end;
 
@@ -171,6 +174,8 @@ begin
     FHead^.Prev := nil;
   end;
 
+  Dec(FLength);
+
   { Free back the queue entry structure. }
   Dispose(Entry);
 end;
@@ -189,6 +194,95 @@ begin
 
   Result := {$IFNDEF USE_OPTIONAL}FHead^.Value{$ELSE}
     TOptionalValue.Create(FHead^.Value){$ENDIF};
+end;
+
+function TQueue{$IFNDEF FPC}<T>{$ENDIF}.PushTail (AData : T) : Boolean;
+var
+  NewEntry : PQueueEntry;
+begin
+  { Create the new entry and fill in the fields in the structure. }
+  New(NewEntry);
+  NewEntry^.Value := AData;
+  NewEntry^.Prev := nil;
+  NewEntry^.Next := FHead;
+
+  { Insert into the queue. }
+  if FTail = nil then
+  begin
+    { If the queue was previously empty, both the head and tail must be pointed 
+      at the new entry. }
+    FHead := NewEntry;
+    FTail := NewEntry;
+  end else
+  begin
+    { First entry in the list must have prev pointed back to this new entry. }
+    FTail^.Next := NewEntry;
+
+    { Only the head must be pointed at the new entry. }
+    FTail := NewEntry;
+  end;
+
+  Inc(FLength);
+  Result := True;
+end;
+
+function TQueue{$IFNDEF FPC}<T>{$ENDIF}.PopTail : {$IFNDEF USE_OPTIONAL}T{$ELSE}
+  TOptionalValue{$ENDIF};
+var
+  Entry : PQueueEntry;
+begin
+  { Check the queue is not empty. }
+  if IsEmpty then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EValueNotExistsException.Create('Queue is empty.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  { Unlink the first entry from the head of the queue. }
+  Entry := FTail;
+  FTail := Entry^.Prev;
+  Result := {$IFNDEF USE_OPTIOANL}Entry^.Value{$ELSE}
+    TOptionalValue.Create(Entry^.Value){$ENDIF};
+  
+  if FTail = nil then
+  begin
+    { If doing this has unlinked the last entry in the queue, set tail to NULL 
+      as well. }
+    FHead := nil;
+  end else
+  begin
+    { The new first in the queue has no previous entry. }
+    FTail^.Next := nil;
+  end;
+
+  Dec(FLength);
+
+  { Free back the queue entry structure. }
+  Dispose(Entry);
+end;
+
+function TQueue{$IFNDEF FPC}<T>{$ENDIF}.PeekTail : {$IFNDEF USE_OPTIONAL}T
+  {$ELSE}TOptionalValue{$ENDIF};
+begin
+  if IsEmpty then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EValueNotExistsException.Create('Queue is empty.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end;
+
+  Result := {$IFNDEF USE_OPTIONAL}FTail^.Value{$ELSE}
+    TOptionalValue.Create(FTail^.Value){$ENDIF};
+end;
+
+function TQueue{$IFNDEF FPC}<T>{$ENDIF}.IsEmpty : Boolean;
+begin
+  Result := FHead = nil;
 end;
 
 end.
