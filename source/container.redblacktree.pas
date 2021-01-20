@@ -96,6 +96,9 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
+    { Insert a new key-value pair into a red-black tree. }
+    procedure Insert (AKey : K; AValue : V);
   protected
     function TreeNodeSide (node : PRedBlackNode) : TRedBlackNodeSide;
 
@@ -377,5 +380,56 @@ begin
   parent^.color := RB_TREE_NODE_BLACK;
   grandparent^.color := RB_TREE_NODE_RED;
 end;
+
+procedure TRedBlackTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Insert (AKey : K; AValue : V);
+var
+  node, parent : PRedBlackNode;
+  rover : PPRedBlackNode;
+  side : TRedBlackNodeSide;
+begin
+  { Allocate a new node. }
+  New(node);
+
+  { Set up structure. Initially, the node is red. }
+  node^.key := Key;
+  node^.value := Value;
+  node^.color := RB_TREE_NODE_RED;
+  node^.children[RB_TREE_NODE_LEFT] := nil;
+  node^.children[RB_TREE_NODE_RIGHT] := nil;
+
+  { First, perform a normal binary tree-style insert. }
+  parent := nil;
+  rover := @(FTree^.root_node);
+
+  while (rover^ <> nil) do
+  begin
+    { Update parent. }
+    parent := rover^;
+
+    { Choose which path to go down, left or right child. }
+    if FCompareFunctor.Call(AKey, (rover^)^.key) < 0 then
+    begin
+      side := RB_TREE_NODE_LEFT;
+    end else
+    begin
+      side := RB_TREE_NODE_RIGHT;
+    end;
+
+    rover :=@((rover^))^.children[side];
+  end;
+
+  { Insert at the position we have reached. }
+  rover^ := node;
+  node^.parent := parent;
+
+  { Possibly reorder the tree. }
+  TreeInsertCase1(node);
+
+  { Update the node count. }
+  Inc(FTree^.num_nodes);
+end;
+
+
 
 end.
