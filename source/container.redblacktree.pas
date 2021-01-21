@@ -99,6 +99,11 @@ type
 
     { Insert a new key-value pair into a red-black tree. }
     procedure Insert (AKey : K; AValue : V);
+
+    { Search a red-black tree for a value corresponding to a particular key. 
+      This uses the tree as a mapping. }
+    function Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
+      {$ENDIF};
   protected
     function TreeNodeSide (node : PRedBlackNode) : TRedBlackNodeSide;
 
@@ -173,6 +178,10 @@ type
             /   \                       /   \
          N/R      ?                   ?      U/B                               }
     procedure TreeInsertCase5 (node : PRedBlackNode);
+
+    { Search a red-black tree for a node with a particular key. This uses the 
+      tree as a mapping. }
+    function SearchNode (key : K) : PRedBlackNode;
   protected
     FTree : PRedBlackTreeStruct;
     FCompareFunctor : KeyBinaryCompareFunctor;
@@ -428,6 +437,56 @@ begin
 
   { Update the node count. }
   Inc(FTree^.num_nodes);
+end;
+
+function TRedBlackTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .SearchNode (key : K) : PRedBlackNode;
+var
+  node : PRedBlackNode;
+  side : TRedBlackNodeSide;
+  diff : Integer;
+begin
+  node := FTree^.root_node;
+  
+  { Search down the tree. }
+  while node <> nil do
+  begin
+    diff := FCompareFunctor.Call(key, node^.key);
+
+    if diff = 0 then
+      Exit(node)
+    else if diff < 0 then
+      side := RB_TREE_NODE_LEFT
+    else
+      side := RB_TREE_NODE_RIGHT;
+
+    node := node^.children[side];
+  end;
+
+  { Not found. }
+  Result := nil;
+end;
+
+function TRedBlackTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
+var
+  node : PRedBlackNode;
+begin
+  { Find the node }
+  node := SearchNode(Key);
+
+  if node = nil then
+  begin
+    {$IFNDEF USE_OPTIONAL}
+    raise EKeyNotExistsException.Create('Key not exists.');
+    {$ELSE}
+    Exit(TOptionalValue.Create);
+    {$ENDIF}
+  end else
+  begin
+    Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}node^.value
+      {$IFDEF USE_OPTIONAL}){$ENDIF};
+  end;
 end;
 
 
