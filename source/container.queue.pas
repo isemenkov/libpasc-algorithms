@@ -84,7 +84,7 @@ type
       queue. }
     function PeekTail : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF};
 
-    { Query if any values are currently in a queue. }
+    { Returns true if the queue contains no data. }
     function IsEmpty : Boolean;
   protected
     FHead : PQueueEntry;
@@ -203,8 +203,8 @@ begin
   { Create the new entry and fill in the fields in the structure. }
   New(NewEntry);
   NewEntry^.Value := AData;
-  NewEntry^.Prev := nil;
-  NewEntry^.Next := FHead;
+  NewEntry^.Prev := FTail;
+  NewEntry^.Next := nil;
 
   { Insert into the queue. }
   if FTail = nil then
