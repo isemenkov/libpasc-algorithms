@@ -637,7 +637,7 @@ function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
   BinaryCompareFunctor>) : {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<V,
   BinaryCompareFunctor>;
 var
-  Value : V;
+  Value : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 begin
   Result := TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
     .Create(FHashFunc);
@@ -646,7 +646,7 @@ begin
   for Value in Self do
   begin
     { Copy the value into the new set. }
-    if not Result.Insert(Value) then
+    if not Result.Insert(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}) then
     begin
       { Failed to insert. }
       FreeAndNil(Result);
@@ -659,8 +659,8 @@ begin
   begin
     { Has this value been put into the new set already?
 		  If so, do not insert this again. }
-    if not Result.HasValue(Value) then
-      if not Result.Insert(Value) then
+    if not Result.HasValue(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}) then
+      if not Result.Insert(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}) then
       begin
         { Failed to insert. }
         FreeAndNil(Result);
@@ -674,7 +674,7 @@ function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
   BinaryCompareFunctor>) : {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<V, 
   BinaryCompareFunctor>;
 var
-  Value : V;
+  Value : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 begin
   Result := TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}
     .Create(FHashFunc);
@@ -683,9 +683,9 @@ begin
   for Value in Self do
   begin
     { Is this value in OrderedSet as well? If so, it should be in the new set. }
-    if OrderedSet.HasValue(Value) then
+    if OrderedSet.HasValue(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}) then
       { Copy the value first before inserting, if necessary. }
-      if not OrderedSet.Insert(Value) then
+      if not OrderedSet.Insert(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}) then
       begin
         FreeAndNil(Result);
         Exit(nil);

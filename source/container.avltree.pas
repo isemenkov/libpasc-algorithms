@@ -105,7 +105,8 @@ type
           PInteger);
 
         { Return current item iterator and move it to next. }
-        function GetCurrent : TAvlKeyValuePair; override;
+        function GetCurrent : TAvlKeyValuePair;
+          {$IFNDEF USE_OPTIONAL}override;{$ELSE}reintroduce;{$ENDIF}
 
         { Get item key. }
         function GetKey : K;

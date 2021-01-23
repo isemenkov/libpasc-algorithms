@@ -58,6 +58,7 @@ type
     type
       {$IFDEF USE_OPTIONAL}
       TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<T>;
+      TOptionalIndex = {$IFDEF FPC}specialize{$ENDIF} TOptional<LongInt>;
       {$ENDIF}
 
       { Internal container storage data type. }

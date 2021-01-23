@@ -50,7 +50,7 @@ type
   {$IFDEF USE_OPTIONAL}
   public
     type  
-      TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<T>;
+      TOptionalValue = {$IFDEF FPC}specialize{$ENDIF} TOptional<V>;
   {$ENDIF}
   public
     { Create a new trie. }
@@ -561,7 +561,7 @@ begin
     {$IFNDEF USE_OPTIONAL}
     raise EKeyNotExistsException.Create('Key not exists.');
     {$ELSE}
-    Exi(TOptionalValue.Create);
+    Exit(TOptionalValue.Create);
     {$ENDIF}
 end;
 

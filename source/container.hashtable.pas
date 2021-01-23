@@ -117,7 +117,8 @@ type
         function GetValue : V; reintroduce;
 
         { Return current item iterator and move it to next. }
-        function GetCurrent : TKeyValuePair; override;
+        function GetCurrent : TKeyValuePair;
+          {$IFNDEF USE_OPTIONAL}override;{$ELSE}reintroduce;{$ENDIF}
       public
         { Return true if iterator has correct value }
         function HasValue : Boolean; override;

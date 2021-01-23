@@ -81,13 +81,13 @@ begin
 
   AssertTrue('#Test_IntegerTrie_InsertNewStringValueInto ->' +
     'Key ''test'' value is not correct', trie.Search('test')
-    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 21);
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 21);
   AssertTrue('#Test_IntegerTrie_InsertNewStringValueInto ->' +
     'Key ''value'' value is not correct', trie.Search('value')
-    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 14);
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 14);
   AssertTrue('#Test_IntegerTrie_InsertNewStringValueInto ->' +
     'Key ''another'' value is not correct', trie.Search('another')
-    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 587);
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 587);
 
   FreeAndNil(trie);
 end;
@@ -110,13 +110,13 @@ begin
 
   AssertTrue('#Test_IntegerTrie_RemoveStringValueFrom ->' +
     'Key ''test'' value is not correct', trie.Search('test')
-    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 21);
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 21);
   AssertTrue('#Test_IntegerTrie_RemoveStringValueFrom ->' +
     'Key ''value'' value is not correct', trie.Search('value')
-    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 14);
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 14);
   AssertTrue('#Test_IntegerTrie_RemoveStringValueFrom ->' +
     'Key ''another'' value is not correct', trie.Search('another')
-    {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = 587);
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 587);
 
   AssertTrue('#Test_IntegerTrie_RemoveStringValueFrom ->' +
     'Key ''value'' is not removed', trie.Remove('value'));
@@ -183,8 +183,9 @@ begin
   for index := 0 to 50000 do
   begin
     AssertTrue('#Test_IntegerTrie_InsertOneMillionStringValuesInto ->' +
-      'Key value is not correct', trie.Search(strings.Value[index])
-      {$IFDEF USE_OPTIOANL}.Unwrap{$ENDIF} = index);
+      'Key value is not correct', trie.Search(strings.Value[index]
+      {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF})
+      {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = index);
   end;
 
   FreeAndNil(trie);

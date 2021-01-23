@@ -1479,23 +1479,28 @@ begin
     case index of
       0 : begin
         AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
-          'ArrayLists value 0 is not correct', map_iter.Value = 4);
+          'ArrayLists value 0 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
       end;
       1 : begin
         AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
-          'ArrayLists value 1 is not correct', map_iter.Value = 9);
+          'ArrayLists value 1 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 9);
       end;
       2 : begin
         AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
-          'ArrayLists value 2 is not correct', map_iter.Value = 16);
+          'ArrayLists value 2 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 16);
       end;
       3 : begin
         AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
-          'ArrayLists value 3 is not correct', map_iter.Value = 25);
+          'ArrayLists value 3 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 25);
       end;
       4 : begin
         AssertTrue('#Test_IntegerArrayList_MapPow -> ' +
-          'ArrayLists value 4 is not correct', map_iter.Value = 36);
+          'ArrayLists value 4 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 36);
       end;
       5 : begin
         Fail('#Test_IntegerArrayList_MapPow -> ' +
@@ -1531,23 +1536,28 @@ begin
     case index of
       0 : begin
         AssertTrue('#Test_StringArrayList_MapSubString -> ' +
-          'ArrayLists value 0 is not correct', map_iter.Value = '2');
+          'ArrayLists value 0 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = '2');
       end;
       1 : begin
         AssertTrue('#Test_StringArrayList_MapSubString -> ' +
-          'ArrayLists value 1 is not correct', map_iter.Value = '3');
+          'ArrayLists value 1 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = '3');
       end;
       2 : begin
         AssertTrue('#Test_StringArrayList_MapSubString -> ' +
-          'ArrayLists value 2 is not correct', map_iter.Value = '4');
+          'ArrayLists value 2 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = '4');
       end;
       3 : begin
         AssertTrue('#Test_StringArrayList_MapSubString -> ' +
-          'ArrayLists value 3 is not correct', map_iter.Value = '5');
+          'ArrayLists value 3 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = '5');
       end;
       4 : begin
         AssertTrue('#Test_StringArrayList_MapSubString -> ' +
-          'ArrayLists value 4 is not correct', map_iter.Value = 'test');
+          'ArrayLists value 4 is not correct', map_iter.Value
+          {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'test');
       end;
       5 : begin
         Fail('#Test_StringArrayList_MapSubString -> ' +

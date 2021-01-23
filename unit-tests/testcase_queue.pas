@@ -23,10 +23,14 @@ type
     procedure Test_IntegerQueue_CreateNewEmpty;
     procedure Test_IntegerQueue_PushHeadNewValueInto;
     procedure Test_IntegerQueue_PushTailNewValueInto;
+    procedure Test_IntegerQueue_PeekHeadValue;
+    procedure Test_IntegerQueue_PeekTailValue;
 
     procedure Test_StringQueue_CreateNewEmpty;
     procedure Test_StringQueue_PushHeadNewValueInto;
     procedure Test_StringQueue_PushTailNewValueInto;
+    procedure Test_StringQueue_PeekHeadValue;
+    procedure Test_StringQueue_PeekTailValue;
   end;
 
 implementation
@@ -109,6 +113,82 @@ begin
   FreeAndNil(queue);
 end;
 
+procedure TQueueTestCase.Test_IntegerQueue_PeekHeadValue;
+var
+  queue : TIntegerQueue;
+begin
+  queue := TIntegerQueue.Create;
+
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> ' +
+    'Queue value 1 not append', queue.PushHead(4));
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> ' +
+    'Queue value 4 not append', queue.PushHead(3));
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> ' +
+    'Queue value 5 not append', queue.PushHead(8));
+
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> ' +
+    'Queue index 0 value is not correct', queue.PeekHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 8);
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> ' +
+    'Queue index 0 value is not correct', queue.PopHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 8);
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> ' +
+    'Queue index 1 value is not correct', queue.PeekHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> ' +
+    'Queue index 1 value is not correct', queue.PopHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> '+
+    'Queue index 2 value is not correct', queue.PeekHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> '+
+    'Queue index 2 value is not correct', queue.PopHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
+
+  AssertTrue('#Test_IntegerQueue_PeekHeadValue -> ' +
+    'Queue must be empty', queue.IsEmpty);
+
+  FreeAndNil(queue);
+end;
+
+procedure TQueueTestCase.Test_IntegerQueue_PeekTailValue;
+var
+  queue : TIntegerQueue;
+begin
+  queue := TIntegerQueue.Create;
+
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> ' +
+    'Queue value 1 not append', queue.PushTail(4));
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> ' +
+    'Queue value 4 not append', queue.PushTail(3));
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> ' +
+    'Queue value 5 not append', queue.PushTail(8));
+
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> ' +
+    'Queue index 0 value is not correct', queue.PeekTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 8);
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> ' +
+    'Queue index 0 value is not correct', queue.PopTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 8);
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> ' +
+    'Queue index 1 value is not correct', queue.PeekTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> ' +
+    'Queue index 1 value is not correct', queue.PopTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 3);
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> '+
+    'Queue index 2 value is not correct', queue.PeekTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> '+
+    'Queue index 2 value is not correct', queue.PopTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 4);
+
+  AssertTrue('#Test_IntegerQueue_PeekTailValue -> ' +
+    'Queue must be empty', queue.IsEmpty);
+
+  FreeAndNil(queue);
+end;
+
 procedure TQueueTestCase.Test_StringQueue_CreateNewEmpty;
 var
   queue : TStringQueue;
@@ -174,6 +254,82 @@ begin
     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'apple');
 
   AssertTrue('#Test_StringQueue_PushTailNewValueInto -> ' +
+    'Queue must be empty', queue.IsEmpty);
+
+  FreeAndNil(queue);
+end;
+
+procedure TQueueTestCase.Test_StringQueue_PeekHeadValue;
+var
+  queue : TStringQueue;
+begin
+  queue := TStringQueue.Create;
+
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> ' +
+    'Queue value 1 not append', queue.PushHead('apple'));
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> ' +
+    'Queue value 4 not append', queue.PushHead('orange'));
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> ' +
+    'Queue value 5 not append', queue.PushHead('banana'));
+
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> ' +
+    'Queue index 0 value is not correct', queue.PeekHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'banana');
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> ' +
+    'Queue index 0 value is not correct', queue.PopHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'banana');
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> ' +
+    'Queue index 1 value is not correct', queue.PeekHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'orange');
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> ' +
+    'Queue index 1 value is not correct', queue.PopHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'orange');
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> '+
+    'Queue index 2 value is not correct', queue.PeekHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'apple');
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> '+
+    'Queue index 2 value is not correct', queue.PopHead
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'apple');
+
+  AssertTrue('#Test_StringQueue_PeekHeadValue -> ' +
+    'Queue must be empty', queue.IsEmpty);
+
+  FreeAndNil(queue);
+end;
+
+procedure TQueueTestCase.Test_StringQueue_PeekTailValue;
+var
+  queue : TStringQueue;
+begin
+  queue := TStringQueue.Create;
+
+  AssertTrue('#Test_StringQueue_PeekTailValue -> ' +
+    'Queue value 1 not append', queue.PushTail('apple'));
+  AssertTrue('#Test_StringQueue_PeekTailValue -> ' +
+    'Queue value 4 not append', queue.PushTail('orange'));
+  AssertTrue('#Test_StringQueue_PeekTailValue -> ' +
+    'Queue value 5 not append', queue.PushTail('banana'));
+
+  AssertTrue('#Test_StringQueue_PeekTailValue -> ' +
+    'Queue index 0 value is not correct', queue.PeekTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'banana');
+  AssertTrue('#Test_StringQueue_PeekTailValue -> ' +
+    'Queue index 0 value is not correct', queue.PopTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'banana');
+  AssertTrue('#Test_StringQueue_PeekTailValue -> ' +
+    'Queue index 1 value is not correct', queue.PeekTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'orange');
+  AssertTrue('#Test_StringQueue_PeekTailValue -> ' +
+    'Queue index 1 value is not correct', queue.PopTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'orange');
+  AssertTrue('#Test_StringQueue_PeekTailValue -> '+
+    'Queue index 2 value is not correct', queue.PeekTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'apple');
+  AssertTrue('#Test_StringQueue_PeekTailValue -> '+
+    'Queue index 2 value is not correct', queue.PopTail
+    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 'apple');
+
+  AssertTrue('#Test_StringQueue_PeekTailValue -> ' +
     'Queue must be empty', queue.IsEmpty);
 
   FreeAndNil(queue);

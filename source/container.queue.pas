@@ -160,7 +160,7 @@ begin
   { Unlink the first entry from the head of the queue. }
   Entry := FHead;
   FHead := Entry^.Next;
-  Result := {$IFNDEF USE_OPTIOANL}Entry^.Value{$ELSE}
+  Result := {$IFNDEF USE_OPTIONAL}Entry^.Value{$ELSE}
     TOptionalValue.Create(Entry^.Value){$ENDIF};
   
   if FHead = nil then
@@ -244,7 +244,7 @@ begin
   { Unlink the first entry from the head of the queue. }
   Entry := FTail;
   FTail := Entry^.Prev;
-  Result := {$IFNDEF USE_OPTIOANL}Entry^.Value{$ELSE}
+  Result := {$IFNDEF USE_OPTIONAL}Entry^.Value{$ELSE}
     TOptionalValue.Create(Entry^.Value){$ENDIF};
   
   if FTail = nil then
