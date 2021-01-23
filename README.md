@@ -11,71 +11,30 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
   * [Testing](#testing)
   * [Containers](#conteiners)
     * [TArrayList](#tarraylist)
+    * [TSortedArray](#tsortedarray)
+    * [TList](#tlist)
+    * [TAvlTree](#tavltree)
+    * [THashTable](#thashtable)
       * [Examples](#examples)
         * [Create](#create)
         * [Insert](#insert)
         * [Remove](#remove)
         * [Search](#search)
-        * [Sort](#sort)
         * [Iterate](#iterate)
-    * [TSortedArray](#tsortedarray)
+    * [TOrderedSet](#torderedset)
+    * [TMinBinaryHeap, TMaxBinaryHeap](#tminbinaryheap-tmaxbinaryheap)
       * [Examples](#examples-1)
         * [Create](#create-1)
         * [Insert](#insert-1)
-        * [Remove](#remove-1)
-        * [Search](#search-1)
-        * [Iterate](#iterate-1)
-    * [TList](#tlist)
+        * [Pop](#pop)
+    * [TTrie](#ttrie)
       * [Examples](#examples-2)
         * [Create](#create-2)
         * [Insert](#insert-2)
-        * [Remove](#remove-2)
-        * [Search](#search-2)
-        * [Sort](#sort-1)
-        * [Iterate](#iterate-2)
-    * [TAvlTree](#tavltree)
-      * [Examples](#examples-3)
-        * [Create](#create-3)
-        * [Insert](#insert-3)
-        * [Remove](#remove-3)
-        * [Search](#search-3)
-        * [Iterate](#iterate-3)
-    * [THashTable](#thashtable)
-      * [Examples](#examples-4)
-        * [Create](#create-4)
-        * [Insert](#insert-4)
-        * [Remove](#remove-4)
-        * [Search](#search-4)
-        * [Iterate](#iterate-4)
-    * [TOrderedSet](#torderedset)
-      * [Examples](#examples-5)
-        * [Create](#create-5)
-        * [Insert](#insert-5)
-        * [Remove](#remove-5)
-        * [Iterate](#iterate-5)
-    * [TMinBinaryHeap, TMaxBinaryHeap](#tminbinaryheap-tmaxbinaryheap)
-      * [Examples](#examples-6)
-        * [Create](#create-6)
-        * [Insert](#insert-6)
-        * [Pop](#pop)
-    * [TTrie](#ttrie)
-      * [Examples](#examples-7)
-        * [Create](#create-7)
-        * [Insert](#insert-7)
-        * [Remove](#remove-6)
-        * [Search](#search-6)
+        * [Remove](#remove-1)
+        * [Search](#search-1)
     * [TQueue](#tqueue)
-      * [Examples](#examples-8)
-        * [Create](#create-8)
-        * [Insert](#insert-8)
-        * [Remove](#remove-7)
     * [TMemoryBuffer](#tmemorybuffer)
-      * [Examples](#examples-9)
-        * [Create](#create-9)
-        * [Insert](#insert-9)
-        * [Buffer size](#buffer-size)
-        * [Realloc buffer size](#realloc-buffer-size)
-        * [Clear buffer](#clear-buffer)
 
 
 
@@ -132,118 +91,7 @@ type
 
 BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two array items. Needed for sort and search functions.
 
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.arraylist, utils.functor;
-
-type
-  TIntegerArrayList = {$IFDEF FPC}type specialize{$ENDIF} TArrayList<Integer, 
-    TCompareFunctorInteger>;
-
-var
-  arr : TIntegerArrayList;
-
-begin
-  arr := TIntegerArrayList.Create;
-
-  FreeAndNil(arr);
-
-  { Create and reserve container for twelve elements. }
-  arr := TIntegerArrayList.Create(12);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add new item at the end. }
-  arr.Append(1);
-
-  { Add new item at start position. }
-  arr.Prepend(-4);
-
-  { Add item at custom position. }
-  arr.Insert(432, 2);
-```
-
-###### Remove
-
-```pascal
-  { Remove item by index. }
-  arr.Remove(1);
-
-  { Remove items range. }
-  arr.RemoveRange(0, 3);
-
-  { Remove all items. }
-  arr.Clear;
-```
-
-###### Search
-
-```pascal
-  { Seach element. }
-  arr.IndexOf(3);
-```
-
-###### Sort
-
-```pascal
-  { Sort elements. }
-  arr.Sort;
-```
-
-###### Iterate
-
-```pascal
-var
-  iterator : TIntegerArrayList.TIterator;
-
-begin
-  { Get first item iterator. }
-  iterator := arr.FirstEntry;
-
-  while iterator.HasValue do
-  begin
-    { Get current value. }
-    writeln(iterator.Value);
-
-    { Get next item. }
-    iterator := iterator.Next;
-  end;
-end;
-```
-
-```pascal
-var
-  iterator : TIntegerArrayList.TIterator;
-
-begin
-  for iterator in arr do
-  begin
-    writeln(iterator.Value);
-  end;
-end;
-```
-
-```pascal
-var
-  iterator : TIntegerArrayList.TEnumerator.TIterator;
-
-begin
-  for iterator in TIntegerArrayList.TEnumerator.Create(arr.FirstEntry) do
-  begin
-    writeln(iterator.Index);
-    writeln(iterator.Value);
-  end;
-end;
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList).
 
 
 
@@ -261,92 +109,7 @@ type
 
 BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two array items. Needed for search function.
 
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.sortedarray, utils.functor;
-
-type
-  TIntegerSortedArray = {$IFDEF FPC}type specialize{$ENDIF} 
-    TSortedArray<Integer, TCompareFunctorInteger>;
-
-var
-  arr : TIntegerSortedArray;
-
-begin
-  arr := TIntegerSortedArray.Create;
-
-  FreeAndNil(arr);
-
-  { Create and reserve container for twelve elements. }
-  arr := TIntegerSortedArray.Create(12);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add new item at the end. }
-  arr.Append(1);
-```
-
-###### Remove
-
-```pascal
-  { Remove item by index. }
-  arr.Remove(1);
-
-  { Remove items range. }
-  arr.RemoveRange(0, 3);
-
-  { Remove all items. }
-  arr.Clear;
-```
-
-###### Search
-
-```pascal
-  { Seach element. }
-  arr.IndexOf(3);
-```
-
-###### Iterate
-
-```pascal
-var
-  iterator : TIntegerSortedArray.TIterator;
-
-begin
-  { Get first item iterator. }
-  iterator := arr.FirstEntry;
-
-  while iterator.HasValue do
-  begin
-    { Get current value. }
-    writeln(iterator.Value);
-
-    { Get next item. }
-    iterator := iterator.Next;
-  end;
-end;
-```
-
-```pascal
-var
-  iterator : TIntegerSortedArray.TIterator;
-
-begin
-  for iterator in arr do
-  begin
-    writeln(iterator.Value);
-  end;
-end;
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TSortedArray).
 
 
 
@@ -364,123 +127,7 @@ type
 
 BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two list items. Needed for sort and search functions.
 
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.list, utils.functor;
-
-type
-  TStringList = {$IFDEF FPC}type specialize{$ENDIF} TList<String, TCompareFunctorString>;
-
-var
-  list : TStringList;
-
-begin
-  list := TStringList.Create;
-
-  FreeAndNil(list);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add new item at the end. }
-  list.Append(4);
-
-  { Add new item at start position. }
-  list.Prepend(59);
-
-  { Insert item at next position. }
-  list.FirstEntry.InsertNext(7);
-
-  { Insert item at prev position. }
-  list.LastEntry.InsertPrev(-4);
-```
-
-###### Remove
-
-```pascal
-  { Remove all items what have value four. }
-  list.Remove(4);
-
-  { Remove custom item. }
-  list.FindEntry(2).Remove;
-```
-
-###### Search
-
-```pascal
-  { Search element by value. }
-  list.FindEntry(3);
-
-  { Search element by index. }
-  list.NthEntry(1);
-```
-
-###### Sort
-
-```pascal
-  { Sort elements. }
-  list.Sort;
-```
-
-###### Iterate
-
-```pascal
-var
-  iterator : TStringList.TIterator;
-
-begin
-  { Get first item iterator. }
-  iterator := list.FirstEntry;
-
-  { Get last item iterator. }
-  iterator := list.LastEntry;
-
-  while iterator.HasValue do
-  begin
-    { Get current value. }
-    writeln(iterator.Value);
-
-    { Get next item. }
-    iterator := iterator.Next;
-
-    { Get previous item. }
-    iterator := iterator.Prev;
-  end;
-end;
-```
-
-```pascal
-var 
-  iterator : TStringList.TIterator;
-
-begin
-  for iterator in list do
-  begin
-    writeln(iterator.Value);
-  end;
-end;
-```
-
-```pascal
-var
-  iterator : TIntegerList.TEnumerator.TIterator;
-
-begin
-  for iterator in TIntegerList.TEnumerator.Create(list.FirstEntry) do
-  begin
-    writeln(iterator.Index);
-    writeln(iterator.Value);
-  end;
-end;
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TList).
 
 
 
@@ -500,85 +147,7 @@ type
 
 KeyBinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two keys. 
 
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.avltree, utils.functor;
-
-type
-  TIntStrTree = {$IFDEF FPC}type specialize{$ENDIF} TAvlTree<Integer, String, 
-    TCompareFunctionInteger>;
-
-var
-  tree : TIntStrTree;
-
-begin
-  tree := TIntStrTree.Create;
-
-  FreeAndNil(tree);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add new item. }
-  tree.Insert(1, "one");
-
-```
-
-###### Remove
-
-```pascal
-  { Remove item by key. }
-  tree.Remove(1);
-```
-
-###### Search
-
-```pascal
-  { Search item by key. }
-  tree.Search(1);
-```
-
-###### Iterate
-
-```pascal
-var
-  iterator : TIntStrTree.TIterator;
-
-begin
-  { Get first item iterator. }
-  iterator := tree.FirstEntry;
-
-  { Get current value. }
-  writeln(iterator.Key, iterator.Value);
-
-  { Get next item. }
-  iterator := iterator.Next;
-
-  { Get prev item. }
-  iterator := iterator.Prev; 
-end;
-```
-
-```pascal
-var
-  iterator := TIntStrTree.TIterator;
-
-begin
-  for iterator in tree do
-  begin
-    { Get current value. }
-    writeln(iterator.Key, iterator.Value);
-  end;
-end;
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TAvlTree).
 
 
 
@@ -688,91 +257,7 @@ type
 
 BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two items.
 
-
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.orderedset, utils.functior;
-
-type
-  TIntOrderedSet = {$IFDEF FPC}type specialize{$ENDIF} TOrderedSet<Integer, 
-    TCompareFunctionInteger>;
-
-var
-  orderedset : TIntOrderedSet;
-
-begin
-  orderedset := TIntOrderedSet.Create(@HashInteger);
-
-  FreeAndNil(orderedset);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add new entry. }
-  orderedset.Insert(1);
-```
-
-###### Remove
-
-```pascal
-  { Remove item from a set. }
-  orderedset.Remove(1);
-```
-
-###### Iterate
-
-```pascal
-var
-  iterator : TIntOrderedSet.TIterator;
-
-begin
-  { Get first item iterator. }
-  iterator := orderedset.FirstEntry;
-
-  while iterator.HasValue do
-  begin
-    { Get current value. }
-    writeln(iterator.Value);
-
-    { Get next item. }
-    iterator := iterator.Next;
-  end;
-end;
-```
-
-```pascal
-var
-  iterator : TIntOrderedSet.TIterator;
-
-begin
-  for iterator in orderedset do
-  begin
-    { Get current value. }
-    writeln(iterator.Value);
-  end;
-end;
-```
-
-```pascal
-var
-  iterator : TIntOrderedSet.TEnumerator.TIterator;
-
-begin
-  for iterator in TIntegerOrdererSet.TEnumerator.Create(orderedset.FirstEntry) do
-  begin
-    writeln(iterator.Index);
-    writeln(iterator.Value);
-  end;
-end;
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet).
 
 
 
@@ -904,48 +389,7 @@ type
   generic TQueue<T> = class
 ```
 
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.queue;
-
-type
-  TIntegerQueue = {$IFDEF FPC}type specialize{$ENDIF} TQueue<Integer>;
-
-var
-  queue : TIntegerQueue;
-
-begin
-  queue := TIntegerQueue.Create;
-
-  FreeAndNil(queue);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add a value to the head of a queue. }
-  queue.PushHead(12);
-
-  { Add a value to the tail of a queue. }
-  queue.PushTail(22);
-```
-
-###### Remove
-
-```pascal
-  { Remove a value from the head of a queue. }
-  queue.PopHead;
-
-  { Remove a value from the tail of a queue. }
-  queue.PopTail;
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TQueue).
 
 
 
@@ -961,61 +405,4 @@ type
   TMemoryBuffer = class
 ```
 
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.menorybuffer;
-
-var
-  buffer : TMemoryBuffer;
-
-begin  
-  buffer := TMemoryBuffer.Create;
-
-  FreeAndNil(buffer);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Append a single byte to the buffer. }
-  buffer.AppendByte(32);
-
-  { Append a data block to the buffer. }
-  buffer.AppendData(PChar("one"), Length("one"));
-
-  
-  Move(PChar("one")^, buffer.GetAppendBuffer(1024)^);
-
-  Move(PChar("one")^, buffer.GetWriteBuffer(1024)^);
-```
-
-###### Buffer size
-
-```pascal
-  { Get the size of the valid data in the buffer. }
-  buffer.GetBufferData;
-
-  { Get the size of the buffer. }
-  buffer.GetBufferAllocSize;
-```
-
-###### Realloc buffer size
-
-```pascal
-  { Ensures the buffer has at least size bytes available. }
-  buffer.SetBufferAllocSize(1024);
-```
-
-###### Clear buffer
-
-```pascal
-  { Clear the buffer contents. }
-  buffer.Clear;
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TMemoryBuffer).
