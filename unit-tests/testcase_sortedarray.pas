@@ -26,6 +26,7 @@ type
     procedure Test_IntegerSortedArray_CreateNewEmpty;
     procedure Test_IntegerSortedArray_AppendNewValueInto;
     procedure Test_IntegerSortedArray_AppendNewValueAndReallocMemory;
+    procedure Test_IntegerSortedArray_AppendOneMillionValuesInto;
 
     procedure Test_StringSortedArray_CreateNewEmpty;
     procedure Test_StringSortedArray_AppendNewValueInto;
@@ -230,6 +231,38 @@ begin
   
   FreeAndNil(arr);
 end;
+
+procedure TSortedArrayTestCase
+  .Test_IntegerSortedArray_AppendOneMillionValuesInto;
+var
+  arr : TIntegerSortedArray;
+  iterator : TIntegerSortedArray.TIterator;
+  index : Integer;
+begin
+  arr := TIntegerSortedArray.Create;
+
+  for index := 0 to 1000000 do
+  begin
+    AssertTrue('#Test_IntegerSortedArray_AppendOneMillionValuesInto -> ' +
+    'ArrayList value ' + IntToStr(index) + ' not append',
+    arr.Append(index));  
+  end;
+
+  index := 0;
+  iterator := arr.FirstEntry;
+  while iterator.HasValue do
+  begin
+    AssertTrue('#Test_IntegerSortedArray_AppendNewValueInto -> ' +
+    'ArrayLists value is not correct',
+    iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = index);
+
+    iterator := iterator.Next;
+    Inc(index);
+  end;
+
+  FreeAndNil(arr);
+end;
+
 
 initialization
   RegisterTest(TSortedArrayTestCase{$IFNDEF FPC}.Suite{$ENDIF});

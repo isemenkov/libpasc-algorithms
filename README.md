@@ -15,12 +15,6 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
     * [TList](#tlist)
     * [TAvlTree](#tavltree)
     * [THashTable](#thashtable)
-      * [Examples](#examples)
-        * [Create](#create)
-        * [Insert](#insert)
-        * [Remove](#remove)
-        * [Search](#search)
-        * [Iterate](#iterate)
     * [TOrderedSet](#torderedset)
     * [TMinBinaryHeap, TMaxBinaryHeap](#tminbinaryheap-tmaxbinaryheap)
       * [Examples](#examples-1)
@@ -165,81 +159,7 @@ type
 
 KeyBinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two keys. 
 
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.hashtable, utils.functor;
-
-type
-  TIntIntHashTable = {$IFDEF FPC}type specialize{$ENDIF} THashTable<Integer, Integer, 
-    TCompareFunctonInteger>;
-
-var
-  hash : TIntIntHashTable;
-
-begin
-  hash := TIntIntHashTable.Create(@HashInteger);
-
-  FreeAndNil(hash);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add new entry. }
-  hash.Insert(1, 20);
-```
-
-###### Remove
-
-```pascal
-  { Remove item by key. }
-  hash.Remove(1);
-```
-
-###### Search
-
-```pascal
-  { Search item by key. }
-  hash.Search(1);
-```
-
-###### Iterate
-
-```pascal
-var
-  iterator : TIntIntHashTable.TIterator;
-
-begin
-  { Get first item iterator. }
-  iterator := hash.FirstEntry;
-
-  { Get current value. }
-  writeln(iterator.Key, iterator.Value);
-
-  { Get next item. }
-  iterator := iterator.Next;
-end;
-```
-
-```pascal
-var
-  iterator : TIntIntHashTable.TIterator;
-
-begin
-  for iterator in hash do
-  begin
-    { Get current value. }
-    writeln(iterator.Key, iterator.Value);
-  end;
-end;
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable).
 
 
 
