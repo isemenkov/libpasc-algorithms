@@ -8,13 +8,16 @@ interface
 
 uses
   Classes, SysUtils, container.sortedarray, utils.functor,
-  utils.enumerate
+  utils.enumerate, container.orderedset
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
   TIntegerSortedArray = {$IFDEF FPC}specialize{$ENDIF} TSortedArray<Integer,
     TCompareFunctorInteger>;
   TStringSortedArray = {$IFDEF FPC}specialize{$ENDIF} TSortedArray<String,
+    TCompareFunctorString>;
+
+  TSetStrings = {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<String,
     TCompareFunctorString>;
 
   TSortedArrayTestCase = class(TTestCase)
@@ -31,6 +34,7 @@ type
     procedure Test_StringSortedArray_CreateNewEmpty;
     procedure Test_StringSortedArray_AppendNewValueInto;
     procedure Test_StringSortedArray_AppendNewValueAndReallocMemory;
+    procedure Test_StringSortedArray_AppendFiftyThousandValuesInto;
   end;
 
 implementation
@@ -248,6 +252,9 @@ begin
     arr.Append(index));  
   end;
 
+  AssertTrue('#Test_IntegerSortedArray_AppendOneMillionValuesInto -> ' +
+    'ArrayLists length is not correct', arr.Length = 1000001);
+
   index := 0;
   iterator := arr.FirstEntry;
   while iterator.HasValue do
@@ -263,6 +270,68 @@ begin
   FreeAndNil(arr);
 end;
 
+procedure TSortedArrayTestCase
+  .Test_StringSortedArray_AppendFiftyThousandValuesInto;
+
+  function RandomString (len : Integer) : String;
+  var
+    i : Integer;
+    letter : Char;
+  begin
+    Result := '';
+    SetLength(Result, len);
+    i := 1;
+    while i < len do
+    begin
+      letter := chr(Random(128));
+
+      if not CharInSet(letter, ['a' .. 'z', 'A' .. 'Z', '0' .. '9']) then
+        Continue;
+
+      Result[i] := letter;
+      Inc(i);
+    end;
+  end;
+
+var
+  arr : TStringSortedArray;
+  iterator : TStringSortedArray.TIterator;
+  value : String;
+  index, len : Integer;
+  stringset : TSetStrings;
+begin
+  arr := TStringSortedArray.Create;
+  stringset := TSetStrings.Create(@HashString);
+
+  Randomize;
+  for index := 0 to 50000 do
+  begin
+    len := 30;
+    value := RandomString(len);
+    while stringset.HasValue(value) do
+      value := RandomString(len);
+
+    stringset.Insert(value);
+
+    AssertTrue('#Test_StringSortedArray_AppendFiftyThousandValuesInto -> ' +
+    'New value isn''t inserted', arr.Append(value));  
+  end;
+
+  AssertTrue('#Test_StringSortedArray_AppendFiftyThousandValuesInto -> ' +
+    'ArrayLists length is not correct', arr.Length = 50001);
+
+  iterator := arr.FirstEntry;
+  while iterator.HasValue do
+  begin
+    AssertTrue('#Test_StringSortedArray_AppendFiftyThousandValuesInto -> ' +
+    'ArrayLists value is not correct',
+    stringset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
+
+    iterator := iterator.Next;
+  end;
+
+  FreeAndNil(arr);
+end;
 
 initialization
   RegisterTest(TSortedArrayTestCase{$IFNDEF FPC}.Suite{$ENDIF});

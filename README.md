@@ -22,11 +22,6 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
         * [Insert](#insert-1)
         * [Pop](#pop)
     * [TTrie](#ttrie)
-      * [Examples](#examples-2)
-        * [Create](#create-2)
-        * [Insert](#insert-2)
-        * [Remove](#remove-1)
-        * [Search](#search-1)
     * [TQueue](#tqueue)
     * [TMemoryBuffer](#tmemorybuffer)
 
@@ -249,51 +244,7 @@ type
   generic TTrie<V> = class
 ```
 
-
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.trie;
-
-type
-  TIntTrie = {$IFDEF FPC}type specialize{$ENDIF} TTrie<Integer>;
-
-var
-  trie : TIntTrie;
-
-begin
-  trie := TIntTrie.Create;
-
-  FreeAndNil(trie);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add new item. }
-  trie.Insert("one", 1);
-
-```
-
-###### Remove
-
-```pascal
-  { Remove item by key. }
-  trie.Remove("one");
-```
-
-###### Search
-
-```pascal
-  { Search element. }
-  trie.Search("one");
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TTrie).
 
 
 
