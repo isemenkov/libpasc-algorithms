@@ -16,11 +16,8 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
     * [TAvlTree](#tavltree)
     * [THashTable](#thashtable)
     * [TOrderedSet](#torderedset)
-    * [TMinBinaryHeap, TMaxBinaryHeap](#tminbinaryheap-tmaxbinaryheap)
-      * [Examples](#examples-1)
-        * [Create](#create-1)
-        * [Insert](#insert-1)
-        * [Pop](#pop)
+    * [TMinBinaryHeap](#tminbinaryheap)
+    * [TMaxBinaryHeap](#tmaxbinaryheap)
     * [TTrie](#ttrie)
     * [TQueue](#tqueue)
     * [TMemoryBuffer](#tmemorybuffer)
@@ -176,9 +173,9 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
 
 
 
-#### TMinBinaryHeap, TMaxBinaryHeap
+#### TMinBinaryHeap
 
-Heap type. If a heap is a min heap, the values with the lowest priority are stored at the top of the heap and will be the first returned. If a heap is a  max heap, the values with the greatest priority are stored at the top of the heap.
+Heap type. The values with the lowest priority are stored at the top of the heap and will be the first returned.
 
 ```pascal
 uses
@@ -186,49 +183,29 @@ uses
 
 type
   generic TMinBinaryHeap<V, BinaryCompareFunctor> = class
+```
+
+BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two items.
+
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TMinBinaryHeap).
+
+
+
+#### TMaxBinaryHeap
+
+Heap type. The values with the greatest priority are stored at the top of the heap and will be the first returned.
+
+```pascal
+uses
+  container.binaryheap, utils.functor;
+
+type
   generic TMaxBinaryHeap<V, BinaryCompareFunctor> = class
 ```
 
 BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/blob/master/source/utils.functor.pas) interface and used to compare two items.
 
-
-
-
-##### Examples
-
-###### Create
-
-```pascal
-uses
-  container.binaryheap, utils.functior;
-
-type
-  TIntMinBinaryHeap = {$IFDEF FPC}type specialize{$ENDIF} TMinBinaryHeap<Integer, 
-    TCompareFunctionInteger>;
-
-var
-  heap : TIntMinBinaryHeap;
-
-begin
-  heap := TIntMinBinaryHeap.Create;
-
-  FreeAndNil(heap);
-end;
-```
-
-###### Insert
-
-```pascal
-  { Add new entry. }
-  heap.Append(1);
-```
-
-###### Pop
-
-```pascal
-  { Get item from a heap and remove it. }
-  writeln(IntToStr(heap.Pop));
-```
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TMaxBinaryHeap).
 
 
 
