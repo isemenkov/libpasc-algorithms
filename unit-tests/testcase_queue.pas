@@ -7,12 +7,14 @@ unit testcase_queue;
 interface
 
 uses
-  Classes, SysUtils, container.queue
+  Classes, SysUtils, container.queue, utils.variant
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
   TIntegerQueue = {$IFDEF FPC}specialize{$ENDIF} TQueue<Integer>;
   TStringQueue = {$IFDEF FPC}specialize{$ENDIF} TQueue<String>;
+
+  TIntStrVariant = {$IFDEF FPC}specialize{$ENDIF} TVariant2<Integer, String>;
 
   TQueueTestCase = class(TTestCase)
   public
@@ -31,6 +33,8 @@ type
     procedure Test_StringQueue_PushTailNewValueInto;
     procedure Test_StringQueue_PeekHeadValue;
     procedure Test_StringQueue_PeekTailValue;
+
+    procedure Test_Variant;
   end;
 
 implementation
@@ -333,6 +337,23 @@ begin
     'Queue must be empty', queue.IsEmpty);
 
   FreeAndNil(queue);
+end;
+
+procedure TQueueTestCase.Test_Variant;
+var
+  var_value : TIntStrVariant;
+begin
+  var_value := TIntStrVariant.Create;
+
+  var_value.SetValue(21);
+  AssertTrue('value type', var_value.GetType = TValueType.VALUE_TYPE1);
+  AssertTrue('value', TIntStrVariant.TVariantValue1(var_value.GetValue).Value = 21);
+
+  var_value.SetValue('test string');
+  AssertTrue('value type', var_value.GetType = TValueType.VALUE_TYPE2);
+  AssertTrue('value', TIntStrVariant.TVariantValue2(var_value.GetValue).Value = 'test string');
+
+  FreeAndNil(var_value);
 end;
 
 initialization

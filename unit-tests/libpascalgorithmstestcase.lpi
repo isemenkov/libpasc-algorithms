@@ -31,7 +31,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="26">
+    <Units Count="27">
       <Unit0>
         <Filename Value="libpascalgorithmstestcase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -136,6 +136,10 @@
         <Filename Value="testcase_queue.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit25>
+      <Unit26>
+        <Filename Value="../../pascalutils/source/utils.variant.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit26>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -145,7 +149,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="../pascalutils/source;../source"/>
+      <OtherUnitFiles Value="../pascalutils/source;../source;../../pascalutils/source"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
