@@ -162,6 +162,8 @@ KeyBinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://githu
   * [Insert](https://github.com/isemenkov/libpasc-algorithms/wiki/TAvlTree#insert)
   * [Remove](https://github.com/isemenkov/libpasc-algorithms/wiki/TAvlTree#remove)
   * [Search](https://github.com/isemenkov/libpasc-algorithms/wiki/TAvlTree#search)
+  * [NumEntries](https://github.com/isemenkov/libpasc-algorithms/wiki/TAvlTree#numentries)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TAvlTree#isempty)
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TAvlTree#iterate)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TAvlTree).

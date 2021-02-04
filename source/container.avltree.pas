@@ -3,7 +3,7 @@
 (* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
-(* Copyright (c) 2020                                       Ivan Semenkov     *)
+(* Copyright (c) 2020 - 2021                                Ivan Semenkov     *)
 (* https://github.com/isemenkov/libpasc-algorithms          ivan@semenkov.pro *)
 (*                                                          Ukraine           *)
 (******************************************************************************)
@@ -163,15 +163,31 @@ type
       uses the tree as a mapping. }
     function Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
       {$ENDIF};
+    
+    { Search an AVL tree for a value corresponding to a particular key. 
+      Return default value if Key not exists. }
+    function SearchDefault (Key : K; ADefault : V) : V;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
+    { Retrieve the number of entries in the tree. }
+    function NumEntries : Cardinal;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
+    { Return true if container is empty. }
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Retrive the first entry in avltree. }
     function FirstEntry : TIterator; 
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Return enumerator for in operator. }
     function GetEnumerator : TIterator;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     { Compare two nodes. }
     function CompareAvlTreeNode (A, B : PAvlTreeNode) : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Free node. }
     procedure FreeSubTreeNode (node : PAvlTreeNode);
@@ -185,25 +201,28 @@ type
 
     { Find the root node of a tree. }
     function RootNode : PAvlTreeNode;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Retrieve the key for a given tree node. }
     function NodeKey (node : PAvlTreeNode) : K;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Retrieve the value at a given tree node. }
     function NodeValue (node : PAvlTreeNode) : V;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Find the child of a given tree node. }
     function NodeChild (node : PAvlTreeNode; side : TAvlTreeNodeSide) : 
       PAvlTreeNode;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
     
     { Find the parent node of a given tree node. }
     function NodeParent (node : PAvlTreeNode) : PAvlTreeNode;
-
-    { Retrieve the number of entries in the tree. }
-    function NumEntries : Cardinal;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Find the height of a subtree. }
     function SubTreeHeight (node : PAvlTreeNode) : Integer;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   
     { Update the "height" variable of a node, from the heights of its children. 
       This does not update the height variable of any parent nodes. }
@@ -211,9 +230,11 @@ type
 
     { Find what side a node is relative to its parent. }
     function TreeNodeParentSide (node : PAvlTreeNode) : TAvlTreeNodeSide;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Replace node1 with node2 at its parent. }
     procedure TreeNodeReplace (node1 : PAvlTreeNode; node2 : PAvlTreeNode);
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Rotate a section of the tree. 'node' is the node at the top of the section 
       to be rotated. 'direction' is the direction in which to rotate the tree: 
@@ -828,11 +849,27 @@ begin
     {$ELSE}
     Exit(TOptionalValue.Create);
     {$ENDIF}
-  end else
-  begin
-    Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}node^.value
-      {$IFDEF USE_OPTIONAL}){$ENDIF};
   end;
+    
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}node^.value
+    {$IFDEF USE_OPTIONAL}){$ENDIF};
+end;
+
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .SearchDefault (Key : K; ADefault : V) : V;
+var
+  node : PAvlTreeNode;
+begin
+  { Find the node }
+  node := SearchNode(Key);
+
+  if node = nil then
+  begin
+    Exit(ADefault);
+  end;
+
+  Result := {$IFDEF USE_OPTIONAL}TOptionalValue.Create({$ENDIF}node^.value
+    {$IFDEF USE_OPTIONAL}){$ENDIF};
 end;
 
 function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
@@ -887,6 +924,12 @@ function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
   .GetEnumerator : TIterator;
 begin
   Result := FirstEntry;
+end;
+
+function TAvlTree{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .IsEmpty : Boolean;
+begin
+  Result := (NumEntries = 0);
 end;
 
 end.

@@ -125,8 +125,6 @@ type
         FLength : LongInt;
         FPosition : LongInt;
       end;
-
-      TEnumerator = {$IFDEF FPC}specialize{$ENDIF} TEnumerator<T, TIterator>;
   public
     constructor Create (ALength : Cardinal = 0);
     destructor Destroy; override;
