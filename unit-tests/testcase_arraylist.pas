@@ -89,7 +89,7 @@ type
     procedure Test_PairIntegerArrayList_AppendObject;
     procedure Test_IntegerArrayList_SearchInEmpty;
     procedure Test_IntegerArrayList_LastElementIterator;
-    procedure Test_IntegerArrayList_Enumerator;
+    //procedure Test_IntegerArrayList_Enumerator;
     procedure Test_IntegerArrayList_FilterEnumerator;
     procedure Test_IntegerArrayList_AdditionalAccumulate;
     procedure Test_IntegerArrayList_MapPow;
@@ -107,7 +107,7 @@ type
     procedure Test_StringArrayList_InsertOneMillionValuesInto;
     procedure Test_StringArrayList_SearchInEmpty;
     procedure Test_StringArrayList_LastElementIterator;
-    procedure Test_StringArrayList_Enumerator;
+    //procedure Test_StringArrayList_Enumerator;
     procedure Test_StringArrayList_FilterEnumerator;
     procedure Test_StringArrayList_AdditionalAccumulate;
     procedure Test_StringArrayList_MapSubString;
@@ -1207,7 +1207,7 @@ begin
 
   FreeAndNil(arr);
 end;
-
+{
 procedure TArrayListTestCase.Test_IntegerArrayList_Enumerator;
 var
   arr : TIntegerArrayList;
@@ -1315,7 +1315,7 @@ begin
     end;
   end;
 end;
-
+}
 procedure TArrayListTestCase.Test_IntegerArrayList_FilterEnumerator;
 var
   arr : TIntegerArrayList;
