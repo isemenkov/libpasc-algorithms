@@ -161,17 +161,28 @@ type
     function Search (Key : K) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue
       {$ENDIF};
 
+    { Look up a value in a hash table by key. Return default value if Key not 
+      exists. }
+    function SearchDefault (Key : K; ADefault : V) : V;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
     { Remove a value from a hash table. }
     function Remove (Key : K) : Boolean;
 
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
     { Retrieve the number of entries in a hash table. }
     function NumEntries : Cardinal;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Retrive the first entry in hashtable. }
     function FirstEntry : TIterator; 
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Return enumerator for in operator. }
     function GetEnumerator : TIterator;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     { Internal function used to allocate the table on hash table creation and 
       when enlarging the table. }
@@ -611,6 +622,35 @@ begin
 end;
 
 function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .SearchDefault (Key : K; ADefault : V) : V;
+var
+  rover : PHashTableEntry;
+  pair : PHashTablePair;
+  index : Cardinal;
+begin
+  { Generate the hash of the key and hence the index into the table }
+  index := FHashFunc(key) mod FHashTable^.table_size;
+
+  { Walk the chain at this index until the corresponding entry is found }
+  rover := TArrayHashTableEntry(FHashTable^.table)[index];
+
+  while rover <> nil do
+  begin
+    pair := @rover^.pair;
+
+    if FCompareFunctor.Call(pair^.key, key) = 0 then
+    begin
+      { Found the entry. Return the data. }
+      Exit(pair^.value);
+    end;
+
+    rover := rover^.next;
+  end;
+
+  Exit(ADefault);
+end;
+
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
   .Remove (Key : K) : Boolean;
 var
   rover : PPHashTableEntry;
@@ -659,6 +699,12 @@ function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
   .NumEntries : Cardinal;
 begin
   Result := FHashTable^.entries;
+end;
+
+function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
+  .IsEmpty : Boolean;
+begin
+  Result := (NumEntries = 0);
 end;
 
 function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
