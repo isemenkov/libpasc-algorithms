@@ -136,6 +136,7 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Search](https://github.com/isemenkov/libpasc-algorithms/wiki/TList#search)
   * [Sort](https://github.com/isemenkov/libpasc-algorithms/wiki/TList#sort)
   * [Length](https://github.com/isemenkov/libpasc-algorithms/wiki/TList#length)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TList#isempty)
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TList#iterate)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TList).

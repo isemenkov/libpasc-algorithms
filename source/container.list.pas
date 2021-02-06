@@ -3,7 +3,7 @@
 (* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
-(* Copyright (c) 2020                                       Ivan Semenkov     *)
+(* Copyright (c) 2020 - 2021                                Ivan Semenkov     *)
 (* https://github.com/isemenkov/libpasc-algorithms          ivan@semenkov.pro *)
 (*                                                          Ukraine           *)
 (******************************************************************************)
@@ -169,6 +169,10 @@ type
     { Remove all occurrences of a particular value from a list. Return the 
       number of entries removed from the list. }
     function Remove (AData : T) : Cardinal;
+
+    { Return true if container is empty. }
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Retrive the first entry in a list. }
     function FirstEntry : TIterator;
@@ -532,6 +536,11 @@ begin
   end;
 
   Result := TIterator.Create(@FFirstNode, @FLastNode, @FLength, nil);
+end;
+
+function TList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}.IsEmpty : Boolean;
+begin
+  Result := (Length = 0);
 end;
 
 function TList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
