@@ -147,9 +147,14 @@ type
 
     { Retrieve the number of entries in a set }
     function NumEntries : Cardinal;
-  
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
     { Query if a particular value is in a set. }
     function HasValue (Value : V) : Boolean;
+
+    { Return true if container is empty. }
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Perform a union of two sets.
       A new set containing all values which are in the first or second sets, or 
@@ -167,9 +172,11 @@ type
 
     { Retrive the first entry in orderedset. }
     function FirstEntry : TIterator; 
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Return enumerator for in operator. }
     function GetEnumerator : TIterator; 
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     { Internal function used to allocate the ordered set on creation and when 
       enlarging the table. }
@@ -618,6 +625,12 @@ function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.NumEntries :
   Cardinal;
 begin
   Result := FOrderedSet^.entries;
+end;
+
+function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.IsEmpty :
+  Boolean;
+begin
+  Result := (NumEntries = 0);
 end;
 
 function TOrderedSet{$IFNDEF FPC}<V, BinaryCompareFunctor>{$ENDIF}.FirstEntry : 

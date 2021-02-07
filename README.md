@@ -190,6 +190,7 @@ KeyBinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://githu
   * [Remove](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable#remove)
   * [Search](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable#search)
   * [NumEntries](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable#numentries)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable#isempty)
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable#iterate)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable).
@@ -214,6 +215,8 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Insert](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet#insert)
   * [Remove](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet#remove)
   * [HasValue](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet#hasvalue)
+  * [NumEntries](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet#numentries)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet#isempty)
   * [Union](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet#union)
   * [Intersection](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet#intersection)
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TOrderedSet#iterate)
