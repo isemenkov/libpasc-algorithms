@@ -133,14 +133,17 @@ type
       Return true if the request was successful, false if it was not possible to 
       allocate more memory for the new entry. }
     function Append (AValue : T) : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Prepend a value to the beginning of an ArrayList. 
       Return true if the request was successful, false if it was not possible to 
       allocate more memory for the new entry. }
     function Prepend (AValue : T) : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Remove the entry at the specified location in an ArrayList. }
     procedure Remove (AIndex: Cardinal);
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Remove a range of entries at the specified location in an ArrayList. }
     procedure RemoveRange (AIndex : LongInt; ALength : LongInt);
@@ -158,18 +161,26 @@ type
 
     { Retrive the first entry in a arraylist. }
     function FirstEntry : TIterator;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Retrive the last entry in a arraylist. }
     function LastEntry : TIterator;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Remove all entries from an ArrayList. }
     procedure Clear;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Sort the values in an ArrayList. }
     procedure Sort;
 
+    { Return true if container is empty. }
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
     { Return enumerator for in operator. }
     function GetEnumerator : TIterator; 
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     { Reallocate the array to the new size }
     function Enlarge : Boolean;
@@ -180,10 +191,12 @@ type
     { Get value by index. }
     function GetValue (AIndex : LongInt) : {$IFNDEF USE_OPTIONAL}T{$ELSE}
       TOptionalValue{$ENDIF};
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Set new value by index. }
     procedure SetValue (AIndex : LongInt; AData : {$IFNDEF USE_OPTIONAL}T
       {$ELSE}TOptionalValue{$ENDIF});
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     var
       FData : array of PData;
@@ -556,6 +569,12 @@ function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .GetEnumerator : TIterator;
 begin
   Result := TIterator.Create(@FData, FLength, 0);
+end;
+
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .IsEmpty : Boolean;
+begin
+  Result := (Length = 0);
 end;
 
 end.

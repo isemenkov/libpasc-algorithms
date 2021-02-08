@@ -84,6 +84,7 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Sort](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#sort)
   * [Values](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#values)
   * [Length](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#length)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#isempty)
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#iterate)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList).
@@ -110,6 +111,7 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Search](https://github.com/isemenkov/libpasc-algorithms/wiki/TSortedArray#search)
   * [Values](https://github.com/isemenkov/libpasc-algorithms/wiki/TSortedArray#values)
   * [Length](https://github.com/isemenkov/libpasc-algorithms/wiki/TSortedArray#length)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TSortedArray#isempty)
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TSortedArray#iterate)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TSortedArray).

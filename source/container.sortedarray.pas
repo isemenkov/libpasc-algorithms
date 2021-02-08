@@ -131,10 +131,11 @@ type
     { Insert a value into a sorted array while maintaining the sorted 
       property. }
     function Append (AData : T) : Boolean;
-
+      
     { Remove a value from a TSortedArray at a specified index while maintaining 
       the sorted property. }
     procedure Remove (AIndex: Cardinal);
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Remove a range of entities from a TSortedArray while maintaining the 
       sorted property. }
@@ -145,15 +146,23 @@ type
 
     { Remove all values from a TSortedArray. }
     procedure Clear;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
+    { Return true if container is empty. }
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Retrive the first entry in a TSortedArray. }
     function FirstEntry : TIterator;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Retrive the last entry in a TSortedArray. }
     function LastEntry : TIterator;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Return enumerator for in operator. }
     function GetEnumerator : TIterator;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     { Function for finding first index of range which equals data. An equal 
       value must be present. }
@@ -168,6 +177,7 @@ type
     { Get value by index. }
     function GetValue (AIndex : LongInt) : {$IFNDEF USE_OPTIONAL}T{$ELSE}
       TOptionalValue{$ENDIF};
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     var
       FData : array of PData;
@@ -527,6 +537,12 @@ begin
   end;
 
   Result := index;
+end;
+
+function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .IsEmpty : Boolean;
+begin
+  Result := (Length = 0);
 end;
 
 end.
