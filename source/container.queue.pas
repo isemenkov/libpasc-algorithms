@@ -73,6 +73,7 @@ type
 
     { Read value from the head of a queue, without removing it from the queue. }
     function PeekHead : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF};
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Add a value to the tail of a queue. }
     function PushTail (AData : T) : Boolean;
@@ -83,9 +84,15 @@ type
     { Read a value from the tail of a queue, without removing it from the 
       queue. }
     function PeekTail : {$IFNDEF USE_OPTIONAL}T{$ELSE}TOptionalValue{$ENDIF};
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
+    { Retrieve the number of entries in the queue. }
+    function NumEntries : Cardinal;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Returns true if the queue contains no data. }
     function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     FHead : PQueueEntry;
     FTail : PQueueEntry;
@@ -278,6 +285,11 @@ begin
 
   Result := {$IFNDEF USE_OPTIONAL}FTail^.Value{$ELSE}
     TOptionalValue.Create(FTail^.Value){$ENDIF};
+end;
+
+function TQueue{$IFNDEF FPC}<T>{$ENDIF}.NumEntries : Cardinal;
+begin
+  Result := FLength;
 end;
 
 function TQueue{$IFNDEF FPC}<T>{$ENDIF}.IsEmpty : Boolean;

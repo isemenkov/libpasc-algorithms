@@ -311,6 +311,7 @@ type
   * [Insert](https://github.com/isemenkov/libpasc-algorithms/wiki/TQueue#insert)
   * [Remove](https://github.com/isemenkov/libpasc-algorithms/wiki/TQueue#remove)
   * [Values](https://github.com/isemenkov/libpasc-algorithms/wiki/TQueue#values)
+  * [NumEntries](https://github.com/isemenkov/libpasc-algorithms/wiki/TQueue#numentries)
   * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TQueue#isempty)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TQueue).
