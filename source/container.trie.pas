@@ -71,10 +71,23 @@ type
     { Look up a value from its key in a trie. }
     function Search (Key : AnsiString) : {$IFNDEF USE_OPTIONAL}V{$ELSE}
       TOptionalValue{$ENDIF};
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
+    { Look up a value from its key in a trie. Return default value if Key not 
+      exists. }
+    function SearchDefault (Key : AnsiString; ADefault : V) : V;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+     
     { Look up a value from its key in a trie. The key is a sequence of bytes. }
     function SearchBinary (Key : PByte; KeyLength : Integer) : 
       {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
+    { Look up a value from its key in a trie. The key is a sequence of bytes.
+      Return default value if Key not exists. }
+    function SearchBinaryDefault (Key : PByte; KeyLength : Integer; ADefault :
+      V) : V;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
 
     { Remove an entry from a trie. }
     function Remove (Key : AnsiString) : Boolean;
@@ -84,6 +97,11 @@ type
 
     { Find the number of entries in a trie. }
     function NumEntries : Cardinal;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
+    { Return true if container is empty. }
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     type
       PPTrieNode = ^PTrieNode;
@@ -109,7 +127,9 @@ type
     procedure InsertRollback (Key : PByte);
   private
     procedure ListPush (list : PPTrieNode; node : PTrieNode);
+      {$IFNDEF DEBUG}inline;{$ENDIF}
     function ListPop (list : PPTrieNode) : PTrieNode;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   end;
 
 implementation
@@ -565,6 +585,19 @@ begin
     {$ENDIF}
 end;
 
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.SearchDefault (Key : AnsiString; 
+  ADefault : V) : V;
+var
+  node : PTrieNode;
+begin
+  node := FindEnd(Key);
+  
+  if node <> nil then
+    Exit(node^.data)
+  else   
+    Exit(ADefault);
+end;
+
 function TTrie{$IFNDEF FPC}<V>{$ENDIF}.SearchBinary (Key : PByte; KeyLength : 
   Integer) : {$IFNDEF USE_OPTIONAL}V{$ELSE}TOptionalValue{$ENDIF};
 var
@@ -583,6 +616,19 @@ begin
     {$ENDIF}
 end;
 
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.SearchBinaryDefault (Key : PByte; 
+  KeyLength : Integer; ADefault : V) : V;
+var
+  node : PTrieNode;
+begin
+  node := FindEndBinary(Key, KeyLength);
+
+  if node <> nil then
+    Exit(node^.data)
+  else
+    Exit(ADefault);
+end;
+
 function TTrie{$IFNDEF FPC}<V>{$ENDIF}.NumEntries : Cardinal;
 begin
   { To find the number of entries, simply look at the use count of the root 
@@ -592,5 +638,11 @@ begin
   else
     Result := 0;
 end;
+
+function TTrie{$IFNDEF FPC}<V>{$ENDIF}.IsEmpty : Boolean;
+begin
+  Result := (NumEntries = 0);
+end;
+
 
 end.

@@ -290,6 +290,7 @@ type
   * [Remove](https://github.com/isemenkov/libpasc-algorithms/wiki/TTrie#remove)
   * [Search](https://github.com/isemenkov/libpasc-algorithms/wiki/TTrie#search)
   * [NumEntries](https://github.com/isemenkov/libpasc-algorithms/wiki/TTrie#numeentries)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TTrie#isempty)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TTrie).
 
