@@ -75,6 +75,11 @@ type
 
     { Find the number of values stored in a binary heap. }
     function NumEntries : Cardinal;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
+    { Return true if container is empty. }
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     FData : array of PData;
     FLength : Cardinal;
@@ -108,6 +113,11 @@ type
 
     { Find the number of values stored in a binary heap. }
     function NumEntries : Cardinal;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
+
+    { Return true if container is empty. }
+    function IsEmpty : Boolean;
+      {$IFNDEF DEBUG}inline;{$ENDIF}
   protected
     FData : array of PData;
     FLength : Cardinal;
@@ -263,6 +273,12 @@ begin
   Result := FLength;
 end;
 
+function TMinBinaryHeap{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .IsEmpty : Boolean;
+begin
+  Result := (NumEntries = 0);
+end;
+
 { TMaxBinaryHeap }
 
 constructor TMaxBinaryHeap{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -407,6 +423,12 @@ function TMaxBinaryHeap{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .NumEntries : Cardinal;
 begin
   Result := FLength;
+end;
+
+function TMaxBinaryHeap{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .IsEmpty : Boolean;
+begin
+  Result := (NumEntries = 0);
 end;
 
 end.

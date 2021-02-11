@@ -245,6 +245,7 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Append](https://github.com/isemenkov/libpasc-algorithms/wiki/TMinBinaryHeap#append)
   * [Pop](https://github.com/isemenkov/libpasc-algorithms/wiki/TMinBinaryHeap#pop)
   * [NumEntries](https://github.com/isemenkov/libpasc-algorithms/wiki/TMinBinaryHeap#numentries)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TMinBinaryHeap#isempty)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TMinBinaryHeap).
 
@@ -268,6 +269,7 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Append](https://github.com/isemenkov/libpasc-algorithms/wiki/TMaxBinaryHeap#append)
   * [Pop](https://github.com/isemenkov/libpasc-algorithms/wiki/TMaxBinaryHeap#pop)
   * [NumEntries](https://github.com/isemenkov/libpasc-algorithms/wiki/TMaxBinaryHeap#numentries)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TMaxBinaryHeap#isempty)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TMaxBinaryHeap).
 
