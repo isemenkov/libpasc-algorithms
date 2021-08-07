@@ -3,10 +3,17 @@ program libpascalgorithmstestcase;
 {$mode objfpc}{$H+}
 
 uses
-  Interfaces, Forms, GuiTestRunner, testcase_arraylist, testcase_list,
-  testcase_avltree, testcase_orderedset, testcase_hashtable,
-  testcase_memorybuffer, testcase_trie, utils.functional, testcase_sortedarray,
-  testcase_binaryheap, testcase_queue;
+  Interfaces, Forms, GuiTestRunner, 
+  testcase_arraylist,
+  testcase_avltree,
+  testcase_binaryheap,
+  testcase_hashtable,
+  testcase_list,
+  testcase_memorybuffer,
+  testcase_orderedset,
+  testcase_queue,
+  testcase_sortedarray,
+  testcase_trie;
 
 {$R *.res}
 
@@ -15,4 +22,3 @@ begin
   Application.CreateForm(TGuiTestRunner, TestRunner);
   Application.Run;
 end.
-
