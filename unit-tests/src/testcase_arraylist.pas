@@ -96,11 +96,6 @@ type
     procedure Remove_Item_AfterUpperBound_CheckLength_ReturnTrue;
     procedure Remove_Item_AfterUpperBound_IsEmpty_ReturnFalse;
 
-    procedure Remove_Item_BeforeLowerBound_ReturnFalse;
-    procedure Remove_Item_BeforeLowerBound_CheckValue_ReturnTrue;
-    procedure Remove_Item_BeforeLowerBound_CheckLength_ReturnTrue;
-    procedure Remove_Item_BeforeLowerBound_IsEmpty_ReturnFalse;
-
     procedure RemoveRange_Items_ReturnTrue;
     procedure RemoveRange_Items_CheckValues_ReturnTrue;
     procedure RemoveRange_Items_CheckLength_ReturnTrue;
@@ -409,15 +404,6 @@ begin
   AssertFalse(AContainer.Remove(5));
 end;
 
-procedure TIntegerArrayListTestCase.Remove_Item_BeforeLowerBound_ReturnFalse;
-begin
-  MakeContainer;
-
-  AContainer.Append(1);
-
-  AssertFalse(AContainer.Remove(-1));
-end;
-
 procedure TIntegerArrayListTestCase.Remove_Item_CheckValues_ReturnTrue;
 begin
   MakeContainer;
@@ -488,42 +474,6 @@ begin
   AContainer.Append(1);
 
   AContainer.Remove(2);
-
-  AssertFalse(AContainer.IsEmpty);
-end;
-
-procedure TIntegerArrayListTestCase
-  .Remove_Item_BeforeLowerBound_CheckValue_ReturnTrue;
-begin
-  MakeContainer;
-
-  AContainer.Append(1);
-
-  AContainer.Remove(-1);
-
-  AssertTrue(AContainer.Value[0] = 1);
-end;
-
-procedure TIntegerArrayListTestCase
-  .Remove_Item_BeforeLowerBound_CheckLength_ReturnTrue;
-begin
-  MakeContainer;
-
-  AContainer.Append(1);
-
-  AContainer.Remove(-1);
-
-  AssertTrue(AContainer.Length = 1);
-end;
-
-procedure TIntegerArrayListTestCase
-  .Remove_Item_BeforeLowerBound_IsEmpty_ReturnFalse;
-begin
-  MakeContainer;
-
-  AContainer.Append(1);
-
-  AContainer.Remove(-1);
 
   AssertFalse(AContainer.IsEmpty);
 end;
