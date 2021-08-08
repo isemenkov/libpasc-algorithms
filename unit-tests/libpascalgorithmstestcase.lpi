@@ -31,7 +31,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="27">
+    <Units Count="26">
       <Unit0>
         <Filename Value="libpascalgorithmstestcase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -69,77 +69,73 @@
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="testcase_avltree.pas"/>
+        <Filename Value="../pascalutils/source/utils.pair.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="testcase_arraylist.pas"/>
+        <Filename Value="../source/container.memorybuffer.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="testcase_orderedset.pas"/>
+        <Filename Value="../source/container.trie.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="testcase_list.pas"/>
+        <Filename Value="../pascalutils/source/utils.functional.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="testcase_hashtable.pas"/>
+        <Filename Value="../source/container.sortedarray.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="../pascalutils/source/utils.pair.pas"/>
+        <Filename Value="../source/container.binaryheap.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
       <Unit15>
-        <Filename Value="../source/container.memorybuffer.pas"/>
+        <Filename Value="../source/container.queue.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit15>
       <Unit16>
-        <Filename Value="testcase_memorybuffer.pas"/>
+        <Filename Value="src/testcase_arraylist.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
-        <Filename Value="../source/container.trie.pas"/>
+        <Filename Value="src/testcase_avltree.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
       <Unit18>
-        <Filename Value="testcase_trie.pas"/>
+        <Filename Value="src/testcase_binaryheap.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit18>
       <Unit19>
-        <Filename Value="../pascalutils/source/utils.functional.pas"/>
+        <Filename Value="src/testcase_hashtable.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
       <Unit20>
-        <Filename Value="../source/container.sortedarray.pas"/>
+        <Filename Value="src/testcase_list.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit20>
       <Unit21>
-        <Filename Value="testcase_sortedarray.pas"/>
+        <Filename Value="src/testcase_memorybuffer.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
       <Unit22>
-        <Filename Value="../source/container.binaryheap.pas"/>
+        <Filename Value="src/testcase_orderedset.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit22>
       <Unit23>
-        <Filename Value="testcase_binaryheap.pas"/>
+        <Filename Value="src/testcase_queue.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="../source/container.queue.pas"/>
+        <Filename Value="src/testcase_sortedarray.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
       <Unit25>
-        <Filename Value="testcase_queue.pas"/>
+        <Filename Value="src/testcase_trie.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit25>
-      <Unit26>
-        <Filename Value="../../pascalutils/source/utils.variant.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit26>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -149,7 +145,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="../pascalutils/source;../source;../../pascalutils/source"/>
+      <OtherUnitFiles Value="../pascalutils/source;../source;src"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>

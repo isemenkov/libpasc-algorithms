@@ -145,12 +145,14 @@ type
     function Prepend (AValue : T) : Boolean;
       {$IFNDEF DEBUG}inline;{$ENDIF}
 
-    { Remove the entry at the specified location in an ArrayList. }
-    procedure Remove (AIndex: Cardinal);
+    { Remove the entry at the specified location in an ArrayList.
+      Return true if the request was successful, false if index is not exists. }
+    function Remove (AIndex: Cardinal) : Boolean;
       {$IFNDEF DEBUG}inline;{$ENDIF}
 
-    { Remove a range of entries at the specified location in an ArrayList. }
-    procedure RemoveRange (AIndex : LongInt; ALength : LongInt);
+    { Remove a range of entries at the specified location in an ArrayList.
+      Return true if the request was successful, false if not. }
+    function RemoveRange (AIndex : LongInt; ALength : LongInt) : Boolean;
 
     { Insert a value at the specified index in an ArrayList.
       The index where the new value can be inserted is limited by the size of 
@@ -232,7 +234,7 @@ end;
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .TIterator.HasValue : Boolean;
 begin
-  if FPosition >= FLength then
+  if (FPosition >= FLength) or (FPosition < 0) then
   begin
     Exit(False);
   end;
@@ -244,11 +246,6 @@ function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .TIterator.Prev : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition - 1);
-
-  if TIterator(Result).FPosition < 0 then
-  begin
-    TIterator(Result).FPosition := 0;
-  end;
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -354,7 +351,7 @@ function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .GetValue (AIndex : LongInt) : {$IFNDEF USE_OPTIONAL}T
   {$ELSE}TOptionalValue{$ENDIF};
 begin
-  if AIndex > FLength then
+  if (AIndex >= FLength) or (AIndex < 0) then
   begin
     {$IFNDEF USE_OPTIONAL}
     raise EIndexOutOfRangeException.Create('Index out of range.');
@@ -464,7 +461,7 @@ function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .Insert (AIndex : LongInt; AData : T) : Boolean;
 begin
   { Sanity check the index }
-  if AIndex > FLength then
+  if (AIndex > FLength) or (AIndex < 0) then
   begin
     Result := False;
     Exit;
@@ -504,12 +501,13 @@ begin
   Result := Insert(0, AValue);
 end;
 
-procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .RemoveRange (AIndex : LongInt; ALength : LongInt);
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .RemoveRange (AIndex : LongInt; ALength : LongInt) : Boolean;
 begin
   { Check this is a valid range }
-  if (AIndex > FLength) or (AIndex + ALength > FLength) then
+  if (AIndex > FLength) or (AIndex + ALength > FLength) or (AIndex < 0) then
   begin
+    Result := False;
     Exit;
   end;
 
@@ -517,12 +515,13 @@ begin
   Move(FData[AIndex + ALength], FData[AIndex],
     (FLength - (AIndex + ALength)) * SizeOf(PData));
   Dec(FLength, ALength);
+  Result := True;
 end;
 
-procedure TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
-  .Remove (AIndex : Cardinal);
+function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
+  .Remove (AIndex : Cardinal) : Boolean;
 begin
-  RemoveRange(AIndex, 1);
+  Result := RemoveRange(AIndex, 1);
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
