@@ -28,7 +28,7 @@
 (*                                                                            *)
 (******************************************************************************)
 
-unit testcase_arraylist_performance;
+unit testcase_list_performance;
 
 {$IFDEF FPC}
   {$mode objfpc}{$H+}
@@ -37,14 +37,14 @@ unit testcase_arraylist_performance;
 interface
 
 uses
-  Classes, SysUtils, container.arraylist, utils.functor
+  Classes, SysUtils, container.list, utils.functor
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntegerArrayListPerformanceTestCase = class(TTestCase)
+  TIntegerListPerformanceTestCase = class(TTestCase)
   public
     type
-      TContainer = {$IFDEF FPC}specialize{$ENDIF} TArrayList<Integer, 
+      TContainer = {$IFDEF FPC}specialize{$ENDIF} TList<Integer,
         TCompareFunctorInteger>;
       TContainerIterator = TContainer.TIterator;
   public
@@ -60,40 +60,40 @@ type
     procedure Append_OneMillionItems_ReturnTrue;
   private
     AContainer : TContainer;
-end;
+    AContainerIterator : TContainerIterator;
+  end;
 
 implementation
 
 {$IFNDEF FPC}
-procedure TIntegerArrayListPerformanceTestCase.AssertTrue(ACondition: Boolean);
+procedure TIntegerListPerformanceTestCase.AssertTrue(ACondition: Boolean);
 begin
   CheckTrue(ACondition);
 end;
 
-procedure TIntegerArrayListPerformanceTestCase.AssertFalse(ACondition: Boolean);
+procedure TIntegerListPerformanceTestCase.AssertFalse(ACondition: Boolean);
 begin
   CheckFalse(ACondition);
 end;
 
-procedure TIntegerArrayListPerformanceTestCase.AssertEquals(Expected, 
+procedure TIntegerListPerformanceTestCase.AssertEquals(Expected, 
   Actual : Integer);
 begin
   CheckEquals(Expected, Actual);
 end;
 {$ENDIF}
 
-procedure TIntegerArrayListPerformanceTestCase.MakeContainer;
+procedure TIntegerListPerformanceTestCase.MakeContainer;
 begin
   AContainer := TContainer.Create;
 end;
 
-procedure TIntegerArrayListPerformanceTestCase.TearDown;
+procedure TIntegerListPerformanceTestCase.TearDown;
 begin
   FreeAndNil(AContainer);
 end;
 
-procedure TIntegerArrayListPerformanceTestCase
-  .Append_OneMillionItems_ReturnTrue;
+procedure TIntegerListPerformanceTestCase.Append_OneMillionItems_ReturnTrue;
 var
   i : Integer;
 begin
@@ -109,7 +109,7 @@ end;
 
 initialization
   RegisterTest(
-    'TArrayList', 
-    TIntegerArrayListPerformanceTestCase{$IFNDEF FPC}.Suite{$ENDIF}
+    'TList', 
+    TIntegerListPerformanceTestCase{$IFNDEF FPC}.Suite{$ENDIF}
   );
 end.

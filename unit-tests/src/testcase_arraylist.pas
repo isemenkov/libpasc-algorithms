@@ -150,9 +150,9 @@ begin
   CheckFalse(ACondition);
 end;
 
-procedure TCompareFunctorInteger.AssertEquals(Expected, Actual : Integer);
+procedure TIntegerArrayListTestCase.AssertEquals(Expected, Actual : Integer);
 begin
-  CheckEqual(Expected, Actual);
+  CheckEquals(Expected, Actual);
 end;
 {$ENDIF}
 
@@ -805,9 +805,9 @@ begin
   for Value in AContainer do
   begin
     case Index of
-      0 : begin AssertTrue(Value = 1); Inc(Index); end;
-      1 : begin AssertTrue(Value = 2); Inc(Index); end;
-      2 : begin AssertTrue(Value = 3); Inc(Index); end;
+      0 : begin AssertEquals(Value, 1); Inc(Index); end;
+      1 : begin AssertEquals(Value, 2); Inc(Index); end;
+      2 : begin AssertEquals(Value, 3); Inc(Index); end;
       else begin AssertTrue(False); Inc(Index); end;
     end;
   end;
@@ -828,9 +828,9 @@ begin
   while AContainerIterator.HasValue do
   begin
     case AContainerIterator.Index of
-      0 : AssertTrue(AContainerIterator.Value = 1);
-      1 : AssertTrue(AContainerIterator.Value = 2);
-      2 : AssertTrue(AContainerIterator.Value = 3);
+      0 : AssertEquals(AContainerIterator.Value, 1);
+      1 : AssertEquals(AContainerIterator.Value, 2);
+      2 : AssertEquals(AContainerIterator.Value, 3);
       else AssertTrue(False);
     end;
 
@@ -851,9 +851,9 @@ begin
   while AContainerIterator.HasValue do
   begin
     case AContainerIterator.Index of
-      2 : AssertTrue(AContainerIterator.Value = 3);
-      1 : AssertTrue(AContainerIterator.Value = 2);
-      0 : AssertTrue(AContainerIterator.Value = 1);
+      2 : AssertEquals(AContainerIterator.Value, 3);
+      1 : AssertEquals(AContainerIterator.Value, 2);
+      0 : AssertEquals(AContainerIterator.Value, 1);
       else AssertTrue(False);
     end;
 

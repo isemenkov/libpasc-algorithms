@@ -18,7 +18,9 @@ uses
   container.queue in '..\source\container.queue.pas',
 
   testcase_arraylist in '..\unit-tests\src\testcase_arraylist.pas',
+  testcase_arraylist_performance in '..\unit-tests\src\testcase_arraylist_performance.pas',
   testcase_list in '..\unit-tests\src\testcase_list.pas',
+  testcase_list_performance in '..\unit-tests\src\testcase_list_performance.pas',
   testcase_avltree in '..\unit-tests\src\testcase_avltree.pas',
   testcase_orderedset in '..\unit-tests\src\testcase_orderedset.pas',
   testcase_hashtable in '..\unit-tests\src\testcase_hashtable.pas',

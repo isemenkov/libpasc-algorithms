@@ -144,6 +144,10 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Length](https://github.com/isemenkov/libpasc-algorithms/wiki/TList#length)
   * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TList#isempty)
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TList#iterate)
+  * [Additional](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#additional)
+      * [TFilterEnumerator](https://github.com/isemenkov/pascalutils/wiki/TFilterEnumerator)
+      * [TAccumulate](https://github.com/isemenkov/pascalutils/wiki/TAccumulate)
+      * [TMap](https://github.com/isemenkov/pascalutils/wiki/TMap)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TList).
 
