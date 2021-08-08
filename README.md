@@ -35,7 +35,7 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
 Library is tested for 
 
 - Embarcadero (R) Delphi 10.3 on Windows 7 Service Pack 1 (Version 6.1, Build 7601, 64-bit Edition)
-- FreePascal Compiler (3.2.0) and Lazarus IDE (2.0.10) on Ubuntu Linux 5.8.0-33-generic x86_64
+- FreePascal Compiler (3.2.0) and Lazarus IDE (2.0.12) on Ubuntu Linux 5.8.0-33-generic x86_64
 
 
 
@@ -86,6 +86,10 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Length](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#length)
   * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#isempty)
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#iterate)
+  * [Additional](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#additional)
+      * [TFilterEnumerator](https://github.com/isemenkov/pascalutils/wiki/TFilterEnumerator)
+      * [TAccumulate](https://github.com/isemenkov/pascalutils/wiki/TAccumulate)
+      * [TMap](https://github.com/isemenkov/pascalutils/wiki/TMap)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList).
 

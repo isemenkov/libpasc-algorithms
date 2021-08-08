@@ -37,8 +37,7 @@ unit testcase_arraylist;
 interface
 
 uses
-  Classes, SysUtils, container.arraylist, utils.functor, utils.pair,
-  utils.enumerate, utils.functional
+  Classes, SysUtils, container.arraylist, utils.functor
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
@@ -55,6 +54,7 @@ type
     {$IFNDEF FPC}
     procedure AssertTrue (ACondition : Boolean);
     procedure AssertFalse (ACondition: Boolean);
+    procedure AssertEquals (Expected, Actual : Integer);
     {$ENDIF} 
   published
     procedure ByDefault_ZeroLength_ReturnTrue;
@@ -78,12 +78,12 @@ type
 
     procedure Insert_Items_AfterUpperBound_ReturnFalse;
     procedure Insert_Items_AfterUpperBound_CheckValue_RaiseEIndexOutOfRangeException_ReturnTrue;
-    procedure Insert_Items_AfterUpperBound_CheckLength_ReturnFalse;
+    procedure Insert_Items_AfterUpperBound_CheckLength_ReturnZero;
     procedure Insert_Items_AfterUpperBound_IsEmpty_ReturnTrue;
 
     procedure Insert_Items_BeforeLowerBound_ReturnFalse;
     procedure Insert_Items_BeforeLowerBound_CheckValue_RaiseEIndexOutOfRangeException_ReturnTrue;
-    procedure Insert_Items_BeforeLowerBound_CheckLength_ReturnFalse;
+    procedure Insert_Items_BeforeLowerBound_CheckLength_ReturnZero;
     procedure Insert_Items_BeforeLowerBound_IsEmpty_ReturnTrue;
 
     procedure Remove_Item_ReturnTrue;
@@ -118,10 +118,9 @@ type
 
     procedure Clear_IsEmpty_ReturnTrue;
 
-    procedure IndexOf_ReturnTrue;
-    procedure IndexOf_ReturnFalse;
-    procedure IndexOf_CheckIndex_ReturnTrue;
-    procedure IndexOf_CheckIndex_ReturnFalse;
+    procedure IndexOf_Exists_ReturnItemIndex;
+    procedure IndexOf_NotExists_ReturnMinusOne;
+    procedure IndexOf_Empty_ReturnMinusOne;
 
     procedure Value_AfterUpperBoundIndex_RaiseEIndexOutOfRangeException_ReturnTrue;
     procedure Value_BeforeLowerBoundIndex_RaiseEIndexOutOfRangeException_ReturnTrue;
@@ -150,6 +149,11 @@ procedure TIntegerArrayListTestCase.AssertFalse(ACondition: Boolean);
 begin
   CheckFalse(ACondition);
 end;
+
+procedure TCompareFunctorInteger.AssertEquals(Expected, Actual : Integer);
+begin
+  CheckEqual(Expected, Actual);
+end;
 {$ENDIF}
 
 
@@ -167,7 +171,7 @@ procedure TIntegerArrayListTestCase.ByDefault_ZeroLength_ReturnTrue;
 begin
   MakeContainer;
 
-  AssertTrue(AContainer.Length = 0);
+  AssertEquals(AContainer.Length, 0);
 end;
 
 procedure TIntegerArrayListTestCase.ByDefault_IsEmpty_ReturnTrue;
@@ -206,9 +210,9 @@ begin
   AContainer.Append(2);
   AContainer.Append(3);
 
-  AssertTrue(AContainer.Value[0] = 1);
-  AssertTrue(AContainer.Value[1] = 2);
-  AssertTrue(AContainer.Value[2] = 3);
+  AssertEquals(AContainer.Value[0], 1);
+  AssertEquals(AContainer.Value[1], 2);
+  AssertEquals(AContainer.Value[2], 3);
 end;
 
 procedure TIntegerArrayListTestCase.Prepend_Items_CheckValues_ReturnTrue;
@@ -219,9 +223,9 @@ begin
   AContainer.Prepend(2);
   AContainer.Prepend(3);
 
-  AssertTrue(AContainer.Value[0] = 3);
-  AssertTrue(AContainer.Value[1] = 2);
-  AssertTrue(AContainer.Value[2] = 1);
+  AssertEquals(AContainer.Value[0], 3);
+  AssertEquals(AContainer.Value[1], 2);
+  AssertEquals(AContainer.Value[2], 1);
 end;
 
 procedure TIntegerArrayListTestCase.Insert_Items_CheckValues_ReturnTrue;
@@ -232,9 +236,9 @@ begin
   AContainer.Insert(1, 2);
   AContainer.Insert(0, 3);
 
-  AssertTrue(AContainer.Value[0] = 3);
-  AssertTrue(AContainer.Value[1] = 1);
-  AssertTrue(AContainer.Value[2] = 2);
+  AssertEquals(AContainer.Value[0], 3);
+  AssertEquals(AContainer.Value[1], 1);
+  AssertEquals(AContainer.Value[2], 2);
 end;
 
 procedure TIntegerArrayListTestCase.Append_Items_CheckLength_ReturnTrue;
@@ -243,7 +247,7 @@ begin
 
   AContainer.Append(0);
 
-  AssertTrue(AContainer.Length = 1);
+  AssertEquals(AContainer.Length, 1);
 end;
 
 procedure TIntegerArrayListTestCase.Prepend_Items_CheckLength_ReturnTrue;
@@ -252,7 +256,7 @@ begin
 
   AContainer.Prepend(0);
 
-  AssertTrue(AContainer.Length = 1);
+  AssertEquals(AContainer.Length, 1);
 end;
 
 procedure TIntegerArrayListTestCase.Insert_Items_CheckLength_ReturnTrue;
@@ -261,7 +265,7 @@ begin
 
   AContainer.Insert(0, 0);
 
-  AssertTrue(AContainer.Length = 1);
+  AssertEquals(AContainer.Length, 1);
 end;
 
 procedure TIntegerArrayListTestCase.Append_Items_IsEmpty_ReturnFalse;
@@ -319,13 +323,13 @@ begin
 end;
 
 procedure TIntegerArrayListTestCase
-  .Insert_Items_AfterUpperBound_CheckLength_ReturnFalse;
+  .Insert_Items_AfterUpperBound_CheckLength_ReturnZero;
 begin
   MakeContainer;
 
   AContainer.Insert(2, 1);
 
-  AssertFalse(AContainer.Length = 1);
+  AssertEquals(AContainer.Length, 0);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -366,13 +370,13 @@ begin
 end;
 
 procedure TIntegerArrayListTestCase
-  .Insert_Items_BeforeLowerBound_CheckLength_ReturnFalse;
+  .Insert_Items_BeforeLowerBound_CheckLength_ReturnZero;
 begin
   MakeContainer;
 
   AContainer.Insert(-1, 1);
 
-  AssertFalse(AContainer.Length = 1);
+  AssertEquals(AContainer.Length, 0);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -414,8 +418,8 @@ begin
 
   AContainer.Remove(0);
 
-  AssertTrue(AContainer.Value[0] = 2);
-  AssertTrue(AContainer.Value[1] = 3);
+  AssertEquals(AContainer.Value[0], 2);
+  AssertEquals(AContainer.Value[1], 3);
 end;
 
 procedure TIntegerArrayListTestCase.Remove_Item_CheckLength_ReturnTrue;
@@ -428,7 +432,7 @@ begin
 
   AContainer.Remove(0);
 
-  AssertTrue(AContainer.Length = 2);
+  AssertEquals(AContainer.Length, 2);
 end;
 
 procedure TIntegerArrayListTestCase.Remove_Item_IsEmpty_ReturnTrue;
@@ -451,7 +455,7 @@ begin
   
   AContainer.Remove(3);
 
-  AssertTrue(AContainer.Value[0] = 1);
+  AssertEquals(AContainer.Value[0], 1);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -463,7 +467,7 @@ begin
 
   AContainer.Remove(2);
 
-  AssertTrue(AContainer.Length = 1);
+  AssertEquals(AContainer.Length, 1);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -499,7 +503,7 @@ begin
 
   AContainer.RemoveRange(0, 2);
 
-  AssertTrue(AContainer.Value[0] = 3);
+  AssertEquals(AContainer.Value[0], 3);
 end;
 
 procedure TIntegerArrayListTestCase.RemoveRange_Items_CheckLength_ReturnTrue;
@@ -512,7 +516,7 @@ begin
 
   AContainer.RemoveRange(0, 2);
 
-  AssertTrue(AContainer.Length = 1);
+  AssertEquals(AContainer.Length, 1);
 end;
 
 procedure TIntegerArrayListTestCase.RemoveRange_Items_IsEmpty_ReturnTrue;
@@ -549,8 +553,8 @@ begin
 
   AContainer.RemoveRange(3, 1);
 
-  AssertTrue(AContainer.Value[0] = 1);
-  AssertTrue(AContainer.Value[1] = 2);
+  AssertEquals(AContainer.Value[0], 1);
+  AssertEquals(AContainer.Value[1], 2);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -563,7 +567,7 @@ begin
 
   AContainer.RemoveRange(3, 1);
 
-  AssertTrue(AContainer.Length = 2);
+  AssertEquals(AContainer.Length, 2);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -600,8 +604,8 @@ begin
 
   AContainer.RemoveRange(-1, 2);
 
-  AssertTrue(AContainer.Value[0] = 1);
-  AssertTrue(AContainer.Value[1] = 2);
+  AssertEquals(AContainer.Value[0], 1);
+  AssertEquals(AContainer.Value[1], 2);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -614,7 +618,7 @@ begin
 
   AContainer.RemoveRange(-1, 2);
 
-  AssertTrue(AContainer.Length = 2);
+  AssertEquals(AContainer.Length, 2);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -651,8 +655,8 @@ begin
 
   AContainer.RemoveRange(0, 0);
 
-  AssertTrue(AContainer.Value[0] = 1);
-  AssertTrue(AContainer.Value[1] = 2);
+  AssertEquals(AContainer.Value[0], 1);
+  AssertEquals(AContainer.Value[1], 2);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -665,7 +669,7 @@ begin
 
   AContainer.RemoveRange(0, 0);
 
-  AssertTrue(AContainer.Length = 2);
+  AssertEquals(AContainer.Length, 2);
 end;
 
 procedure TIntegerArrayListTestCase
@@ -694,7 +698,7 @@ begin
   AssertTrue(AContainer.IsEmpty);
 end;
 
-procedure TIntegerArrayListTestCase.IndexOf_ReturnTrue;
+procedure TIntegerArrayListTestCase.IndexOf_Exists_ReturnItemIndex;
 begin
   MakeContainer;
 
@@ -702,10 +706,10 @@ begin
   AContainer.Append(2);
   AContainer.Append(3);
 
-  AssertTrue(AContainer.IndexOf(2) <> -1);
+  AssertEquals(AContainer.IndexOf(2), 1);
 end;
 
-procedure TIntegerArrayListTestCase.IndexOf_ReturnFalse;
+procedure TIntegerArrayListTestCase.IndexOf_NotExists_ReturnMinusOne;
 begin
   MakeContainer;
 
@@ -713,29 +717,14 @@ begin
   AContainer.Append(2);
   AContainer.Append(3);
 
-  AssertFalse(AContainer.IndexOf(0) <> -1);
+  AssertEquals(AContainer.IndexOf(5), -1);
 end;
 
-procedure TIntegerArrayListTestCase.IndexOf_CheckIndex_ReturnTrue;
+procedure TIntegerArrayListTestCase.IndexOf_Empty_ReturnMinusOne;
 begin
   MakeContainer;
 
-  AContainer.Append(1);
-  AContainer.Append(2);
-  AContainer.Append(3);
-
-  AssertTrue(AContainer.IndexOf(2) = 1);
-end;
-
-procedure TIntegerArrayListTestCase.IndexOf_CheckIndex_ReturnFalse;
-begin
-  MakeContainer;
-
-  AContainer.Append(1);
-  AContainer.Append(2);
-  AContainer.Append(3);
-
-  AssertFalse(AContainer.IndexOf(3) = 1);
+  AssertEquals(AContainer.IndexOf(1), -1);
 end;
 
 procedure TIntegerArrayListTestCase
