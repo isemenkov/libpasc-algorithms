@@ -234,7 +234,7 @@ end;
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .TIterator.HasValue : Boolean;
 begin
-  if FPosition >= FLength then
+  if (FPosition >= FLength) or (FPosition < 0) then
   begin
     Exit(False);
   end;
@@ -246,11 +246,6 @@ function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .TIterator.Prev : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition - 1);
-
-  if TIterator(Result).FPosition < 0 then
-  begin
-    TIterator(Result).FPosition := 0;
-  end;
 end;
 
 function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
@@ -356,7 +351,7 @@ function TArrayList{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .GetValue (AIndex : LongInt) : {$IFNDEF USE_OPTIONAL}T
   {$ELSE}TOptionalValue{$ENDIF};
 begin
-  if AIndex >= FLength then
+  if (AIndex >= FLength) or (AIndex < 0) then
   begin
     {$IFNDEF USE_OPTIONAL}
     raise EIndexOutOfRangeException.Create('Index out of range.');
