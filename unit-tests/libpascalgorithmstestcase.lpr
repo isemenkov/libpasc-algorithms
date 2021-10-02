@@ -14,6 +14,7 @@ uses
   testcase_memorybuffer,
   testcase_orderedset,
   testcase_queue,
+  testcase_queue_performance,
   testcase_sortedarray,
   testcase_trie;
 

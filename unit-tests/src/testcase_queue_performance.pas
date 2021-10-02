@@ -3,7 +3,7 @@
 (* delphi and object pascal library of  common data structures and algorithms *)
 (*                 https://github.com/fragglet/c-algorithms                   *)
 (*                                                                            *)
-(* Copyright (c) 2020 - 2021                                Ivan Semenkov     *)
+(* Copyright (c) 2021                                       Ivan Semenkov     *)
 (* https://github.com/isemenkov/libpasc-algorithms          ivan@semenkov.pro *)
 (*                                                          Ukraine           *)
 (******************************************************************************)
@@ -28,7 +28,7 @@
 (*                                                                            *)
 (******************************************************************************)
 
-unit testcase_list_performance;
+unit testcase_queue_performance;
 
 {$IFDEF FPC}
   {$mode objfpc}{$H+}
@@ -37,16 +37,14 @@ unit testcase_list_performance;
 interface
 
 uses
-  Classes, SysUtils, container.list, utils.functor
+  Classes, SysUtils, container.queue
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntegerListPerformanceTestCase = class(TTestCase)
+  TIntegerQueuePerformanceTestCase = class(TTestCase)
   public
     type
-      TContainer = {$IFDEF FPC}specialize{$ENDIF} TList<Integer,
-        TCompareFunctorInteger>;
-      TContainerIterator = TContainer.TIterator;
+      TContainer = {$IFDEF FPC}specialize{$ENDIF} TQueue<Integer>;
   public
     procedure MakeContainer;
     procedure TearDown; override;
@@ -60,39 +58,40 @@ type
     procedure Append_OneMillionItems_ReturnTrue;
   private
     AContainer : TContainer;
-  end;
+end;
 
 implementation
 
 {$IFNDEF FPC}
-procedure TIntegerListPerformanceTestCase.AssertTrue(ACondition: Boolean);
+procedure TIntegerQueuePerformanceTestCase.AssertTrue(ACondition: Boolean);
 begin
   CheckTrue(ACondition);
 end;
 
-procedure TIntegerListPerformanceTestCase.AssertFalse(ACondition: Boolean);
+procedure TIntegerQueuePerformanceTestCase.AssertFalse(ACondition: Boolean);
 begin
   CheckFalse(ACondition);
 end;
 
-procedure TIntegerListPerformanceTestCase.AssertEquals(Expected, 
+procedure TIntegerQueuePerformanceTestCase.AssertEquals(Expected, 
   Actual : Integer);
 begin
   CheckEquals(Expected, Actual);
 end;
 {$ENDIF}
 
-procedure TIntegerListPerformanceTestCase.MakeContainer;
+procedure TIntegerQueuePerformanceTestCase.MakeContainer;
 begin
   AContainer := TContainer.Create;
 end;
 
-procedure TIntegerListPerformanceTestCase.TearDown;
+procedure TIntegerQueuePerformanceTestCase.TearDown;
 begin
   FreeAndNil(AContainer);
 end;
 
-procedure TIntegerListPerformanceTestCase.Append_OneMillionItems_ReturnTrue;
+procedure TIntegerQueuePerformanceTestCase
+  .Append_OneMillionItems_ReturnTrue;
 var
   i : Integer;
 begin
@@ -100,15 +99,15 @@ begin
 
   for i := 0 to 999999 do
   begin
-    AssertTrue(AContainer.Append(i));
+    AssertTrue(AContainer.PushHead(i));
   end;
 
-  AssertEquals(AContainer.Length, 1000000);
+  AssertEquals(AContainer.NumEntries, 1000000);
 end;
 
 initialization
   RegisterTest(
-    'TList', 
-    TIntegerListPerformanceTestCase{$IFNDEF FPC}.Suite{$ENDIF}
+    'TQueue', 
+    TIntegerQueuePerformanceTestCase{$IFNDEF FPC}.Suite{$ENDIF}
   );
 end.

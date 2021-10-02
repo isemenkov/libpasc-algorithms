@@ -28,7 +28,8 @@ uses
   testcase_trie in '..\unit-tests\src\testcase_trie.pas',
   testcase_sortedarray in '..\unit-tests\src\testcase_sortedarray.pas',
   testcase_binaryheap in '..\unit-tests\src\testcase_binaryheap.pas',
-  testcase_queue in '..\unit-tests\src\testcase_queue.pas';
+  testcase_queue in '..\unit-tests\src\testcase_queue.pas',
+  testcase_queue_performance in '..\unit-tests\src\testcase_queue_performance.pas';
 
 {$R *.RES}
 
