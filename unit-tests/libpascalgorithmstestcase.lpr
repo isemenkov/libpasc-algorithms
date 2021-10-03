@@ -16,6 +16,7 @@ uses
   testcase_queue,
   testcase_queue_performance,
   testcase_sortedarray,
+  testcase_sortedarray_performance,
   testcase_trie;
 
 {$R *.res}
