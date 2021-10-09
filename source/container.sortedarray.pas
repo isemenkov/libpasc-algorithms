@@ -213,7 +213,7 @@ end;
 function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .TIterator.HasValue : Boolean;
 begin
-  if FPosition >= FLength then
+  if (FPosition >= FLength) or (FPosition < 0) then
   begin
     Exit(False);
   end;
@@ -225,11 +225,6 @@ function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}
   .TIterator.Prev : TIterator;
 begin
   Result := TIterator.Create(FArray, FLength, FPosition - 1);
-
-  if TIterator(Result).FPosition < 0 then
-  begin
-    TIterator(Result).FPosition := 0;
-  end;
 end;
 
 function TSortedArray{$IFNDEF FPC}<T, BinaryCompareFunctor>{$ENDIF}

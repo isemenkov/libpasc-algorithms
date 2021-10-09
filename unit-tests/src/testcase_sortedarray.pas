@@ -366,6 +366,8 @@ begin
 end;
 
 procedure TSortedArrayTestCase.Iterator_BackwardIteration_CheckValue_ReturnTrue;
+var
+  Index: Cardinal;
 begin
   MakeContainer;
 
@@ -374,15 +376,18 @@ begin
   AContainer.Append(0);
 
   AContainerIterator := AContainer.LastEntry;
+
+  Index := 0;
   while AContainerIterator.HasValue do
   begin
-    case AContainerIterator.Index of
+    case Index of
       0 : AssertEquals(AContainerIterator.Value, 2);
       1 : AssertEquals(AContainerIterator.Value, 1);
       2 : AssertEquals(AContainerIterator.Value, 0);
       else AssertTrue(False);
     end;
 
+    Inc(Index);
     AContainerIterator := AContainerIterator.Prev;
   end;
 end;
