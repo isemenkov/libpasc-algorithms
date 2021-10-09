@@ -7,6 +7,7 @@ uses
   testcase_arraylist,
   testcase_arraylist_performance,
   testcase_avltree,
+  testcase_avltree_performance,
   testcase_binaryheap,
   testcase_hashtable,
   testcase_list,
