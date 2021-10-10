@@ -14,6 +14,7 @@ uses
   testcase_list_performance,
   testcase_memorybuffer,
   testcase_orderedset,
+  testcase_orderedset_performance,
   testcase_queue,
   testcase_queue_performance,
   testcase_sortedarray,

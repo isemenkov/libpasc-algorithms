@@ -702,7 +702,7 @@ begin
     { Is this value in OrderedSet as well? If so, it should be in the new set. }
     if OrderedSet.HasValue(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}) then
       { Copy the value first before inserting, if necessary. }
-      if not OrderedSet.Insert(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}) then
+      if not Result.Insert(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}) then
       begin
         FreeAndNil(Result);
         Exit(nil);

@@ -31,7 +31,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="30">
+    <Units Count="31">
       <Unit0>
         <Filename Value="libpascalgorithmstestcase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -152,6 +152,10 @@
         <Filename Value="src/testcase_sortedarray_performance.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit29>
+      <Unit30>
+        <Filename Value="src/testcase_orderedset_performance.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit30>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

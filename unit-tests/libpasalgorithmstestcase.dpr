@@ -24,6 +24,7 @@ uses
   testcase_avltree in '..\unit-tests\src\testcase_avltree.pas',
   testcase_avltree_performance in '..\unit-tests\src\testcase_avltree_performance.pas',
   testcase_orderedset in '..\unit-tests\src\testcase_orderedset.pas',
+  testcase_orderedset_performance in '..\unit-tests\src\testcase_orderedset_performance.pas',
   testcase_hashtable in '..\unit-tests\src\testcase_hashtable.pas',
   testcase_memorybuffer in '..\unit-tests\src\testcase_memorybuffer.pas',
   testcase_trie in '..\unit-tests\src\testcase_trie.pas',
