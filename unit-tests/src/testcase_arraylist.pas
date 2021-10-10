@@ -37,8 +37,7 @@ unit testcase_arraylist;
 interface
 
 uses
-  Classes, SysUtils, container.arraylist, utils.functor, utils.pair,
-  utils.enumerate, utils.functional
+  Classes, SysUtils, container.arraylist, utils.functor, utils.enumerate
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
@@ -104,7 +103,7 @@ type
     procedure RemoveRange_Items_AfterUpperBoundIndex_ReturnFalse;
     procedure RemoveRange_Items_AfterUpperBoundIndex_CheckValue_ReturnTrue;
     procedure RemoveRange_Items_AfterUpperBoundIndex_CheckLength_ReturnTrue;
-    procedure RemoveRange_Items_AgterUpperBoundIndex_IsEmpty_ReturnFalse;
+    procedure RemoveRange_Items_AfterUpperBoundIndex_IsEmpty_ReturnFalse;
 
     procedure RemoveRange_Items_BeforeLowerBoundIndex_ReturnFalse;
     procedure RemoveRange_Items_BeforeLowerBoundIndex_CheckValue_ReturnTrue;
@@ -567,7 +566,7 @@ begin
 end;
 
 procedure TIntegerArrayListTestCase
-  .RemoveRange_Items_AgterUpperBoundIndex_IsEmpty_ReturnFalse;
+  .RemoveRange_Items_AfterUpperBoundIndex_IsEmpty_ReturnFalse;
 begin
   MakeContainer;
 

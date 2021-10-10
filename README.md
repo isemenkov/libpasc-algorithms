@@ -11,6 +11,7 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
   * [Testing](#testing)
   * [Containers](#conteiners)
     * [TArrayList](#tarraylist)
+    * [TMultiArray](#tmultiarray)
     * [TSortedArray](#tsortedarray)
     * [TList](#tlist)
     * [TAvlTree](#tavltree)
@@ -88,6 +89,32 @@ BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.c
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList#iterate)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TArrayList).
+
+
+
+#### TMultiArray
+
+TMultiArray is a generic array of array of T which automatically increase in size. 
+
+```pascal
+uses
+  container.multiarray, utils.functor;
+  
+type
+  generic TMultiArray<T, BinaryCompareFunctor> = class
+```
+
+BinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/wiki/TBinaryFunctor) interface and used to compare two array items. Needed for sort and search functions.
+
+  * [Create](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiArray#create)
+  * [Insert](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiArray#insert)
+  * [Remove](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiArray#remove)
+  * [Values](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiArray#values)
+  * [Length](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiArray#length)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiArray#isempty)
+  * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiArray#iterate)
+
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiArray).
 
 
 
