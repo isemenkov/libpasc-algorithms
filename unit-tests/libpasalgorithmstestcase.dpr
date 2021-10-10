@@ -7,6 +7,7 @@ program libpasalgorithmstestcase;
 uses
   DUnitTestRunner,
   container.arraylist in '..\source\container.arraylist.pas',
+  container.multiarray in '..\source\container.multiarray.pas',
   container.list in '..\source\container.list.pas',
   container.avltree in '..\source\container.avltree.pas',
   container.orderedset in '..\source\container.orderedset.pas',
@@ -18,6 +19,7 @@ uses
   container.queue in '..\source\container.queue.pas',
 
   testcase_arraylist in '..\unit-tests\src\testcase_arraylist.pas',
+  testcase_multiarray in '..\unit-tests\src\testcase_multiarray.pas',
   testcase_list in '..\unit-tests\src\testcase_list.pas',
   testcase_avltree in '..\unit-tests\src\testcase_avltree.pas',
   testcase_orderedset in '..\unit-tests\src\testcase_orderedset.pas',

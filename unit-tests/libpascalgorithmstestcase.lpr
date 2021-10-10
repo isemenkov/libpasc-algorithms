@@ -5,6 +5,7 @@ program libpascalgorithmstestcase;
 uses
   Interfaces, Forms, GuiTestRunner, 
   testcase_arraylist,
+  testcase_multiarray,
   testcase_avltree,
   testcase_binaryheap,
   testcase_hashtable,

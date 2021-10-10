@@ -31,7 +31,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="26">
+    <Units Count="28">
       <Unit0>
         <Filename Value="libpascalgorithmstestcase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -136,6 +136,14 @@
         <Filename Value="src/testcase_trie.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit25>
+      <Unit26>
+        <Filename Value="../source/container.multiarray.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="src/testcase_multiarray.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit27>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
