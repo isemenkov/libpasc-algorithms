@@ -12,6 +12,7 @@ uses
   container.avltree in '..\source\container.avltree.pas',
   container.orderedset in '..\source\container.orderedset.pas',
   container.hashtable in '..\source\container.hashtable.pas',
+  container.multihash in '..\source\container.multihash.pas',
   container.memorybuffer in '..\source\container.memorybuffer.pas',
   container.trie in '..\source\container.trie.pas',
   container.sortedarray in '..\source\container.sortedarray.pas',
