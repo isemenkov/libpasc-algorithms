@@ -31,7 +31,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="32">
+    <Units Count="44">
       <Unit0>
         <Filename Value="libpascalgorithmstestcase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -137,7 +137,6 @@
         <IsPartOfProject Value="True"/>
       </Unit25>
       <Unit26>
-<<<<<<< HEAD
         <Filename Value="src/testcase_arraylist_performance.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit26>
@@ -161,19 +160,54 @@
         <Filename Value="src/testcase_hashtable_performance.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit31>
-=======
+      <Unit32>
+        <Filename Value="../pascalutils/source/utils.enumerate.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="../pascalutils/source/utils.api.cstring.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="src/testcase_avltree_performance.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit34>
+      <Unit35>
         <Filename Value="../source/container.multiarray.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit26>
-      <Unit27>
+      </Unit35>
+      <Unit36>
         <Filename Value="src/testcase_multiarray.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit27>
-      <Unit28>
+      </Unit36>
+      <Unit37>
         <Filename Value="../source/container.multihash.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit28>
->>>>>>> 537babe0e76d95ca059cb0d18d43a09830321467
+      </Unit37>
+      <Unit38>
+        <Filename Value="src/testcase_multihash.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="../pascalutils/source/utils.datasize.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="../pascalutils/source/utils.errorsstack.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="../pascalutils/source/utils.timeinterval.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="../pascalutils/source/utils.tuple.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="../pascalutils/source/utils.variant.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit43>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

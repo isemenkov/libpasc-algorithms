@@ -28,7 +28,7 @@
 (*                                                                            *)
 (******************************************************************************)
 
-unit testcase_hashtable;
+unit testcase_multihash;
 
 {$IFDEF FPC}
   {$mode objfpc}{$H+}
@@ -37,15 +37,15 @@ unit testcase_hashtable;
 interface
 
 uses
-  Classes, SysUtils, container.hashtable, utils.functor
+  Classes, SysUtils, container.hashtable, container.multihash, utils.functor
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntegerHashTableTestCase = class(TTestCase)
+  TIntegerMultiHashTestCase = class(TTestCase)
   public
     type
-      TContainer = {$IFDEF FPC}specialize{$ENDIF} THashTable<Integer, Integer, 
-        TCompareFunctorInteger>;
+      TContainer = {$IFDEF FPC}specialize{$ENDIF} TMultiHash<Integer, Integer, 
+        TCompareFunctorInteger, TCompareFunctorInteger>;
       TContainerIterator = TContainer.TIterator;
   public
     procedure MakeContainer;
@@ -65,6 +65,9 @@ type
     procedure Insert_Items_CheckValues_ReturnTrue;
     procedure Insert_Items_CheckLength_ReturnTrue;
     procedure Insert_Items_IsEmpty_ReturnFalse;
+
+    procedure Insert_MultipleItems_CheckValues_ReturnTrue;
+    procedure Insert_MultipleItems_CheckLength_ReturnTrue;
 
     procedure Remove_Items_CheckValue_ReturnTrue;
     procedure Remove_Items_CheckNumEntries_ReturnTrue;
@@ -88,63 +91,91 @@ type
 implementation
 
 {$IFNDEF FPC}
-procedure TIntegerHashTableTestCase.AssertTrue(ACondition: Boolean);
+procedure TIntegerMultiHashTestCase.AssertTrue(ACondition: Boolean);
 begin
   CheckTrue(ACondition);
 end;
 
-procedure TIntegerHashTableTestCase.AssertFalse(ACondition: Boolean);
+procedure TIntegerMultiHashTestCase.AssertFalse(ACondition: Boolean);
 begin
   CheckFalse(ACondition);
 end;
 
-procedure TIntegerHashTableTestCase.AssertEquals(Expected, Actual : Integer);
+procedure TIntegerMultiHashTestCase.AssertEquals(Expected, Actual : Integer);
 begin
   CheckEquals(Expected, Actual);
 end;
 {$ENDIF}
 
-procedure TIntegerHashTableTestCase.MakeContainer;
+procedure TIntegerMultiHashTestCase.MakeContainer;
 begin
   AContainer := TContainer.Create(@HashInteger);
 end;
 
-procedure TIntegerHashTableTestCase.TearDown;
+procedure TIntegerMultiHashTestCase.TearDown;
 begin
   FreeAndNil(AContainer);
 end;
 
-procedure TIntegerHashTableTestCase.ByDefault_ZeroNumEntries_ReturnTrue;
+procedure TIntegerMultiHashTestCase.ByDefault_ZeroNumEntries_ReturnTrue;
 begin
   MakeContainer;
 
   AssertEquals(AContainer.NumEntries, 0);
 end;
 
-procedure TIntegerHashTableTestCase.ByDefault_IsEmpty_ReturnTrue;
+procedure TIntegerMultiHashTestCase.ByDefault_IsEmpty_ReturnTrue;
 begin
   MakeContainer;
 
   AssertTrue(AContainer.IsEmpty);
 end;
 
-procedure TIntegerHashTableTestCase.Insert_NewItem_ReturnTrue;
+procedure TIntegerMultiHashTestCase.Insert_NewItem_ReturnTrue;
 begin
   MakeContainer;
 
   AssertTrue(AContainer.Insert(1, 1));
 end;
 
-procedure TIntegerHashTableTestCase.Insert_Items_CheckValues_ReturnTrue;
+procedure TIntegerMultiHashTestCase.Insert_Items_CheckValues_ReturnTrue;
+var
+  MultiValue : TContainer.TMultiValue;
 begin
   MakeContainer;
 
   AContainer.Insert(1, 1);
+  MultiValue := AContainer.Search(1);
 
-  AssertEquals(AContainer.Search(1), 1);
+  AssertEquals(MultiValue.NthEntry(0).Value, 1);
 end;
 
-procedure TIntegerHashTableTestCase.Insert_Items_CheckLength_ReturnTrue;
+procedure TIntegerMultiHashTestCase.Insert_MultipleItems_CheckValues_ReturnTrue;
+var
+  Value : TContainer.TMultiValue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+  AContainer.Insert(1, 2);
+
+  Value := AContainer.Search(1);
+
+  AssertEquals(Value.NthEntry(0).Value, 1);
+  AssertEquals(Value.NthEntry(1).Value, 2);
+end;
+
+procedure TIntegerMultiHashTestCase.Insert_MultipleItems_CheckLength_ReturnTrue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+  AContainer.Insert(1, 2);
+
+  AssertEquals(AContainer.Search(1).Length, 2);
+end;
+
+procedure TIntegerMultiHashTestCase.Insert_Items_CheckLength_ReturnTrue;
 begin
   MakeContainer;
 
@@ -153,7 +184,7 @@ begin
   AssertEquals(AContainer.NumEntries, 1);
 end;
 
-procedure TIntegerHashTableTestCase.Insert_Items_IsEmpty_ReturnFalse;
+procedure TIntegerMultiHashTestCase.Insert_Items_IsEmpty_ReturnFalse;
 begin
   MakeContainer;
 
@@ -162,7 +193,7 @@ begin
   AssertFalse(AContainer.IsEmpty);
 end;
 
-procedure TIntegerHashTableTestCase.Remove_Items_CheckValue_ReturnTrue;
+procedure TIntegerMultiHashTestCase.Remove_Items_CheckValue_ReturnTrue;
 begin
   MakeContainer;
 
@@ -171,7 +202,7 @@ begin
   AssertTrue(AContainer.Remove(1));
 end;
 
-procedure TIntegerHashTableTestCase.Remove_Items_NotExistsValue_ReturnFalse;
+procedure TIntegerMultiHashTestCase.Remove_Items_NotExistsValue_ReturnFalse;
 begin
   MakeContainer;
 
@@ -180,7 +211,7 @@ begin
   AssertFalse(AContainer.Remove(2));
 end;
 
-procedure TIntegerHashTableTestCase.Remove_Items_CheckNumEntries_ReturnTrue;
+procedure TIntegerMultiHashTestCase.Remove_Items_CheckNumEntries_ReturnTrue;
 begin
   MakeContainer;
 
@@ -191,7 +222,7 @@ begin
   AssertEquals(AContainer.NumEntries, 1);
 end;
 
-procedure TIntegerHashTableTestCase.Remove_Items_IsEmpty_ReturnTrue;
+procedure TIntegerMultiHashTestCase.Remove_Items_IsEmpty_ReturnTrue;
 begin
   MakeContainer;
 
@@ -201,16 +232,16 @@ begin
   AssertTrue(AContainer.IsEmpty);
 end;
 
-procedure TIntegerHashTableTestCase.Search_Exists_CheckValue_ReturnTrue;
+procedure TIntegerMultiHashTestCase.Search_Exists_CheckValue_ReturnTrue;
 begin
   MakeContainer;
 
   AContainer.Insert(1, 1);
 
-  AssertEquals(AContainer.Search(1), 1);
+  AssertEquals(AContainer.Search(1).NthEntry(0).Value, 1);
 end;
 
-procedure TIntegerHashTableTestCase
+procedure TIntegerMultiHashTestCase
   .Search_NotExists_CheckValue_RaiseEKeyNotExistsException_ReturnTrue;
 begin
   MakeContainer;
@@ -230,30 +261,30 @@ begin
   AssertTrue(False);
 end;
 
-procedure TIntegerHashTableTestCase.SearchDefault_Exists_CheckValue_ReturnTrue;
+procedure TIntegerMultiHashTestCase.SearchDefault_Exists_CheckValue_ReturnTrue;
 begin
   MakeContainer;
 
   AContainer.Insert(1, 1);
 
-  AssertEquals(AContainer.SearchDefault(1, 4), 1);
+  AssertEquals(AContainer.SearchDefault(1, 4).NthEntry(0).Value, 1);
 end;
 
-procedure TIntegerHashTableTestCase
+procedure TIntegerMultiHashTestCase
   .SearchDefault_NotExists_CheckValue_ReturnTrue;
 begin
   MakeContainer;
 
   AContainer.Insert(1, 1);
 
-  AssertEquals(AContainer.SearchDefault(2, 4), 4);
+  AssertEquals(AContainer.SearchDefault(2, 4).NthEntry(0).Value, 4);
 end;
 
-procedure TIntegerHashTableTestCase.Iterator_ForIn_CheckValue_ReturnTrue;
+procedure TIntegerMultiHashTestCase.Iterator_ForIn_CheckValue_ReturnTrue;
 var
   ContainsValue: array [0 .. 3] of Boolean;
   Index: Integer;
-  Value: TContainer.TKeyValuePair;
+  Value: TContainer.TKeyMultiValuePair;
 begin
   MakeContainer;
 
@@ -286,7 +317,7 @@ begin
   AssertEquals(Index, 4);
 end;
 
-procedure TIntegerHashTableTestCase
+procedure TIntegerMultiHashTestCase
   .Iterator_ForwardIterator_CheckValue_ReturnTrue;
 var
   ContainsValue: array [0 .. 3] of Boolean;
@@ -326,7 +357,7 @@ begin
   AssertEquals(Index, 4);
 end;
 
-procedure TIntegerHashTableTestCase.Iterator_Empty_Iteration_ReturnFalse;
+procedure TIntegerMultiHashTestCase.Iterator_Empty_Iteration_ReturnFalse;
 begin
   MakeContainer;
 
@@ -343,8 +374,8 @@ end;
 
 initialization
   RegisterTest(
-    'THashTable',
-    TIntegerHashTableTestCase{$IFNDEF FPC}.Suite{$ENDIF}
+    'TMultiHash',
+    TIntegerMultiHashTestCase{$IFNDEF FPC}.Suite{$ENDIF}
   );
 end.
 

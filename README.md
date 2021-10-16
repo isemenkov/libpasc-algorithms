@@ -16,6 +16,7 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
     * [TList](#tlist)
     * [TAvlTree](#tavltree)
     * [THashTable](#thashtable)
+    * [TMultiHash](#tmultihash)
     * [TOrderedSet](#torderedset)
     * [TMinBinaryHeap](#tminbinaryheap)
     * [TMaxBinaryHeap](#tmaxbinaryheap)
@@ -231,6 +232,32 @@ KeyBinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://githu
   * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable#iterate)
 
 *More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/THashTable).
+
+
+
+#### TMultiHash
+
+A multi hash table stores a set of values which can be addressed by a key. Given the key, the corresponding value can be looked up quickly.
+
+```pascal
+uses
+  container.hashtable, container.multihash, utils.functor;
+ 
+type
+  generic TMultiHash<K, V, KeyBinaryCompareFunctor, ValueBinaryCompareFunctor> = class
+```
+
+KeyBinaryCompareFunctor and ValueBinaryCompareFunctor is based on [utils.functor.TBinaryFunctor](https://github.com/isemenkov/pascalutils/wiki/TBinaryFunctor) interface and used to compare two keys. 
+
+  * [Create](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiHash#create)
+  * [Insert](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiHash#insert)
+  * [Remove](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiHash#remove)
+  * [Search](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiHash#search)
+  * [NumEntries](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiHash#numentries)
+  * [IsEmpty](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiHash#isempty)
+  * [Iterate](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiHash#iterate)
+
+*More details read on* [wiki page](https://github.com/isemenkov/libpasc-algorithms/wiki/TMultiHash).
 
 
 

@@ -40,17 +40,19 @@ unit container.multihash;
 interface
 
 uses
-  SysUtils, container.hashtable, container.list, utils.functor
+  SysUtils, container.hashtable, container.list
+  {$IFNDEF FPC}, utils.functor{$ENDIF}
   {$IFDEF USE_OPTIONAL}, utils.optional{$ENDIF};
 
 type
   {$IFDEF FPC}generic{$ENDIF} TMultiHash<K, V; KeyBinaryCompareFunctor
     {$IFNDEF FPC}: constructor, utils.functor.TBinaryFunctor<K,
-    Integer> {$ENDIF}> = class
+    Integer> {$ENDIF}; ValueBinaryCompareFunctor{$IFNDEF FPC}: constructor,
+    utils.functor.TBinaryFunctor<V, Integer> {$ENDIF}> = class
   public
     type
       TMultiValue = {$IFDEF FPC}specialize{$ENDIF} TList<V, 
-        BinaryCompareFunctor>;
+        ValueBinaryCompareFunctor>;
       {$IFDEF USE_OPTIONAL}
       TOptionalMultiValue = {$IFDEF FPC}specialize{$ENDIF} 
         TOptional<TMultiValue>;
@@ -63,6 +65,7 @@ type
     type
       { TMultiHash iterator. }
       TIterator = TContainer.TIterator;
+      TKeyMultiValuePair = TContainer.TKeyValuePair;
   public
     constructor Create (HashFunc : TContainer.THashTableHashFunc);
     destructor Destroy; override;
@@ -109,71 +112,85 @@ implementation
 
 { TMultiHash }
 
-constructor TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .Create (HashFunc : TContainer.THashTableHashFunc);
+constructor TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.Create (HashFunc : 
+  TContainer.THashTableHashFunc);
 begin
   FContainer := TContainer.Create(HashFunc);
 end;
 
-destructor TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .Destroy;
+destructor TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor,
+  ValueBinaryCompareFunctor>{$ENDIF}.Destroy;
 begin
   FreeAndNil(FContainer);
 end;
 
-function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .Insert (Key : K; Value : V) : Boolean;
+function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.Insert (Key : K; Value : V) : Boolean;
+var
+  MultiValue : TMultiValue;
 begin
   try
     FContainer.Search(Key).Append(Value);
   except on e : EKeyNotExistsException do
-    FContainer.Insert(Key, TMultiValue.Create.Append(Value));
+    begin
+      MultiValue := TMultiValue.Create;
+      MultiValue.Append(Value);
+      FContainer.Insert(Key, MultiValue);
+    end;
   end;
 end;
 
-function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .Search (Key : K) : {$IFNDEF USE_OPTIONAL}TMultiValue{$ELSE}
-  TOptionalMultiValue{$ENDIF};
+function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.Search (Key : K) : 
+  {$IFNDEF USE_OPTIONAL}TMultiValue{$ELSE}TOptionalMultiValue{$ENDIF};
 begin
   Result := FContainer.Search(Key);
 end;
 
-function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .SearchDefault (Key : K; ADefault : V) : TMultiValue;
+function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.SearchDefault (Key : K; ADefault : V) : 
+  TMultiValue;
+var
+  MultiValue : TMultiValue;
 begin
   try
     Result := FContainer.Search(Key);
   except on e: EKeyNotExistsException do
-    Result := TMultiValue.Create.Append(ADefault);
+    begin
+      MultiValue := TMultiValue.Create;
+      MultiValue.Append(ADefault);
+      Result := MultiValue;
+    end;
   end;
 end;
 
-function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .Remove (Key : K) : Boolean;
+function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.Remove (Key : K) : Boolean;
 begin
   Result := FContainer.Remove(Key);
 end;
 
-function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .IsEmpty : Boolean;
+function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.IsEmpty : Boolean;
 begin
   Result := FContainer.IsEmpty;
 end;
 
-function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .NumEntries : Cardinal;
+function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.NumEntries : Cardinal;
 begin
   Result := FContainer.NumEntries;
 end;
 
-function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .FirstEntry : TIterator;
+function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.FirstEntry : TIterator;
 begin
   Result := FContainer.FirstEntry;
 end;
 
-function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
-  .GetEnumerator : TIterator;
+function TMultiHash{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor, 
+  ValueBinaryCompareFunctor>{$ENDIF}.GetEnumerator : TIterator;
 begin
   Result := FContainer.GetEnumerator;
 end;
