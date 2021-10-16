@@ -1,3 +1,33 @@
+(******************************************************************************)
+(*                             libPasC-Algorithms                             *)
+(* delphi and object pascal library of  common data structures and algorithms *)
+(*                 https://github.com/fragglet/c-algorithms                   *)
+(*                                                                            *)
+(* Copyright (c) 2020 - 2021                                Ivan Semenkov     *)
+(* https://github.com/isemenkov/libpasc-algorithms          ivan@semenkov.pro *)
+(*                                                          Ukraine           *)
+(******************************************************************************)
+(*                                                                            *)
+(* Permission is hereby  granted, free of  charge, to any  person obtaining a *)
+(* copy of this software and associated documentation files (the "Software"), *)
+(* to deal in the Software without  restriction, including without limitation *)
+(* the rights  to use, copy,  modify, merge, publish, distribute, sublicense, *)
+(* and/or  sell copies of  the Software,  and to permit  persons to  whom the *)
+(* Software  is  furnished  to  do so, subject  to the following  conditions: *)
+(*                                                                            *)
+(* The above copyright notice and this permission notice shall be included in *)
+(* all copies or substantial portions of the Software.                        *)
+(*                                                                            *)
+(* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR *)
+(* IMPLIED, INCLUDING BUT NOT  LIMITED TO THE WARRANTIES  OF MERCHANTABILITY, *)
+(* FITNESS FOR A  PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO  EVENT SHALL *)
+(* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER *)
+(* LIABILITY,  WHETHER IN AN ACTION OF  CONTRACT, TORT OR  OTHERWISE, ARISING *)
+(* FROM,  OUT OF OR  IN  CONNECTION WITH THE  SOFTWARE OR  THE  USE  OR OTHER *)
+(* DEALINGS IN THE SOFTWARE.                                                  *)
+(*                                                                            *)
+(******************************************************************************)
+
 unit testcase_orderedset;
 
 {$IFDEF FPC}
@@ -11,379 +41,330 @@ uses
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntOrderedSet = {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<Integer, 
-    TCompareFunctorInteger>;
-  TStringOrderedSet = {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<String, 
-    TCompareFunctorString>;
-
-  TOrderedSetTestCase = class(TTestCase)
+  TIntegerOrderedSetTestCase = class(TTestCase)
   public
-    {$IFNDEF FPC}
-    procedure AssertTrue (AMessage : String; ACondition : Boolean);
-    {$ENDIF}
-  published
-    procedure Test_IntOrderedSet_CreateNewEmpty;
-    procedure Test_IntOrderedSet_InsertNewValueInto;
-    procedure Test_IntOrderedSet_RemoveValueFrom;
-    procedure Test_IntOrderedSet_IterateValues;
-    procedure Test_IntOrderedSet_IterateRange;
-    procedure Test_IntOrderedSet_InsertOneMillionValuesInto;
+    type
+      TContainer = {$IFDEF FPC}specialize{$ENDIF} TOrderedSet<Integer, 
+        TCompareFunctorInteger>;
+      TContainerIterator = TContainer.TIterator;
+  public
+    procedure MakeContainer;
+    procedure TearDown; override;
 
-    procedure Test_StringOrderedSet_CreateNewEmpty;
-    procedure Test_StringOrderedSet_InsertNewValueInto;
-    procedure Test_StringOrderedSet_RemoveValueFrom;
-    procedure Test_StringOrderedSet_IterateValues;
-    procedure Test_StringOrderedSet_IterateRange;
-    procedure Test_StringOrderedSet_InsertOneMillionValuesInto;
+    {$IFNDEF FPC}
+    procedure AssertTrue (ACondition : Boolean);
+    procedure AssertFalse (ACondition: Boolean);
+    procedure AssertEquals (Expected, Actual : Integer);
+    {$ENDIF} 
+  published
+    procedure ByDefault_NumEntries_ReturnZero;
+    procedure ByDefault_IsEmpty_ReturnTrue;
+
+    procedure Insert_NewItem_ReturnTrue;
+
+    procedure Insert_Items_CheckNumEntries_ReturnTrue;
+    procedure Insert_Items_IsEmpty_ReturnFalse;
+    procedure Insert_Items_CheckValues_ReturnTrue;
+
+    procedure Remove_Items_CheckNumEntries_ReturnTrue;
+    procedure Remove_Items_IsEmpty_ReturnTrue;
+    procedure Remove_Items_CheckValues_ReturnTrue;
+
+    procedure Union_Items_CheckNumEntries_ReturnTrue;
+    procedure Union_Items_CheckValues_ReturnTrue;
+
+    procedure Intersection_Items_CheckNumEntries_RetrunTrue;
+    procedure Intersection_Items_CheckValues_ReturnTrue;
+
+    procedure Iterator_ForIn_CheckValue_ReturnTrue;
+    procedure Iterator_ForwardIterator_CheckValue_ReturnTrue;
+    procedure Iterator_Empty_Iteration_ReturnFalse;
+  private
+    AContainer : TContainer;
+    AContainerIterator : TContainerIterator;
   end;
 
 implementation
 
 {$IFNDEF FPC}
-procedure TOrderedSetTestCase.AssertTrue(AMessage : String; ACondition :
-  Boolean);
+procedure TIntegerOrderedSetTestCase.AssertTrue(ACondition: Boolean);
 begin
-  CheckTrue(ACondition, AMessage);
+  CheckTrue(ACondition);
+end;
+
+procedure TIntegerOrderedSetTestCase.AssertFalse(ACondition: Boolean);
+begin
+  CheckFalse(ACondition);
+end;
+
+procedure TIntegerOrderedSetTestCase.AssertEquals(Expected, Actual : Integer);
+begin
+  CheckEquals(Expected, Actual);
 end;
 {$ENDIF}
 
-procedure TOrderedSetTestCase.Test_IntOrderedSet_CreateNewEmpty;
-var
-  orderedset : TIntOrderedSet;
+procedure TIntegerOrderedSetTestCase.MakeContainer;
 begin
-  orderedset := TIntOrderedSet.Create(@HashInteger);
-
-  AssertTrue('#Test_IntOrderedSet_CreateNewEmpty -> ' +
-    'OrderedSet must be empty', orderedset.NumEntries = 0);
-
-  FreeAndNil(orderedset);
+  AContainer := TContainer.Create(@HashInteger);
 end;
 
-procedure TOrderedSetTestCase.Test_StringOrderedSet_CreateNewEmpty;
-var
-  orderedset : TStringOrderedSet;
+procedure TIntegerOrderedSetTestCase.TearDown;
 begin
-  orderedset := TStringOrderedSet.Create(@HashString);
-
-  AssertTrue('#Test_StringOrderedSet_CreateNewEmpty -> ' +
-    'OrderedSet must be empty', orderedset.NumEntries = 0);
-
-  FreeAndNil(orderedset);
+  FreeAndNil(AContainer);
 end;
 
-procedure TOrderedSetTestCase.Test_IntOrderedSet_InsertNewValueInto;
-var
-  orderedset : TIntOrderedSet;
+procedure TIntegerOrderedSetTestCase.ByDefault_NumEntries_ReturnZero;
 begin
-  orderedset := TIntOrderedSet.Create(@HashInteger);
+  MakeContainer;
 
-  AssertTrue('#Test_IntOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet value 1 not insert', orderedset.Insert(1));
-  AssertTrue('#Test_IntOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet value 5 not insert', orderedset.Insert(5));
-  AssertTrue('#Test_IntOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet value 121 not insert', orderedset.Insert(121));
-
-  AssertTrue('#Test_IntOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet hasn''t value 1', orderedset.HasValue(1));
-  AssertTrue('#Test_IntOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet hasn''t value 5', orderedset.HasValue(5));
-  AssertTrue('#Test_IntOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet hasn''t value 121', orderedset.HasValue(121));
-
-  FreeAndNil(orderedset);
+  AssertEquals(AContainer.NumEntries, 0);
 end;
 
-procedure TOrderedSetTestCase.Test_StringOrderedSet_InsertNewValueInto;
-var
-  orderedset : TStringOrderedSet;
+procedure TIntegerOrderedSetTestCase.ByDefault_IsEmpty_ReturnTrue;
 begin
-  orderedset := TStringOrderedSet.Create(@HashString);
+  MakeContainer;
 
-  AssertTrue('#Test_StringOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet value test1 not insert', orderedset.Insert('test1'));
-  AssertTrue('#Test_StringOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet value test5 not insert', orderedset.Insert('test5'));
-  AssertTrue('#Test_StringOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet value test121 not insert', orderedset.Insert('test121'));
-
-  AssertTrue('#Test_StringOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet hasn''t value test1', orderedset.HasValue('test1'));
-  AssertTrue('#Test_StringOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet hasn''t value test5', orderedset.HasValue('test5'));
-  AssertTrue('#Test_StringOrderedSet_InsertNewValueInto -> ' +
-    'OrderedSet hasn''t value test121', orderedset.HasValue('test121'));
-
-  FreeAndNil(orderedset);
+  AssertTrue(AContainer.IsEmpty);
 end;
 
-procedure TOrderedSetTestCase.Test_IntOrderedSet_RemoveValueFrom;
-var
-  orderedset : TIntOrderedSet;
+procedure TIntegerOrderedSetTestCase.Insert_NewItem_ReturnTrue;
 begin
-  orderedset := TIntOrderedSet.Create(@HashInteger);
+  MakeContainer;
 
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value 1 not insert', orderedset.Insert(1));
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value 5 not insert', orderedset.Insert(5));
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value 121 not insert', orderedset.Insert(121));
-
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet hasn''t value 1', orderedset.HasValue(1));
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet hasn''t value 5', orderedset.HasValue(5));
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet hasn''t value 121', orderedset.HasValue(121));
-
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value 1 not removed', orderedset.Remove(1));
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value 5 not removed', orderedset.Remove(5));
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value 121 not removed', orderedset.Remove(121));
-
-  AssertTrue('#Test_IntOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet must be empty', orderedset.NumEntries = 0);
-
-  FreeAndNil(orderedset);
+  AssertTrue(AContainer.Insert(1));
 end;
 
-procedure TOrderedSetTestCase.Test_StringOrderedSet_RemoveValueFrom;
-var
-  orderedset : TStringOrderedSet;
+procedure TIntegerOrderedSetTestCase.Insert_Items_CheckNumEntries_ReturnTrue;
 begin
-  orderedset := TStringOrderedSet.Create(@HashString);
+  MakeContainer;
 
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value test1 not insert', orderedset.Insert('test1'));
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value test5 not insert', orderedset.Insert('test5'));
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value test121 not insert', orderedset.Insert('test121'));
+  AContainer.Insert(1);
 
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet hasn''t value test1', orderedset.HasValue('test1'));
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet hasn''t value test5', orderedset.HasValue('test5'));
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet hasn''t value test121', orderedset.HasValue('test121'));
-
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value test1 not removed', orderedset.Remove('test1'));
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value test5 not removed', orderedset.Remove('test5'));
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet value test121 not removed', orderedset.Remove('test121'));
-
-  AssertTrue('#Test_StringOrderedSet_RemoveValueFrom -> ' +
-    'OrderedSet must be empty', orderedset.NumEntries = 0);
-
-  FreeAndNil(orderedset);
+  AssertEquals(AContainer.NumEntries, 1);
 end;
 
-procedure TOrderedSetTestCase.Test_IntOrderedSet_IterateValues;
-var
-  orderedset : TIntOrderedSet;
-  iterator : TIntOrderedSet.TIterator;
+procedure TIntegerOrderedSetTestCase.Insert_Items_IsEmpty_ReturnFalse;
 begin
-  orderedset := TIntOrderedSet.Create(@HashInteger);
+  MakeContainer;
 
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet value 1 not insert', orderedset.Insert(1));
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet value 5 not insert', orderedset.Insert(5));
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet value 121 not insert', orderedset.Insert(121));
+  AContainer.Insert(1);
 
-  iterator := orderedset.FirstEntry;
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet iterator hasn''t value', iterator.HasValue);
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.Value{$IFDEF USE_OPTIONAL}
-    .Unwrap{$ENDIF}),
-    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet iterator hasn''t value', iterator.HasValue);
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.Value{$IFDEF USE_OPTIONAL}
-    .Unwrap{$ENDIF}),
-    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet iterator hasn''t value', iterator.HasValue);
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + IntToStr(iterator.Value{$IFDEF USE_OPTIONAL}
-    .Unwrap{$ENDIF}),
-    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntOrderedSet_IterateValues -> ' +
-    'OrderedSet iterator not correct', not iterator.HasValue);
-
-  FreeAndNil(orderedset);
+  AssertFalse(AContainer.IsEmpty);
 end;
 
-procedure TOrderedSetTestCase.Test_StringOrderedSet_IterateValues;
-var
-  orderedset : TStringOrderedSet;
-  iterator : TStringOrderedSet.TIterator;
+procedure TIntegerOrderedSetTestCase.Insert_Items_CheckValues_ReturnTrue;
 begin
-  orderedset := TStringOrderedSet.Create(@HashString);
+  MakeContainer;
 
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet value test1 not insert', orderedset.Insert('test1'));
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet value test5 not insert', orderedset.Insert('test5'));
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet value test121 not insert', orderedset.Insert('test121'));
+  AContainer.Insert(1);
 
-  iterator := orderedset.FirstEntry;
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet iterator hasn''t value', iterator.HasValue);
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.Value{$IFDEF USE_OPTIONAL}
-    .Unwrap{$ENDIF},
-    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet iterator hasn''t value', iterator.HasValue);
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.Value{$IFDEF USE_OPTIONAL}
-    .Unwrap{$ENDIF},
-    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet iterator hasn''t value', iterator.HasValue);
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet hasn''t value ' + iterator.Value{$IFDEF USE_OPTIONAL}
-    .Unwrap{$ENDIF},
-    orderedset.HasValue(iterator.Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringOrderedSet_IterateValues -> ' +
-    'OrderedSet iterator not correct', not iterator.HasValue);
-
-  FreeAndNil(orderedset);
+  AssertTrue(AContainer.HasValue(1));
 end;
 
-procedure TOrderedSetTestCase.Test_IntOrderedSet_IterateRange;
-var
-  orderedset : TIntOrderedSet;
-  value : {$IFNDEF USE_OPTIONAL}Integer{$ELSE}TIntOrderedSet.TOptionalValue
-    {$ENDIF};
-  counter : Cardinal;
+procedure TIntegerOrderedSetTestCase.Remove_Items_CheckNumEntries_ReturnTrue;
 begin
-  orderedset := TIntOrderedSet.Create(@hashInteger);
+  MakeContainer;
 
-  AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
-    'OrderedSet value 1 not insert', orderedset.Insert(1));
-  AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
-    'OrderedSet value 5 not insert', orderedset.Insert(5));
-  AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
-    'OrderedSet value 121 not insert', orderedset.Insert(121));
+  AContainer.Insert(1);
+  AContainer.Insert(2);
+  AContainer.Insert(0);
 
-  counter := 0;
-  for value in orderedset do
+  AContainer.Remove(2);
+
+  AssertEquals(AContainer.NumEntries, 2);
+end;
+
+procedure TIntegerOrderedSetTestCase.Remove_Items_IsEmpty_ReturnTrue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1);
+
+  AContainer.Remove(1);
+
+  AssertTrue(AContainer.IsEmpty);
+end;
+
+procedure TIntegerOrderedSetTestCase.Remove_Items_CheckValues_ReturnTrue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1);
+  AContainer.Insert(2);
+  AContainer.Insert(0);
+
+  AContainer.Remove(2);
+
+  AssertTrue(AContainer.HasValue(1));
+  AssertFalse(AContainer.HasValue(2));
+  AssertTrue(AContainer.HasValue(0));
+end;
+
+procedure TIntegerOrderedSetTestCase.Union_Items_CheckNumEntries_ReturnTrue;
+var
+  Container2 : TContainer;
+begin
+  MakeContainer;
+  Container2 := TContainer.Create(@HashInteger);
+
+  Container2.Insert(1);
+  Container2.Insert(4);
+  Container2.Insert(5);
+
+  AContainer.Insert(1);
+  AContainer.Insert(2);
+  AContainer.Insert(0);
+
+  AContainer := AContainer.Union(Container2);
+
+  AssertEquals(AContainer.NumEntries, 5);
+
+  FreeAndNil(Container2);
+end;
+
+procedure TIntegerOrderedSetTestCase.Union_Items_CheckValues_ReturnTrue;
+var
+  Container2 : TContainer;
+begin
+  MakeContainer;
+  Container2 := TContainer.Create(@HashInteger);
+
+  Container2.Insert(1);
+  Container2.Insert(4);
+  Container2.Insert(5);
+
+  AContainer.Insert(1);
+  AContainer.Insert(2);
+  AContainer.Insert(0);
+
+  AContainer := AContainer.Union(Container2);
+
+  AssertTrue(AContainer.HasValue(0));
+  AssertTrue(AContainer.HasValue(1));
+  AssertTrue(AContainer.HasValue(2));
+  AssertTrue(AContainer.HasValue(4));
+  AssertTrue(AContainer.HasValue(5));
+
+  FreeAndNil(Container2);
+end;
+
+procedure TIntegerOrderedSetTestCase
+  .Intersection_Items_CheckNumEntries_RetrunTrue;
+var
+  Container2 : TContainer;
+begin
+  MakeContainer;
+  Container2 := TContainer.Create(@HashInteger);
+
+  Container2.Insert(1);
+  Container2.Insert(4);
+  Container2.Insert(5);
+
+  AContainer.Insert(1);
+  AContainer.Insert(2);
+  AContainer.Insert(0);
+
+  AContainer := AContainer.Intersection(Container2);
+
+  AssertEquals(AContainer.NumEntries, 1);
+
+  FreeAndNil(Container2);
+end;
+
+procedure TIntegerOrderedSetTestCase.Intersection_Items_CheckValues_ReturnTrue;
+var
+  Container2 : TContainer;
+begin
+  MakeContainer;
+  Container2 := TContainer.Create(@HashInteger);
+
+  Container2.Insert(1);
+  Container2.Insert(4);
+  Container2.Insert(5);
+
+  AContainer.Insert(1);
+  AContainer.Insert(2);
+  AContainer.Insert(0);
+
+  AContainer := AContainer.Intersection(Container2);
+
+  AssertTrue(AContainer.HasValue(1));
+
+  FreeAndNil(Container2);
+end;
+
+procedure TIntegerOrderedSetTestCase.Iterator_ForIn_CheckValue_ReturnTrue;
+var
+  Index, Value : Integer;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1);
+  AContainer.Insert(2);
+  AContainer.Insert(0);
+
+  Index := 0;
+  for Value in AContainer do
   begin
-    AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
-      'OrderedSet hasn''t value ' + IntToStr(Value{$IFDEF USE_OPTIONAL}
-      .Unwrap{$ENDIF}),
-      orderedset.HasValue(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
-    Inc(counter);
-  end;
-  AssertTrue('#Test_IntOrderedSet_IterateRange -> ' +
-    'OrderedSet iterate through not all elements', counter = 3);
-
-  FreeAndNil(orderedset);
-end;
-
-procedure TOrderedSetTestCase.Test_StringOrderedSet_IterateRange;
-var
-  orderedset : TStringOrderedSet;
-  value : {$IFNDEF USE_OPTIONAL}String{$ELSE}TStringOrderedSet.TOptionalValue
-    {$ENDIF};
-  counter : Cardinal;
-begin
-  orderedset := TStringOrderedSet.Create(@hashString);
-
-  AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
-    'OrderedSet value test1 not insert', orderedset.Insert('test1'));
-  AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
-    'OrderedSet value test5 not insert', orderedset.Insert('test5'));
-  AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
-    'OrderedSet value test121 not insert', orderedset.Insert('test121'));
-
-  counter := 0;
-  for value in orderedset do
-  begin
-    AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
-      'OrderedSet hasn''t value ' + Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF},
-      orderedset.HasValue(Value{$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}));
-    Inc(counter);
-  end;
-  AssertTrue('#Test_StringOrderedSet_IterateRange -> ' +
-    'OrderedSet iterate through not all elements', counter = 3);
-
-  FreeAndNil(orderedset);
-end;
-
-procedure TOrderedSetTestCase.Test_IntOrderedSet_InsertOneMillionValuesInto;
-var
-  orderedset : TIntOrderedSet;
-  index : Integer;
-begin
-  orderedset := TIntOrderedSet.Create(@HashInteger);
-
-  for index := 0 to 1000000 do
-  begin
-    AssertTrue('#Test_IntOrderedSet_InsertOneMillionValuesInto -> ' +
-      'OrderedSet value ' + IntToStr(index) + ' not insert',
-      orderedset.Insert(index * 10 + 4));
+    case Index of
+      0 : begin AssertEquals(Value, 0); Inc(Index); end;
+      1 : begin AssertEquals(Value, 1); Inc(Index); end;
+      2 : begin AssertEquals(Value, 2); Inc(Index); end;
+      else begin AssertTrue(False); Inc(Index); end;
+    end;
   end;
 
-  for index := 0 to 1000000 do
-  begin
-    AssertTrue('#Test_IntOrderedSet_InsertOneMillionValuesInto -> ' +
-      'OrderedSet hasn''t value '+ IntToStr(index),
-      orderedset.HasValue(index * 10 + 4));
-  end;
-
-  FreeAndNil(orderedset);
+  AssertEquals(Index, 3);
 end;
 
-procedure TOrderedSetTestCase.Test_StringOrderedSet_InsertOneMillionValuesInto;
+procedure TIntegerOrderedSetTestCase
+  .Iterator_ForwardIterator_CheckValue_ReturnTrue;
 var
-  orderedset : TStringOrderedSet;
-  index : Integer;
+  Index : Integer;
 begin
-  orderedset := TStringOrderedSet.Create(@HashString);
+  MakeContainer;
 
-  for index := 0 to 1000000 do
+  AContainer.Insert(1);
+  AContainer.Insert(2);
+  AContainer.Insert(0);
+
+  Index := 0;
+  AContainerIterator := AContainer.FirstEntry;
+  while AContainerIterator.HasValue do
   begin
-    AssertTrue('#Test_StringOrderedSet_InsertOneMillionValuesInto -> ' +
-      'OrderedSet value test' + IntToStr(index) + ' not insert',
-      orderedset.Insert('test' + IntToStr(index * 10 + 4)));
+    case Index of
+      0 : begin AssertEquals(AContainerIterator.Value, 0); Inc(Index); end;
+      1 : begin AssertEquals(AContainerIterator.Value, 1); Inc(Index); end;
+      2 : begin AssertEquals(AContainerIterator.Value, 2); Inc(Index); end;
+      else begin AssertTrue(False); Inc(Index); end;
+    end;
+
+    AContainerIterator := AContainerIterator.Next;
   end;
 
-  for index := 0 to 1000000 do
+  AssertEquals(Index, 3);
+end;
+
+procedure TIntegerOrderedSetTestCase.Iterator_Empty_Iteration_ReturnFalse;
+begin
+  MakeContainer;
+
+  AContainerIterator := AContainer.FirstEntry;
+  while AContainerIterator.HasValue do
   begin
-    AssertTrue('#Test_StringOrderedSet_InsertOneMillionValuesInto -> ' +
-      'OrderedSet hasn''t value test' + IntToStr(index),
-      orderedset.HasValue('test' + IntToStr(index * 10 + 4)));
+    AssertTrue(False);
+
+    AContainerIterator := AContainerIterator.Next;
   end;
 
-  FreeAndNil(orderedset);
+  AssertFalse(False);
 end;
 
 initialization
-  RegisterTest(TOrderedSetTestCase{$IFNDEF FPC}.Suite{$ENDIF});
+  RegisterTest(
+    'TOrderedSet',
+    TIntegerOrderedSetTestCase{$IFNDEF FPC}.Suite{$ENDIF}
+  );
 
 end.
 

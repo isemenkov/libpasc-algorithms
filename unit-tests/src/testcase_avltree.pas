@@ -11,368 +11,280 @@ uses
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntIntTree = {$IFDEF FPC}specialize{$ENDIF} TAvlTree<Integer, Integer, 
-    TCompareFunctorInteger>;
-  TStrIntTree = {$IFDEF FPC}specialize{$ENDIF} TAvlTree<String, Integer, 
-    TCompareFunctorString>;
-
-  TAvlTreeTestCase = class(TTestCase)
+  TIntegerAvlTreeTestCase = class(TTestCase)
   public
-    {$IFNDEF FPC}
-    procedure AssertTrue (AMessage : String; ACondition : Boolean);
-    {$ENDIF}
-  published
-    procedure Test_IntegerIntegerAvlTree_CreateNewEmpty;
-    procedure Test_IntegerIntegerAvlTree_InsertNewValueInto;
-    procedure Test_IntegerIntegerAvlTree_RemoveValueFrom;
-    procedure Test_IntegerIntegerAvlTree_IterateValues;
-    procedure Test_IntegerIntegerAvlTree_IterateRange;
-    procedure Test_IntegerIntegerAvlTree_InsertOneMillionValuesInto;
+    type
+      TContainer = {$IFDEF FPC}specialize{$ENDIF} TAvlTree<Integer, Integer, 
+        TCompareFunctorInteger>;
+      TContainerIterator = TContainer.TIterator;
+  public
+    procedure MakeContainer;
+    procedure TearDown; override;
 
-    procedure Test_StringIntegerAvlTree_CreateNewEmpty;
-    procedure Test_StringIntegerAvlTree_InsertNewValueInto;
-    procedure Test_StringIntegerAvlTree_RemoveValueFrom;
-    procedure Test_StringIntegerAvlTree_IterateValues;
-    procedure Test_StringIntegerAvlTree_IterateRange;
-    procedure Test_StringIntegerAvlTree_InsertOneMillionValuesInto;
+    {$IFNDEF FPC}
+    procedure AssertTrue (ACondition : Boolean);
+    procedure AssertFalse (ACondition: Boolean);
+    procedure AssertEquals (Expected, Actual : Integer);
+    {$ENDIF} 
+  published
+    procedure ByDefault_NumEntries_ReturnZero;
+    procedure ByDefault_IsEmpty_ReturnTrue;
+
+    procedure Insert_Items_CheckValues_ReturnTrue;
+
+    procedure Remove_Items_CheckValue_ReturnTrue;
+    procedure Remove_Items_CheckNumEntries_ReturnTrue;
+    procedure Remove_Items_IsEmpty_ReturnTrue;
+    procedure Remove_Items_NotExistsValue_ReturnFalse;
+
+    procedure Search_Exists_CheckValue_ReturnTrue;
+    procedure Search_NotExists_CheckValue_RaiseEKeyNotExistsException_ReturnTrue;
+
+    procedure SearchDefault_Exists_CheckValue_ReturnTrue;
+    procedure SearchDefault_NotExists_CheckValue_ReturnTrue;
+
+    procedure Iterator_ForIn_CheckValue_ReturnTrue;
+    procedure Iterator_ForwardIterator_CheckValue_ReturnTrue;
+    procedure Iterator_Empty_Iteration_ReturnFalse;
+  private
+    AContainer : TContainer;
+    AContainerIterator : TContainerIterator;
   end;
 
 implementation
 
 {$IFNDEF FPC}
-procedure TAvlTreeTestCase.AssertTrue(AMessage : String; ACondition :
-  Boolean);
+procedure TIntegerAvlTreeTestCase.AssertTrue(ACondition: Boolean);
 begin
-  CheckTrue(ACondition, AMessage);
+  CheckTrue(ACondition);
+end;
+
+procedure TIntegerAvlTreeTestCase.AssertFalse(ACondition: Boolean);
+begin
+  CheckFalse(ACondition);
+end;
+
+procedure TIntegerAvlTreeTestCase.AssertEquals(Expected, Actual : Integer);
+begin
+  CheckEquals(Expected, Actual);
 end;
 {$ENDIF}
 
-procedure TAvlTreeTestCase.Test_IntegerIntegerAvlTree_CreateNewEmpty;
-var
-  tree : TIntIntTree;
+procedure TIntegerAvlTreeTestCase.MakeContainer;
 begin
-  tree := TIntIntTree.Create;
-
-  FreeAndNil(tree);
+  AContainer := TContainer.Create;
 end;
 
-procedure TAvlTreeTestCase.Test_StringIntegerAvlTree_CreateNewEmpty;
-var
-  tree : TStrIntTree;
+procedure TIntegerAvlTreeTestCase.TearDown;
 begin
-  tree := TStrIntTree.Create;
-
-  FreeAndNil(tree);
+  FreeAndNil(AContainer);
 end;
 
-procedure TAvlTreeTestCase.Test_IntegerIntegerAvlTree_InsertNewValueInto;
-var
-  tree : TIntIntTree;
+procedure TIntegerAvlTreeTestCase.ByDefault_NumEntries_ReturnZero;
 begin
-  tree := TIntIntTree.Create;
+  MakeContainer;
 
-  tree.Insert(1, 100);
-  tree.Insert(2, 200);
-  tree.Insert(4, 400);
-  tree.Insert(10, 1000);
-  tree.Insert(12, 1200);
-  tree.Insert(132, 13200);
-
-  AssertTrue('#Test_IntegerIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value 1 is not correct', tree.Search(1)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_IntegerIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value 2 is not correct', tree.Search(2)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 200);
-  AssertTrue('#Test_IntegerIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value 4 is not correct', tree.Search(4)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 400);
-  AssertTrue('#Test_IntegerIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value 10 is not correct', tree.Search(10)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1000);
-  AssertTrue('#Test_IntegerIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value 12 is not correct', tree.Search(12)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1200);
-  AssertTrue('#Test_IntegerIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value 132 is not correct', tree.Search(132)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 13200);
-
-  FreeAndNil(tree);
+  AssertEquals(AContainer.NumEntries, 0);
 end;
 
-procedure TAvlTreeTestCase.Test_StringIntegerAvlTree_InsertNewValueInto;
-var
-  tree : TStrIntTree;
+procedure TIntegerAvlTreeTestCase.ByDefault_IsEmpty_ReturnTrue;
 begin
-  tree := TStrIntTree.Create;
+  MakeContainer;
 
-  tree.Insert('test1', 100);
-  tree.Insert('test2', 200);
-  tree.Insert('test4', 400);
-  tree.Insert('test10', 1000);
-  tree.Insert('test12', 1200);
-  tree.Insert('test132', 13200);
-
-  AssertTrue('#Test_StringIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value test1 is not correct', tree.Search('test1')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_StringIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value test2 is not correct', tree.Search('test2')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 200);
-  AssertTrue('#Test_StringIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value test4 is not correct', tree.Search('test4')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 400);
-  AssertTrue('#Test_StringIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value test10 is not correct', tree.Search('test10')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1000);
-  AssertTrue('#Test_StringIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value test12 is not correct', tree.Search('test12')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 1200);
-  AssertTrue('#Test_StringIntegerAvlTree_InsertNewValueInto -> ' +
-    'Tree value test132 is not correct', tree.Search('test132')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 13200);
-
-  FreeAndNil(tree);
+  AssertTrue(AContainer.IsEmpty);
 end;
 
-procedure TAvlTreeTestCase.Test_IntegerIntegerAvlTree_RemoveValueFrom;
-var
-  tree : TIntIntTree;
+procedure TIntegerAvlTreeTestCase.Insert_Items_CheckValues_ReturnTrue;
 begin
-  tree := TIntIntTree.Create;
+  MakeContainer;
 
-  tree.Insert(1, 20);
-  tree.Insert(2, 40);
-  tree.Insert(5, 100);
+  AContainer.Insert(1, 1);
 
-  AssertTrue('#Test_IntegerIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value 1 is not correct', tree.Search(1)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 20);
-  AssertTrue('#Test_IntegerIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value 2 is not correct', tree.Search(2)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 40);
-  AssertTrue('#Test_IntegerIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value 5 is not correct', tree.Search(5)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-
-  AssertTrue('#Test_IntegerIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value 1 is not removed', tree.Remove(1));
-  AssertTrue('#Test_IntegerIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value 2 is not removed', tree.Remove(2));
-  AssertTrue('#Test_IntegerIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value 5 is not removed', tree.Remove(5));
-  AssertTrue('#Test_IntegerIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree not exists value is removed', not tree.Remove(7));
-
-  FreeAndNil(tree);
+  AssertEquals(AContainer.Search(1), 1);
 end;
 
-procedure TAvlTreeTestCase.Test_StringIntegerAvlTree_RemoveValueFrom;
-var
-  tree : TStrIntTree;
+procedure TIntegerAvlTreeTestCase.Remove_Items_CheckValue_ReturnTrue;
 begin
-  tree := TStrIntTree.Create;
+  MakeContainer;
 
-  tree.Insert('test1', 20);
-  tree.Insert('test2', 40);
-  tree.Insert('test5', 100);
-
-  AssertTrue('#Test_StringIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value test1 is not correct', tree.Search('test1')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 20);
-  AssertTrue('#Test_StringIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value test2 is not correct', tree.Search('test2')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 40);
-  AssertTrue('#Test_StringIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value test5 is not correct', tree.Search('test5')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-
-  AssertTrue('#Test_StringIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value test1 is not removed', tree.Remove('test1'));
-  AssertTrue('#Test_StringIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value test2 is not removed', tree.Remove('test2'));
-  AssertTrue('#Test_StringIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree value test5 is not removed', tree.Remove('test5'));
-  AssertTrue('#Test_StringIntegerAvlTree_RemoveValueFrom -> ' +
-    'Tree not exists value is removed', not tree.Remove('test7'));
-
-  FreeAndNil(tree);
+  AContainer.Insert(1, 1);
+  
+  AssertTrue(AContainer.Remove(1));
 end;
 
-procedure TAvlTreeTestCase.Test_IntegerIntegerAvlTree_IterateValues;
-var
-  tree : TIntIntTree;
-  iterator : TIntIntTree.TIterator;
+procedure TIntegerAvlTreeTestCase.Remove_Items_CheckNumEntries_ReturnTrue;
 begin
-  tree := TIntIntTree.Create;
+  MakeContainer;
 
-  tree.Insert(1, 20);
-  tree.Insert(2, 40);
-  tree.Insert(5, 100);
+  AContainer.Insert(1, 1);
+  AContainer.Insert(2, 4);
 
-  iterator := tree.FirstEntry;
-  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
-    'Tree key 1 is not correct', iterator.Key = 1);
-  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
-    'Tree key 1 value is not correct', iterator.Value = 20);
+  AContainer.Remove(2);
 
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
-    'Tree key 2 is not correct', iterator.Key = 2);
-  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
-    'Tree key 2 value is not correct', iterator.Value = 40);
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
-    'Tree key 5 is not correct', iterator.Key = 5);
-  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
-    'Tree key 5 value is not correct', iterator.Value = 100);
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntegerIntegerAvlTree_IterateValues -> ' +
-    'Tree iterator is not correct', iterator.Key = 0);
-
-  FreeAndNil(tree);
+  AssertEquals(AContainer.NumEntries, 1);
 end;
 
-procedure TAvlTreeTestCase.Test_StringIntegerAvlTree_IterateValues;
-var
-  tree : TStrIntTree;
-  iterator : TStrIntTree.TIterator;
+procedure TIntegerAvlTreeTestCase.Remove_Items_IsEmpty_ReturnTrue;
 begin
-  tree := TStrIntTree.Create;
+  MakeContainer;
 
-  tree.Insert('test1', 20);
-  tree.Insert('test2', 40);
-  tree.Insert('test5', 100);
+  AContainer.Insert(1, 1);
+  AContainer.Remove(1);
 
-  iterator := tree.FirstEntry;
-  AssertTrue('#Test_StringIntegerAvlTree_IterateValues -> ' +
-    'Tree key test1 is not correct', iterator.Key = 'test1');
-  AssertTrue('#Test_StringIntegerAvlTree_IterateValues -> ' +
-    'Tree key test1 value is not correct', iterator.Value = 20);
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringIntegerAvlTree_IterateValues -> ' +
-    'Tree key test2 is not correct', iterator.Key = 'test2');
-  AssertTrue('#Test_StringIntegerAvlTree_IterateValues -> ' +
-    'Tree key test2 value is not correct', iterator.Value = 40);
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringIntegerAvlTree_IterateValues -> ' +
-    'Tree key test5 is not correct', iterator.Key = 'test5');
-  AssertTrue('#Test_StringIntegerAvlTree_IterateValues -> ' +
-    'Tree key test5 value is not correct', iterator.Value = 100);
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringIntegerAvlTree_IterateValues -> ' +
-    'Tree iterator is not correct', iterator.Key = '');
-
-  FreeAndNil(tree);
+  AssertTrue(AContainer.IsEmpty);
 end;
 
-procedure TAvlTreeTestCase.Test_IntegerIntegerAvlTree_IterateRange;
-var
-  tree : TIntIntTree;
-  counter : Cardinal;
-  value : TIntIntTree.TAvlKeyValuePair;
+procedure TIntegerAvlTreeTestCase.Remove_Items_NotExistsValue_ReturnFalse;
 begin
-  tree := TIntIntTree.Create;
+  MakeContainer;
 
-  tree.Insert(1, 20);
-  tree.Insert(2, 40);
-  tree.Insert(5, 100);
+  AContainer.Insert(1, 1);
 
-  counter := 0;
-  for value in tree do
-  begin
-    AssertTrue('#Test_IntegerIntegerAvlTree_IterateRange -> ' +
-      'Tree key' + IntToStr(value.First) + ' value not correct',
-      tree.Search(value.First){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} =
-      value.Second);
-    Inc(counter);
-  end;
-  AssertTrue('#Test_IntegerIntegerAvlTree_IterateRange -> ' +
-    'Tree iterate through not all elements', counter = 3);
-
-  FreeAndNil(tree);
+  AssertFalse(AContainer.Remove(2));
 end;
 
-procedure TAvlTreeTestCase.Test_StringIntegerAvlTree_IterateRange;
-var
-  tree : TStrIntTree;
-  counter : Cardinal;
-  value : TStrIntTree.TAvlKeyValuePair;
+procedure TIntegerAvlTreeTestCase.Search_Exists_CheckValue_ReturnTrue;
 begin
-  tree := TStrIntTree.Create;
+  MakeContainer;
 
-  tree.Insert('test1', 20);
-  tree.Insert('test2', 40);
-  tree.Insert('test5', 100);
+  AContainer.Insert(1, 1);
 
-  counter := 0;
-  for value in tree do
-  begin
-    AssertTrue('#Test_StringIntegerAvlTree_IterateRange -> ' +
-      'Tree key' + value.First + ' value not correct',
-      tree.Search(value.First){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} =
-      value.Second);
-    Inc(counter);
-  end;
-  AssertTrue('#Test_StringIntegerAvlTree_IterateRange -> ' +
-    'Tree iterate through not all elements', counter = 3);
-
-  FreeAndNil(tree);
+  AssertEquals(AContainer.Search(1), 1);
 end;
 
-procedure TAvlTreeTestCase
-  .Test_IntegerIntegerAvlTree_InsertOneMillionValuesInto;
-var
-  tree : TIntIntTree;
-  index : Integer;
+procedure TIntegerAvlTreeTestCase
+  .Search_NotExists_CheckValue_RaiseEKeyNotExistsException_ReturnTrue;
 begin
-  tree := TIntIntTree.Create;
+  MakeContainer;
 
-  for index := 0 to 1000000 do
-  begin
-    tree.Insert(index, index * 10 + 3);
+  AContainer.Insert(1, 1);
+
+  try 
+    AContainer.Search(2);
+  except on e: EKeyNotExistsException do
+    begin
+      AssertTrue(True);
+      Exit;
+    end;
   end;
 
-  for index := 0 to 1000000 do
-  begin
-    AssertTrue('#Test_IntegerIntegerAvlTree_InsertOneMillionValuesInto -> ' +
-      'Tree value index ' + IntToStr(index) + ' value is not correct',
-      tree.Search(index){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = index * 10 + 3);
-  end;
-
-  FreeAndNil(tree);
+  AssertTrue(False);
 end;
 
-procedure TAvlTreeTestCase
-  .Test_StringIntegerAvlTree_InsertOneMillionValuesInto;
-var
-  tree : TStrIntTree;
-  index : Integer;
+procedure TIntegerAvlTreeTestCase.SearchDefault_Exists_CheckValue_ReturnTrue;
 begin
-  tree := TStrIntTree.Create;
+  MakeContainer;
 
-  for index := 0 to 1000000 do
+  AContainer.Insert(1, 1);
+
+  AssertEquals(AContainer.SearchDefault(1, 4), 1);
+end;
+
+procedure TIntegerAvlTreeTestCase.SearchDefault_NotExists_CheckValue_ReturnTrue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+
+  AssertEquals(AContainer.SearchDefault(2, 4), 4);
+end;
+
+procedure TIntegerAvlTreeTestCase.Iterator_ForIn_CheckValue_ReturnTrue;
+var
+  ContainsValue: array [0 .. 3] of Boolean;
+  Index: Integer;
+  Value: TContainer.TAvlKeyValuePair;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+  AContainer.Insert(2, 4);
+  AContainer.Insert(3, 9);
+  AContainer.Insert(4, 16);
+
+  ContainsValue[0] := False;
+  ContainsValue[1] := False;
+  ContainsValue[2] := False;
+  ContainsValue[3] := False;
+
+  Index := 0;
+  for Value in AContainer do
   begin
-    tree.Insert('test' + IntToStr(index), index * 10 + 3);
+    case Value.First of
+      1 : begin ContainsValue[0] := True; Inc(Index); end;
+      2 : begin ContainsValue[1] := True; Inc(Index); end;
+      3 : begin ContainsValue[2] := True; Inc(Index); end;
+      4 : begin ContainsValue[3] := True; Inc(Index); end;
+      else begin AssertTrue(False); Inc(Index); end;
+    end;
   end;
 
-  for index := 0 to 1000000 do
+  AssertTrue(ContainsValue[0]);
+  AssertTrue(ContainsValue[1]);
+  AssertTrue(ContainsValue[2]);
+  AssertTrue(ContainsValue[3]);
+  AssertEquals(Index, 4);
+end;
+
+procedure TIntegerAvlTreeTestCase
+  .Iterator_ForwardIterator_CheckValue_ReturnTrue;
+var
+  ContainsValue: array [0 .. 3] of Boolean;
+  Index: Integer;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+  AContainer.Insert(2, 4);
+  AContainer.Insert(3, 9);
+  AContainer.Insert(4, 16);
+
+  ContainsValue[0] := False;
+  ContainsValue[1] := False;
+  ContainsValue[2] := False;
+  ContainsValue[3] := False;
+
+  Index := 0;
+  AContainerIterator := AContainer.FirstEntry;
+  while AContainerIterator.HasValue do
   begin
-    AssertTrue('#Test_StringIntegerAvlTree_InsertOneMillionValuesInto -> ' +
-      'Tree value test' + IntToStr(index) + ' value is not correct',
-      tree.Search('test' + IntToStr(index)){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}
-      = index * 10 + 3);
+    case AContainerIterator.Key of
+      1 : begin ContainsValue[0] := True; Inc(Index); end;
+      2 : begin ContainsValue[1] := True; Inc(Index); end;
+      3 : begin ContainsValue[2] := True; Inc(Index); end;
+      4 : begin ContainsValue[3] := True; Inc(Index); end;
+      else begin AssertTrue(False); Inc(Index); end;
+    end;
+
+    AContainerIterator := AContainerIterator.Next;
   end;
 
-  FreeAndNil(tree);
+  AssertTrue(ContainsValue[0]);
+  AssertTrue(ContainsValue[1]);
+  AssertTrue(ContainsValue[2]);
+  AssertTrue(ContainsValue[3]);
+  AssertEquals(Index, 4);
+end;
+
+procedure TIntegerAvlTreeTestCase.Iterator_Empty_Iteration_ReturnFalse;
+begin
+  MakeContainer;
+
+  AContainerIterator := AContainer.FirstEntry;
+  while AContainerIterator.HasValue do
+  begin
+    AssertTrue(False);
+
+    AContainerIterator := AContainerIterator.Next;
+  end;
+
+  AssertFalse(False);
 end;
 
 initialization
-  RegisterTest(TAvlTreeTestCase{$IFNDEF FPC}.Suite{$ENDIF});
+  RegisterTest(
+    'TAvlTree',
+    TIntegerAvlTreeTestCase{$IFNDEF FPC}.Suite{$ENDIF}
+  );
 end.
 

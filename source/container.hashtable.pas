@@ -147,6 +147,7 @@ type
         var
           FHashTable : PHashTableStruct;
           FHashTablePair : THashTablePair;
+          FHasValue : Boolean;
           next_entry : PHashTableEntry;
           next_chain : Cardinal; 
       end; 
@@ -263,6 +264,8 @@ begin
 
   if Initialize then
   begin
+    FHasValue := FHashTable^.entries <> 0;
+
     { Default value of next if no entries are found. }
     next_entry := nil;
 
@@ -287,7 +290,7 @@ end;
 function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
   .TIterator.HasValue : Boolean;
 begin
-  Result := True;
+  Result := FHasValue;
 end;
 
 function THashTable{$IFNDEF FPC}<K, V, KeyBinaryCompareFunctor>{$ENDIF}
@@ -338,6 +341,10 @@ begin
   begin
     FHashTablePair := next_entry^.pair;
     Result.FHashTablePair := next_entry^.pair;
+    Result.FHasValue := True;
+  end else
+  begin
+    Result.FHasValue := False;
   end;
 
   Result.next_entry := next_entry;
