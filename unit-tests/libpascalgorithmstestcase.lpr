@@ -10,6 +10,7 @@ uses
   testcase_avltree_performance,
   testcase_binaryheap,
   testcase_hashtable,
+  testcase_hashtable_performance,
   testcase_list,
   testcase_list_performance,
   testcase_memorybuffer,

@@ -26,6 +26,7 @@ uses
   testcase_orderedset in '..\unit-tests\src\testcase_orderedset.pas',
   testcase_orderedset_performance in '..\unit-tests\src\testcase_orderedset_performance.pas',
   testcase_hashtable in '..\unit-tests\src\testcase_hashtable.pas',
+  testcase_hashtable_performance in '..\unit-tests\src\testcase_hashtable_performance.pas',
   testcase_memorybuffer in '..\unit-tests\src\testcase_memorybuffer.pas',
   testcase_trie in '..\unit-tests\src\testcase_trie.pas',
   testcase_sortedarray in '..\unit-tests\src\testcase_sortedarray.pas',
@@ -38,4 +39,3 @@ uses
 begin
   DUnitTestRunner.RunRegisteredTests;
 end.
-

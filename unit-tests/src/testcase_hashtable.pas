@@ -11,372 +11,310 @@ uses
   {$IFDEF FPC}, fpcunit, testregistry{$ELSE}, TestFramework{$ENDIF};
 
 type
-  TIntIntHashTable = {$IFDEF FPC}specialize{$ENDIF} THashTable<Integer, Integer,
-    TCompareFunctorInteger>;
-  TStrIntHashTable = {$IFDEF FPC}specialize{$ENDIF} THashTable<String, Integer,
-    TCompareFunctorString>;
-
-  THashTableTestCase = class(TTestCase)
+  TIntegerHashTableTestCase = class(TTestCase)
   public
-    {$IFNDEF FPC}
-    procedure AssertTrue (AMessage : String; ACondition : Boolean);
-    {$ENDIF}
-  published
-    procedure Test_IntegerIntegerHashTable_CreateNewEmpty;
-    procedure Test_IntegerIntegerHashTable_InsertNewValueInto;
-    procedure Test_IntegerIntegerHashTable_RemoveValueFrom;
-    procedure Test_IntegerIntegerHashTable_IterateValues;
-    procedure Test_IntegerIntegerHashTable_IterateRange;
-    procedure Test_IntegerIntegerHashTable_InsertOneMillionValuesInto;
+    type
+      TContainer = {$IFDEF FPC}specialize{$ENDIF} THashTable<Integer, Integer, 
+        TCompareFunctorInteger>;
+      TContainerIterator = TContainer.TIterator;
+  public
+    procedure MakeContainer;
+    procedure TearDown; override;
 
-    procedure Test_StringIntegerHashTable_CreateNewEmpty;
-    procedure Test_StringIntegerHashTable_InsertNewValueInto;
-    procedure Test_StringIntegerHashTable_RemoveValueFrom;
-    procedure Test_StringIntegerHashTable_IterateValues;
-    procedure Test_StringIntegerHashTable_IterateRange;
-    procedure Test_StringIntegerHashTable_InsertOneMillionValuesInto;
+    {$IFNDEF FPC}
+    procedure AssertTrue (ACondition : Boolean);
+    procedure AssertFalse (ACondition: Boolean);
+    procedure AssertEquals (Expected, Actual : Integer);
+    {$ENDIF} 
+  published
+    procedure ByDefault_ZeroNumEntries_ReturnTrue;
+    procedure ByDefault_IsEmpty_ReturnTrue;
+
+    procedure Insert_NewItem_ReturnTrue;
+
+    procedure Insert_Items_CheckValues_ReturnTrue;
+    procedure Insert_Items_CheckLength_ReturnTrue;
+    procedure Insert_Items_IsEmpty_ReturnFalse;
+
+    procedure Remove_Items_CheckValue_ReturnTrue;
+    procedure Remove_Items_CheckNumEntries_ReturnTrue;
+    procedure Remove_Items_IsEmpty_ReturnTrue;
+    procedure Remove_Items_NotExistsValue_ReturnFalse;
+
+    procedure Search_Exists_CheckValue_ReturnTrue;
+    procedure Search_NotExists_CheckValue_RaiseEKeyNotExistsException_ReturnTrue;
+
+    procedure SearchDefault_Exists_CheckValue_ReturnTrue;
+    procedure SearchDefault_NotExists_CheckValue_ReturnTrue;
+
+    procedure Iterator_ForIn_CheckValue_ReturnTrue;
+    procedure Iterator_ForwardIterator_CheckValue_ReturnTrue;
+    procedure Iterator_Empty_Iteration_ReturnFalse;
+  private
+    AContainer : TContainer;
+    AContainerIterator : TContainerIterator;
   end;
 
 implementation
 
 {$IFNDEF FPC}
-procedure THashTableTestCase.AssertTrue(AMessage : String; ACondition :
-  Boolean);
+procedure TIntegerHashTableTestCase.AssertTrue(ACondition: Boolean);
 begin
-  CheckTrue(ACondition, AMessage);
+  CheckTrue(ACondition);
+end;
+
+procedure TIntegerHashTableTestCase.AssertFalse(ACondition: Boolean);
+begin
+  CheckFalse(ACondition);
+end;
+
+procedure TIntegerHashTableTestCase.AssertEquals(Expected, Actual : Integer);
+begin
+  CheckEquals(Expected, Actual);
 end;
 {$ENDIF}
 
-procedure THashTableTestCase.Test_IntegerIntegerHashTable_CreateNewEmpty;
-var
-  hash : TIntIntHashTable;
+procedure TIntegerHashTableTestCase.MakeContainer;
 begin
-  hash := TIntIntHashTable.Create(@HashInteger);
-
-  AssertTrue('#Test_IntegerIntegerHashTable_CreateNewEmpty -> ' +
-    'HashTable must be empty', hash.NumEntries = 0);
-
-  FreeAndNil(hash);
+  AContainer := TContainer.Create(@HashInteger);
 end;
 
-procedure THashTableTestCase.Test_StringIntegerHashTable_CreateNewEmpty;
-var
-  hash : TStrIntHashTable;
+procedure TIntegerHashTableTestCase.TearDown;
 begin
-  hash := TStrIntHashTable.Create(@HashString);
-
-  AssertTrue('#Test_StringIntegerHashTable_CreateNewEmpty -> ' +
-    'HashTable must be empty', hash.NumEntries = 0);
-
-  FreeAndNil(hash);
+  FreeAndNil(AContainer);
 end;
 
-procedure THashTableTestCase.Test_IntegerIntegerHashTable_InsertNewValueInto;
-var
-  hash : TIntIntHashTable;
+procedure TIntegerHashTableTestCase.ByDefault_ZeroNumEntries_ReturnTrue;
 begin
-  hash := TIntIntHashTable.Create(@HashInteger);
+  MakeContainer;
 
-  AssertTrue('#Test_IntegerIntegerHashTable_InsertNewValueInto -> ' +
-    'HashTable value 1 not insert', hash.Insert(1, 100));
-  AssertTrue('#Test_IntegerIntegerHashTable_InsertNewValueInto -> ' +
-    'HashTable value 5 not insert', hash.Insert(5, 100));
-  AssertTrue('#Test_IntegerIntegerHashTable_InsertNewValueInto -> ' +
-    'HashTable value 121 not insert', hash.Insert(121, 12100));
-
-  AssertTrue('#Test_IntegerIntegerHashTable_InsertNewValueInto -> ' +
-    'Hash table value 1 is not correct', hash.Search(1)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_IntegerIntegerHashTable_InsertNewValueInto -> ' +
-    'Hash table value 5 is not correct', hash.Search(5)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_IntegerIntegerHashTable_InsertNewValueInto -> ' +
-    'Hash table value 121 is not correct', hash.Search(121)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12100);
-
-  FreeAndNil(hash);
+  AssertEquals(AContainer.NumEntries, 0);
 end;
 
-procedure THashTableTestCase.Test_StringIntegerHashTable_InsertNewValueInto;
-var
-  hash : TStrIntHashTable;
+procedure TIntegerHashTableTestCase.ByDefault_IsEmpty_ReturnTrue;
 begin
-  hash := TStrIntHashTable.Create(@HashString);
+  MakeContainer;
 
-  AssertTrue('#Test_StringIntegerHashTable_InsertNewValueInto -> ' +
-    'HashTable value test1 not insert', hash.Insert('test1', 100));
-  AssertTrue('#Test_StringIntegerHashTable_InsertNewValueInto -> ' +
-    'HashTable value test5 not insert', hash.Insert('test5', 100));
-  AssertTrue('#Test_StringIntegerHashTable_InsertNewValueInto -> ' +
-    'HashTable value test121 not insert', hash.Insert('test121', 12100));
-
-  AssertTrue('#Test_StringIntegerHashTable_InsertNewValueInto -> ' +
-    'Hash table value test1 is not correct', hash.Search('test1')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_StringIntegerHashTable_InsertNewValueInto -> ' +
-    'Hash table value test5 is not correct', hash.Search('test5')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_StringIntegerHashTable_InsertNewValueInto -> ' +
-    'Hash table value test121 is not correct', hash.Search('test121')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12100);
-
-  FreeAndNil(hash);
+  AssertTrue(AContainer.IsEmpty);
 end;
 
-procedure THashTableTestCase.Test_IntegerIntegerHashTable_RemoveValueFrom;
-var
-  hash : TIntIntHashTable;
+procedure TIntegerHashTableTestCase.Insert_NewItem_ReturnTrue;
 begin
-  hash := TIntIntHashTable.Create(@HashInteger);
+  MakeContainer;
 
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'HashTable value 1 not insert', hash.Insert(1, 100));
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'HashTable value 5 not insert', hash.Insert(5, 100));
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'HashTable value 121 not insert', hash.Insert(121, 12100));
-
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value 1 is not correct', hash.Search(1)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value 5 is not correct', hash.Search(5)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value 121 is not correct', hash.Search(121)
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12100);
-
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value 1 is not removed', hash.Remove(1));
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value 5 is not removed', hash.Remove(5));
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value 121 is not removed', hash.Remove(121));
-
-  AssertTrue('#Test_IntegerIntegerHashTable_RemoveValueFrom -> ' +
-    'HashTable must be empty', hash.NumEntries = 0);
-
-  FreeAndNil(hash);
+  AssertTrue(AContainer.Insert(1, 1));
 end;
 
-procedure THashTableTestCase.Test_StringIntegerHashTable_RemoveValueFrom;
-var
-  hash : TStrIntHashTable;
+procedure TIntegerHashTableTestCase.Insert_Items_CheckValues_ReturnTrue;
 begin
-  hash := TStrIntHashTable.Create(@HashString);
+  MakeContainer;
 
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'HashTable value test1 not insert', hash.Insert('test1', 100));
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'HashTable value test5 not insert', hash.Insert('test5', 100));
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'HashTable value test121 not insert', hash.Insert('test121', 12100));
+  AContainer.Insert(1, 1);
 
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value test1 is not correct', hash.Search('test1')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value test5 is not correct', hash.Search('test5')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 100);
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value test121 is not correct', hash.Search('test121')
-    {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF} = 12100);
-
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value test1 is not removed', hash.Remove('test1'));
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value test5 is not removed', hash.Remove('test5'));
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'Hash table value test121 is not removed', hash.Remove('test121'));
-
-  AssertTrue('#Test_StringIntegerHashTable_RemoveValueFrom -> ' +
-    'HashTable must be empty', hash.NumEntries = 0);
-
-  FreeAndNil(hash);
+  AssertEquals(AContainer.Search(1), 1);
 end;
 
-procedure THashTableTestCase.Test_IntegerIntegerHashTable_IterateValues;
-var
-  hash : TIntIntHashTable;
-  iterator : TIntIntHashTable.TIterator;
+procedure TIntegerHashTableTestCase.Insert_Items_CheckLength_ReturnTrue;
 begin
-  hash := TIntIntHashTable.Create(@HashInteger);
+  MakeContainer;
 
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
-    'HashTable value 1 not insert', hash.Insert(1, 100));
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
-    'HashTable value 5 not insert', hash.Insert(5, 100));
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
-    'HashTable value 121 not insert', hash.Insert(121, 12100));
+  AContainer.Insert(1, 1);
 
-  iterator := hash.FirstEntry;
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
-    'HashTable hasn''t key ' + IntToStr(iterator.Key),
-    hash.Remove(iterator.Key));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
-    'HashTable hasn''t key ' + IntToStr(iterator.Key),
-    hash.Remove(iterator.Key));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
-    'HashTable hasn''t key ' + IntToStr(iterator.Key),
-    hash.Remove(iterator.Key));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateValues -> ' +
-    'HashTable iterator not correct', not hash.Remove(iterator.Key));
-
-  FreeAndNil(hash);
+  AssertEquals(AContainer.NumEntries, 1);
 end;
 
-procedure THashTableTestCase.Test_StringIntegerHashTable_IterateValues;
-var
-  hash : TStrIntHashTable;
-  iterator : TStrIntHashTable.TIterator;
+procedure TIntegerHashTableTestCase.Insert_Items_IsEmpty_ReturnFalse;
 begin
-  hash := TStrIntHashTable.Create(@HashString);
+  MakeContainer;
 
-  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
-    'HashTable value 1 not insert', hash.Insert('test1', 100));
-  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
-    'HashTable value 5 not insert', hash.Insert('test5', 300));
-  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
-    'HashTable value 121 not insert', hash.Insert('test121', 12100));
+  AContainer.Insert(1, 1);
 
-  iterator := hash.FirstEntry;
-  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
-    'HashTable hasn''t key ' + iterator.Key,
-    hash.Remove(iterator.Key));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
-    'HashTable hasn''t key ' + iterator.Key,
-    hash.Remove(iterator.Key));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
-    'HashTable hasn''t key ' + iterator.Key,
-    hash.Remove(iterator.Key));
-
-  iterator := iterator.Next;
-  AssertTrue('#Test_StringIntegerHashTable_IterateValues -> ' +
-    'HashTable iterator not correct', iterator.Key = '');
-
-  FreeAndNil(hash);
+  AssertFalse(AContainer.IsEmpty);
 end;
 
-procedure THashTableTestCase.Test_IntegerIntegerHashTable_IterateRange;
-var
-  hash : TIntIntHashTable;
-  pair : TIntIntHashTable.TKeyValuePair;
-  counter : Cardinal;
+procedure TIntegerHashTableTestCase.Remove_Items_CheckValue_ReturnTrue;
 begin
-  hash := TIntIntHashTable.Create(@HashInteger);
+  MakeContainer;
 
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
-    'HashTable value 1 not insert', hash.Insert(1, 100));
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
-    'HashTable value 5 not insert', hash.Insert(5, 100));
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
-    'HashTable value 121 not insert', hash.Insert(121, 12100));
+  AContainer.Insert(1, 1);
 
-  counter := 0;
-  for pair in hash do
-  begin
-    AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
-      'HashTable hasn''t key ' + IntToStr(pair.First),
-      hash.Remove(pair.First));
-    Inc(counter);
-  end;
-  AssertTrue('#Test_IntegerIntegerHashTable_IterateRange -> ' +
-    'Hash table iterate through not all elements', counter = 3);
-
-  FreeAndNil(hash);
+  AssertTrue(AContainer.Remove(1));
 end;
 
-procedure THashTableTestCase.Test_StringIntegerHashTable_IterateRange;
-var
-  hash : TStrIntHashTable;
-  pair : TStrIntHashTable.TKeyValuePair;
-  counter : Cardinal;
+procedure TIntegerHashTableTestCase.Remove_Items_NotExistsValue_ReturnFalse;
 begin
-  hash := TStrIntHashTable.Create(@HashString);
+  MakeContainer;
 
-  AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
-    'HashTable value 1 not insert', hash.Insert('test1', 100));
-  AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
-    'HashTable value 5 not insert', hash.Insert('test5', 300));
-  AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
-    'HashTable value 121 not insert', hash.Insert('test121', 12100));
+  AContainer.Insert(1, 1);
 
-  counter := 0;
-  for pair in hash do
-  begin
-    AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
-      'HashTable hasn''t key ' + pair.First, hash.Remove(pair.First));
-    Inc(counter);
-  end;
-  AssertTrue('#Test_StringIntegerHashTable_IterateRange -> ' +
-    'Hash table iterate through not all elements', counter = 3);
-
-  FreeAndNil(hash);
+  AssertFalse(AContainer.Remove(2));
 end;
 
-procedure THashTableTestCase
-  .Test_IntegerIntegerHashTable_InsertOneMillionValuesInto;
-var
-  hash : TIntIntHashTable;
-  index : Integer;
+procedure TIntegerHashTableTestCase.Remove_Items_CheckNumEntries_ReturnTrue;
 begin
-  hash := TIntIntHashTable.Create(@HashInteger);
+  MakeContainer;
 
-  for index := 0 to 1000000 do
-  begin
-    AssertTrue('#Test_IntegerIntegerHashTable_InsertOneMillionValuesInto -> ' +
-      'HashTable index ' + IntToStr(index) + ' value not insert',
-      hash.Insert(index, index * 10 + 4));
+  AContainer.Insert(1, 1);
+  AContainer.Insert(2, 2);
+  AContainer.Remove(1);
+
+  AssertEquals(AContainer.NumEntries, 1);
+end;
+
+procedure TIntegerHashTableTestCase.Remove_Items_IsEmpty_ReturnTrue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+  AContainer.Remove(1);
+
+  AssertTrue(AContainer.IsEmpty);
+end;
+
+procedure TIntegerHashTableTestCase.Search_Exists_CheckValue_ReturnTrue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+
+  AssertEquals(AContainer.Search(1), 1);
+end;
+
+procedure TIntegerHashTableTestCase
+  .Search_NotExists_CheckValue_RaiseEKeyNotExistsException_ReturnTrue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+
+  try
+    AContainer.Search(2);
+  except
+    on e: EKeyNotExistsException do
+    begin
+      AssertTrue(True);
+      Exit;
+    end;
   end;
 
-  for index := 0 to 1000000 do
-  begin
-    AssertTrue('#Test_IntegerIntegerHashTable_InsertOneMillionValuesInto -> ' +
-      'Hash table value index ' + IntToStr(index) +
-     ' is not correct', hash.Search(index){$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}
-     = index * 10 + 4);
-  end;
-
-  FreeAndNil(hash);
+  AssertTrue(False);
 end;
 
-procedure THashTableTestCase
-  .Test_StringIntegerHashTable_InsertOneMillionValuesInto;
-var
-  hash : TStrIntHashTable;
-  index : Integer;
+procedure TIntegerHashTableTestCase.SearchDefault_Exists_CheckValue_ReturnTrue;
 begin
-  hash := TStrIntHashTable.Create(@HashString);
+  MakeContainer;
 
-  for index := 0 to 1000000 do
+  AContainer.Insert(1, 1);
+
+  AssertEquals(AContainer.SearchDefault(1, 4), 1);
+end;
+
+procedure TIntegerHashTableTestCase
+  .SearchDefault_NotExists_CheckValue_ReturnTrue;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+
+  AssertEquals(AContainer.SearchDefault(2, 4), 4);
+end;
+
+procedure TIntegerHashTableTestCase.Iterator_ForIn_CheckValue_ReturnTrue;
+var
+  ContainsValue: array [0 .. 3] of Boolean;
+  Index: Integer;
+  Value: TContainer.TKeyValuePair;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+  AContainer.Insert(2, 4);
+  AContainer.Insert(3, 9);
+  AContainer.Insert(4, 16);
+
+  ContainsValue[0] := False;
+  ContainsValue[1] := False;
+  ContainsValue[2] := False;
+  ContainsValue[3] := False;
+
+  Index := 0;
+  for Value in AContainer do
   begin
-    AssertTrue('#Test_StringIntegerHashTable_InsertOneMillionValuesInto -> ' +
-      'HashTable index ' + IntToStr(index) + ' value not insert',
-      hash.Insert('test' + IntToStr(index), index * 10 + 4));
+    case Value.First of
+      1 : begin ContainsValue[0] := True; Inc(Index); end;
+      2 : begin ContainsValue[1] := True; Inc(Index); end;
+      3 : begin ContainsValue[2] := True; Inc(Index); end;
+      4 : begin ContainsValue[3] := True; Inc(Index); end;
+      else begin AssertTrue(False); Inc(Index); end;
+    end;
   end;
 
-  for index := 0 to 1000000 do
+  AssertTrue(ContainsValue[0]);
+  AssertTrue(ContainsValue[1]);
+  AssertTrue(ContainsValue[2]);
+  AssertTrue(ContainsValue[3]);
+  AssertEquals(Index, 4);
+end;
+
+procedure TIntegerHashTableTestCase
+  .Iterator_ForwardIterator_CheckValue_ReturnTrue;
+var
+  ContainsValue: array [0 .. 3] of Boolean;
+  Index: Integer;
+begin
+  MakeContainer;
+
+  AContainer.Insert(1, 1);
+  AContainer.Insert(2, 4);
+  AContainer.Insert(3, 9);
+  AContainer.Insert(4, 16);
+
+  ContainsValue[0] := False;
+  ContainsValue[1] := False;
+  ContainsValue[2] := False;
+  ContainsValue[3] := False;
+
+  Index := 0;
+  AContainerIterator := AContainer.FirstEntry;
+  while AContainerIterator.HasValue do
   begin
-    AssertTrue('#Test_StringIntegerHashTable_InsertOneMillionValuesInto -> ' +
-      'Hash table value index ' + IntToStr(index) +
-     ' is not correct', hash.Search('test' + IntToStr(index))
-     {$IFDEF USE_OPTIONAL}.Unwrap{$ENDIF}= index * 10 + 4);
+    case AContainerIterator.Key of
+      1 : begin ContainsValue[0] := True; Inc(Index); end;
+      2 : begin ContainsValue[1] := True; Inc(Index); end;
+      3 : begin ContainsValue[2] := True; Inc(Index); end;
+      4 : begin ContainsValue[3] := True; Inc(Index); end;
+      else begin AssertTrue(False); Inc(Index); end;
+    end;
+
+    AContainerIterator := AContainerIterator.Next;
   end;
 
-  FreeAndNil(hash);
+  AssertTrue(ContainsValue[0]);
+  AssertTrue(ContainsValue[1]);
+  AssertTrue(ContainsValue[2]);
+  AssertTrue(ContainsValue[3]);
+  AssertEquals(Index, 4);
+end;
+
+procedure TIntegerHashTableTestCase.Iterator_Empty_Iteration_ReturnFalse;
+begin
+  MakeContainer;
+
+  AContainerIterator := AContainer.FirstEntry;
+  while AContainerIterator.HasValue do
+  begin
+    AssertTrue(False);
+
+    AContainerIterator := AContainerIterator.Next;
+  end;
+
+  AssertFalse(False);
 end;
 
 initialization
-  RegisterTest(THashTableTestCase{$IFNDEF FPC}.Suite{$ENDIF});
+  RegisterTest(
+    'THashTable',
+    TIntegerHashTableTestCase{$IFNDEF FPC}.Suite{$ENDIF}
+  );
 end.
 
