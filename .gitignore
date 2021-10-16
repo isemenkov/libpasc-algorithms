@@ -81,5 +81,8 @@ lib/
 
 # Application bundle for Mac OS
 *.app/
+<<<<<<< HEAD
 
+=======
+>>>>>>> 537babe0e76d95ca059cb0d18d43a09830321467
 *.dia

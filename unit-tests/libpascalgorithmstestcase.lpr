@@ -6,6 +6,7 @@ uses
   Interfaces, Forms, GuiTestRunner, 
   testcase_arraylist,
   testcase_arraylist_performance,
+  testcase_multiarray,
   testcase_avltree,
   testcase_avltree_performance,
   testcase_binaryheap,

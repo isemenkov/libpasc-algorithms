@@ -137,6 +137,7 @@
         <IsPartOfProject Value="True"/>
       </Unit25>
       <Unit26>
+<<<<<<< HEAD
         <Filename Value="src/testcase_arraylist_performance.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit26>
@@ -160,6 +161,19 @@
         <Filename Value="src/testcase_hashtable_performance.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit31>
+=======
+        <Filename Value="../source/container.multiarray.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="src/testcase_multiarray.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="../source/container.multihash.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit28>
+>>>>>>> 537babe0e76d95ca059cb0d18d43a09830321467
     </Units>
   </ProjectOptions>
   <CompilerOptions>
