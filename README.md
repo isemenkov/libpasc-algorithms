@@ -37,6 +37,7 @@ libPasC-Algorithms is delphi and object pascal library of common data structures
 Library is tested for 
 
 - Embarcadero (R) Delphi 10.3 on Windows 7 Service Pack 1 (Version 6.1, Build 7601, 64-bit Edition)
+- Embarcadero (R) Delphi 11.0 Version 28.0.42600.6491 on Windows 10 (Version 10.0, Build 19042, 64-bit Edition)
 - FreePascal Compiler (3.2.0) and Lazarus IDE (2.0.12) on Ubuntu Linux 5.8.0-33-generic x86_64
 
 
